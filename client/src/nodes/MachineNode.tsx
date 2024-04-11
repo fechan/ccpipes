@@ -10,7 +10,7 @@ export function MachineNode({ data }: NodeProps<MachineNodeData>) {
   return (
     <div className="react-flow__node-default w-full h-full">
       <div className="absolute -top-5 left-0">
-        MACHINE { machine.id }
+        { machine.nickname || machine.id }
         { machine.nickname && 
             <span>({ machine.nickname })</span>
         }

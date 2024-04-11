@@ -21,7 +21,7 @@ export function GroupNode({ data }: NodeProps<GroupNodeData>) {
   return (
     <div className="react-flow__node-default w-full h-full">
       <div className="absolute -top-5 left-0 text-xs">
-        { group.id }
+        { group.nickname || group.id }
       </div>
 
       <div>
