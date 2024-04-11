@@ -30,6 +30,11 @@ local function init ()
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))
     io.close(factoryJsonFile)
   end
+
+  -- TODO: constantly loop between three coloutines:
+  -- 1. move items across all pipes
+  -- 2. handle when the user wants to start/stop editing pipes
+  -- 3. check for websocket messages and update factory
 end
 
 init()
