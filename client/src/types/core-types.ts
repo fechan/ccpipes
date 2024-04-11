@@ -1,3 +1,12 @@
+/**
+ * These types are used to describe a Minecraft factory. The ComputerCraft
+ * program outputs JSON that is compatible with these types.
+ * 
+ * The maps like PipeMap and GroupMap are maps and *not* arrays
+ * mainly because the ComputerCraft program needs to reference Pipes etc. by ID
+ * a lot since it's faster than searching through an array.
+ */
+
 export type PipeId = string;
 export type PipeMap = { [key: PipeId]: Pipe };
 
