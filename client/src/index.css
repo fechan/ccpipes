@@ -14,3 +14,7 @@ body,
   height: 100%;
   margin: 0;
 }
+
+.react-flow__node {
+  z-index: -1 !important;
+}

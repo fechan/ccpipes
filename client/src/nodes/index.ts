@@ -1,5 +1,4 @@
 import type { Node, NodeTypes } from "reactflow";
-import { PositionLoggerNode } from "./PositionLoggerNode";
 import factory from "../factory.json";
 import { Machine } from "../types/core-types";
 import { MachineNode } from "./MachineNode";
@@ -15,8 +14,8 @@ function getNodesForFactory(factory: Machine[]): Node[] {
       position: { x: 100 + 100*i, y: 100 },
       data: { machine: machine },
       style: {
-        width: 800,
-        height: 800,
+        width: 350,
+        height: 300,
       }
     } as Node);
 
@@ -24,11 +23,13 @@ function getNodesForFactory(factory: Machine[]): Node[] {
       nodes.push({
         id: group.id,
         type: "slot-group",
-        position: { x: 10, y: 10 + 10*i },
+        position: { x: 10 + 50*i, y: 30 },
         data: { group: group },
+        style: {
+          width: 35 + 10 * group.slots.length,
+        },
         parentId: machine.id,
         extent: "parent",
-        expandParent: false,
       } as Node);
     }
   }
@@ -38,8 +39,6 @@ function getNodesForFactory(factory: Machine[]): Node[] {
 
 export const initialNodes = getNodesForFactory(factory);
 export const nodeTypes = {
-  "position-logger": PositionLoggerNode,
   "machine": MachineNode,
   "slot-group": GroupNode,
-  // Add any of your custom nodes here!
 } satisfies NodeTypes;

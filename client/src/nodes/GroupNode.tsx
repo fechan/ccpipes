@@ -1,5 +1,5 @@
 import { Handle, NodeProps, Position } from "reactflow";
-import { Group } from "../types/core-types";
+import { Group, Slot } from "../types/core-types";
 
 export type GroupNodeData = {
   group: Group,
@@ -7,14 +7,28 @@ export type GroupNodeData = {
 
 export function GroupNode({ data }: NodeProps<GroupNodeData>) {
   const { group } = data;
+
+  function ItemSlot({ slot }: {slot: Slot}) {
+    return (
+      <li
+        key={ `${slot.periphId}-${slot.slot}` }
+        className="border w-8 h-8 grow-0 flex items-center justify-center"
+      >
+        { slot.slot }
+      </li>
+    )
+  }
+
   return (
-    <div className="react-flow__node-default">
-      <div>GROUP { group.id }</div>
+    <div className="react-flow__node-default w-full h-full">
+      <div className="absolute -top-5 left-0 text-xs">
+        { group.id }
+      </div>
 
       <div>
-        <ul>
+        <ul className="flex gap-1 flex-wrap">
           {
-            group.slots.map(slot => <li key={ `${slot.periphId}-${slot.slot}` }>{ slot.slot }</li>)
+            group.slots.map(slot => <ItemSlot slot={ slot } />)
           }
         </ul>
       </div>
