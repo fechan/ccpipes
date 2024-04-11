@@ -1,9 +1,9 @@
 import type { Edge, EdgeTypes } from "reactflow";
-import { Machine } from "../types/core-types";
+import { Factory, Machine } from "../types/core-types";
 import { getAllPipes } from "../util/factory-graph";
 import factory from "../factory.json";
 
-function getEdgesForFactory(factory: Machine[]): Edge[] {
+function getEdgesForFactory(factory: Factory): Edge[] {
   return getAllPipes(factory).map(pipe => ({
     id: pipe.id,
     source: pipe.from,

@@ -18,7 +18,7 @@ local function init ()
 
     for i, periphId in ipairs(getPeripheralIds()) do
       local machine = Machine.fromPeriphId(periphId)
-      table.insert(factory, machine)
+      factory[machine.id] = machine
     end
 
     -- save it as json

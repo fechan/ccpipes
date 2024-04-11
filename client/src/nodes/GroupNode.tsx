@@ -11,7 +11,6 @@ export function GroupNode({ data }: NodeProps<GroupNodeData>) {
   function ItemSlot({ slot }: {slot: Slot}) {
     return (
       <li
-        key={ `${slot.periphId}-${slot.slot}` }
         className="border w-8 h-8 grow-0 flex items-center justify-center"
       >
         { slot.slot }
@@ -28,7 +27,10 @@ export function GroupNode({ data }: NodeProps<GroupNodeData>) {
       <div>
         <ul className="flex gap-1 flex-wrap">
           {
-            group.slots.map(slot => <ItemSlot slot={ slot } />)
+            group.slots.map(slot => <ItemSlot
+              key={ `${slot.periphId}-${slot.slot}` }
+              slot={ slot }
+              />)
           }
         </ul>
       </div>

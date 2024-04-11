@@ -1,8 +1,11 @@
+export type PipeId = string;
+export type PipeMap = { [key: PipeId]: Pipe };
+
 export type Pipe = {
-    id: string,
-    nickname?: string,
+    id: PipeId,
     from: GroupId,
     to: GroupId
+    nickname?: string,
 };
 
 export type Slot = {
@@ -11,17 +14,21 @@ export type Slot = {
 };
 
 export type GroupId = string;
+export type GroupMap = { [key: GroupId]: Group };
 
 export type Group = {
     id: GroupId,
-    nickname?: string,
     slots: Slot[],
     distribution: string,
-    outputs: Pipe[],
+    outputs: PipeMap,
+    nickname?: string,
 };
 
+export type MachineId = string;
+export type Factory = { [key: MachineId]: Machine };
+
 export type Machine = {
-    id: string,
+    id: MachineId,
+    groups: GroupMap,
     nickname?: string,
-    groups: Group[],
 }

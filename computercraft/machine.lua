@@ -7,7 +7,7 @@ Machine = {}
 ---@return Machine machine New machine
 function Machine.new (periphId, groups, nickname)
   return {
-    periphId = periphId,
+    id = periphId,
     groups = groups or {},
     nickname = nickname,
   }
@@ -19,7 +19,7 @@ end
 function Machine.fromPeriphId (periphId)
   local o = Machine.new(periphId)
 
-  if string.find(periphId, "minecraft:chest_") then
+  if string.find(periphId, 'minecraft:chest_') then
     return Machine.fromChestPeriphId(periphId)
   end
 
@@ -32,14 +32,16 @@ function Machine.fromPeriphId (periphId)
       slot = slotNbr,
     }
 
+    local groupId = periphId .. ':g' .. slotNbr
     local group = {
+      id = groupId,
       slots = {slot},
       distribution = 'roundRobin',
       outputs = {},
-      nickname = nil,
+      nickname = 'Slot ' .. slotNbr,
     }
 
-    table.insert(o.groups, group)
+    o.groups[groupId] = group
   end
 
   return o
@@ -51,11 +53,13 @@ end
 function Machine.fromChestPeriphId (periphId)
   local o = Machine.new(periphId)
 
+  local groupId = periphId .. ':g1'
   local group = {
+    id = groupId,
     slots = {},
     distribution = 'roundRobin',
     outputs = {},
-    nickname = 'inventory',
+    nickname = 'Inventory',
   }
 
   local peripheral = peripheral.wrap(periphId)
@@ -69,7 +73,7 @@ function Machine.fromChestPeriphId (periphId)
     table.insert(group.slots, slot)
   end
 
-  table.insert(o.groups, group)
+  o.groups[groupId] = group
 
   return o
 end

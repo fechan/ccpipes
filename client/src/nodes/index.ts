@@ -1,13 +1,13 @@
 import type { Node, NodeTypes } from "reactflow";
 import factory from "../factory.json";
-import { Machine } from "../types/core-types";
+import { Factory, Machine } from "../types/core-types";
 import { MachineNode } from "./MachineNode";
 import { GroupNode } from "./GroupNode";
 
-function getNodesForFactory(factory: Machine[]): Node[] {
+function getNodesForFactory(factory: Factory): Node[] {
   const nodes = [];
 
-  for (let [i, machine] of factory.entries()) {
+  for (let [i, machine] of Object.values(factory).entries()) {
     nodes.push({
       id: machine.id,
       type: "machine",
@@ -19,7 +19,9 @@ function getNodesForFactory(factory: Machine[]): Node[] {
       }
     } as Node);
 
-    for (let [i, group] of machine.groups.entries()) {
+
+    for (let [i, group] of Object.values(machine.groups).entries()) {
+      console.log(group.id)
       nodes.push({
         id: group.id,
         type: "slot-group",
