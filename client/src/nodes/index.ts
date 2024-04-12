@@ -1,6 +1,6 @@
 import type { Node, NodeTypes } from "reactflow";
 import factory from "../factory.json";
-import { Factory } from "../types/core-types";
+import { Factory } from "@server/types/core-types";
 import { MachineNode } from "./MachineNode";
 import { GroupNode } from "./GroupNode";
 

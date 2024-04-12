@@ -1,4 +1,4 @@
-import { Factory, Pipe } from "../types/core-types";
+import { Factory, Pipe } from "@server/types/core-types";
 
 export function getAllPipes(factory: Factory) {
   const pipes: Pipe[] = [];

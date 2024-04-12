@@ -1,4 +1,4 @@
-import { Machine } from "../types/core-types";
+import { Machine } from "@server/types/core-types";
 import type { NodeProps } from "reactflow";
 
 export type MachineNodeData = {

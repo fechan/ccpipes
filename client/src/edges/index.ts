@@ -1,5 +1,5 @@
 import type { Edge, EdgeTypes } from "reactflow";
-import { Factory } from "../types/core-types";
+import { Factory } from "@server/types/core-types";
 import { getAllPipes } from "../util/factory-graph";
 import factory from "../factory.json";
 
