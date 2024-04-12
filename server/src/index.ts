@@ -40,7 +40,7 @@ function sendGenericSuccess(reqId: string, ws: WebSocket) {
   return ws.send(JSON.stringify(res));
 }
 
-function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket) {
+function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket) {  
   if (!(sessionId in sessions)) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
@@ -49,6 +49,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket) {
       reqId: reqId,
     };
     editor.send(JSON.stringify(res));
+    return;
   }
 
   if (sessions[sessionId].editor) {
@@ -59,6 +60,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket) {
       reqId: reqId,
     };
     editor.send(JSON.stringify(res));
+    return;
   }
 
   sessions[sessionId].editor = editor;
@@ -75,6 +77,7 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
       reqId: reqId,
     };
     computerCraft.send(JSON.stringify(res));
+    return;
   }
 
   sessions[sessionId] = {

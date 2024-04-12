@@ -1,7 +1,7 @@
 local Machine = require('machine')
 
 local function getPeripheralIds ()
-  return {'minecraft:chest_0', 'minecraft:furnace_0'}
+  return {'minecraft:chest_0', 'minecraft:furnace_0', 'create:depot_0', 'create:deployer_0'}
 end
 
 local function absolutePathTo (relativePath)
@@ -35,6 +35,9 @@ local function init ()
   -- 1. move items across all pipes
   -- 2. handle when the user wants to start/stop editing pipes
   -- 3. check for websocket messages and update factory
+  parallel.waitForAll(
+    
+  )
 end
 
 init()
