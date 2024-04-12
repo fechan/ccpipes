@@ -57,7 +57,7 @@ function relayMessage(message: string, sessionId: SessionId, to: Role) {
 
 /**
  * Send a generic success response for the given request ID
- * @param reqId Reqeust ID
+ * @param reqId Request ID
  * @param ws Websocket to send to
  */
 function sendGenericSuccess(reqId: string, ws: WebSocket) {
