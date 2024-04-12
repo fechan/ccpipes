@@ -1,9 +1,10 @@
-import { Machine, MachineId, Pipe, PipeId } from "./core-types"
+import { Factory, Machine, MachineId, Pipe, PipeId } from "./core-types"
 import { SessionId } from "./session";
 
 export type MessageType = (
   "ConfirmationResponse" |
   "SessionCreate" | "SessionJoin" |
+  "FactoryGet" | "FactoryGetResponse" |
   "PipeAdd" | "PipeEdit" | "PipeDel" |
   "MachineAdd" | "MachineEdit" | "MachineDel" |
   "GroupAdd" | "GroupEdit" | "GroupDel"
@@ -43,15 +44,46 @@ export interface FailResponse extends ConfirmationResponse {
 
 /**
  * Request for the creation of an editor session accessible via a session ID
+ * 
+ * - Emitted from CC
+ * - Not emitted from the editor
  */
 export interface SessionCreateReq extends Request {
   type: "SessionCreate",
   sessionId: SessionId,
 };
 
+/**
+ * Request for joining an editor session via a session ID
+ * 
+ * - Not emitted from CC
+ * - Emitted from the editor when the user inserts a session ID
+ */
 export interface SessionJoinReq extends Request {
   type: "SessionJoin",
   sessionId: SessionId,
+}
+
+/**
+ * Request for the full factory definition
+ * 
+ * - Not emitted from CC
+ * - Emitted from the editor after joining a session
+ */
+export interface FactoryGetReq extends Request {
+  type: "FactoryGet",
+}
+
+/**
+ * Response to FactoryGet, containing the factory definition
+ * 
+ * - Emitted from CC after receiving FactoryGet
+ * - Not emitted from the editor
+ */
+export interface FactoryGetRes extends Message {
+  type: "FactoryGetResponse",
+  reqId: string,
+  factory: Factory,
 }
 
 /**
