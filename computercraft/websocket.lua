@@ -7,8 +7,8 @@ end
 local function requestSession (ws)
   local sessionId = Utils.randomString(5)
   local req = {
-    reqId = Utils.randomString(20),
     type = 'SessionCreate',
+    reqId = Utils.randomString(20),
     sessionId = sessionId,
   }
   ws.send(textutils.serializeJSON(req))
