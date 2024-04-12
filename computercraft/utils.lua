@@ -1,4 +1,4 @@
-function randomString (length)
+local function randomString (length)
 	math.randomseed(os.time('utc')^5)
 
 	local res = ""
