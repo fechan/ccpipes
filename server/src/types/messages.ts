@@ -3,7 +3,7 @@ import { SessionId } from "./session";
 
 export type MessageType = (
   "ConfirmationResponse" |
-  "SessionCreate" |
+  "SessionCreate" | "SessionJoin" |
   "PipeAdd" | "PipeEdit" | "PipeDel" |
   "MachineAdd" | "MachineEdit" | "MachineDel" |
   "GroupAdd" | "GroupEdit" | "GroupDel"
@@ -22,7 +22,8 @@ export interface Request extends Message {
  * 
  * - CC should always respond to requests
  * - The server should always relay responses from CC to the editor
- * - The server should only respond to SessionCreate requests from CC
+ * - The server should only respond to `SessionCreate` requests from CC
+ *   and `SessionJoin` requests from the editor
  * - The editor should never respond to requests from CC
  */
 export interface ConfirmationResponse extends Message {
@@ -47,6 +48,11 @@ export interface SessionCreateReq extends Request {
   type: "SessionCreate",
   sessionId: SessionId,
 };
+
+export interface SessionJoinReq extends Request {
+  type: "SessionJoin",
+  sessionId: SessionId,
+}
 
 /**
  * Request to add a Pipe to the factory.
