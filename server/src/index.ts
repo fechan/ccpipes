@@ -14,7 +14,7 @@ wss.on("connection", function connection(ws) {
 
   ws.on("error", console.error);
 
-  ws.on("message", function message(data) {
+  ws.on("message", (data) => {
     const json = data.toString();
     const message = JSON.parse(json);
     console.log(message.type)
@@ -41,6 +41,13 @@ wss.on("connection", function connection(ws) {
       }
     }
   });
+
+  ws.on("close", (data) => {
+    if (role === "CC" && sessionId) {
+      sessions[sessionId].editor?.close();
+      delete sessions[sessionId];
+    }
+  })
 });
 
 /**
