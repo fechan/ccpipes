@@ -37,6 +37,11 @@ export default function App() {
   );
 
   useEffect(() => {
+    setNodes(getNodesForFactory(factory));
+    setEdges(getEdgesForFactory(factory));
+  }, [factory]);
+
+  useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
       const message: Message = JSON.parse(lastMessage.data as string);
       
@@ -68,9 +73,8 @@ export default function App() {
         }
       }
 
-      }
-    }, [lastMessage]
-  );
+    }
+  }, [lastMessage]);
 
   return (
     <div className="w-full h-full">

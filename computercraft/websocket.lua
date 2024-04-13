@@ -1,7 +1,11 @@
 local Utils = require('utils')
 
 local function connect (url)
-  return http.websocket(url)
+  local websocket, err = http.websocket(url)
+  if websocket == false then
+    error(err)
+  end
+  return websocket
 end
 
 local function requestSession (ws)
@@ -39,8 +43,8 @@ local function attachSession (ws)
   -- main ws listening loop
   while true do
     local res, isBinary = ws.receive()
-    if (not isBinary) then
-      queueEventFromMessage(res)
+    if (res ~= nil and not isBinary) then
+      queueEventFromMessage(textutils.unserializeJSON(res))
     end
   end
 end

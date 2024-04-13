@@ -17,6 +17,8 @@ wss.on("connection", function connection(ws) {
   ws.on("message", function message(data) {
     const json = data.toString();
     const message = JSON.parse(json);
+    console.log(message.type)
+
 
     if ("reqId" in message) {
       const request: Request = message;

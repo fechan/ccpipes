@@ -1,5 +1,12 @@
 local function handleFactoryGet (request, sendMessage, factory)
-  sendMessage(textutils.serialize(factory))
+  local factoryGetRes = {
+    type = 'ConfirmationResponse',
+    respondingTo = 'FactoryGet',
+    reqId = request.reqId,
+    ok = true,
+    factory = factory,
+  }
+  sendMessage(textutils.serializeJSON(factoryGetRes))
 end
 
 local function listenForCcpipesEvents (sendMessage, factory)
