@@ -1,5 +1,24 @@
 local Utils = require('utils')
 
+-- This is a table with message type names as keys and not an array
+-- so it's easy to check if a string is in the list of message types
+local MESSAGE_TYPES = {
+  ConfirmationResponse = true,
+  SessionCreate = true,
+  SessionJoin = true,
+  FactoryGet = true,
+  FactoryGetResponse = true,
+  PipeAdd = true,
+  PipeEdit = true,
+  PipeDel = true,
+  MachineAdd = true,
+  MachineEdit = true,
+  MachineDel = true,
+  GroupAdd = true,
+  GroupEdit = true,
+  GroupDel = true,
+}
+
 local function connect (url)
   local websocket, err = http.websocket(url)
   if websocket == false then
@@ -9,7 +28,7 @@ local function connect (url)
 end
 
 local function requestSession (ws)
-  local sessionId = Utils.randomString(5)
+  local sessionId = Utils.randomString(1)
   local req = {
     type = 'SessionCreate',
     reqId = Utils.randomString(20),
@@ -22,8 +41,12 @@ local function requestSession (ws)
 end
 
 local function queueEventFromMessage (message)
-  if message['type'] == "FactoryGet" then
-    os.queueEvent("ccpipes-FactoryGet", message)
+  local messageType = message['type']
+
+  if MESSAGE_TYPES[messageType] then
+    os.queueEvent("ccpipes-" .. messageType, message)
+  else
+    print("Unhandled message type: " .. messageType)
   end
 end
 
@@ -53,9 +76,3 @@ return {
   connect = connect,
   attachSession = attachSession,
 }
-
--- local ws = connect('ws://localhost:3000')
--- parallel.waitForAll(
---   function () attachSession(ws) end
--- )
--- print('done')
