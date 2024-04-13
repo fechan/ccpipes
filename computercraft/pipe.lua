@@ -11,14 +11,13 @@ local function processPipe (pipe, groupMap)
     for j, toSlot in ipairs(toGroup.slots) do
       local fromPeriph = peripheral.wrap(fromSlot.periphId)
 
-      fromPeriph.pushItems(toSlot.periphId, fromSlot.slot)
-
       -- stop trying to transfer if the origin slot is empty
       local fromSlotDetail = fromPeriph.getItemDetail(fromSlot.slot)
       if not fromSlotDetail then
         break
       end
 
+      fromPeriph.pushItems(toSlot.periphId, fromSlot.slot)
     end
   end
 end
