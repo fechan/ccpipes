@@ -1,6 +1,7 @@
 local Machine = require('machine')
 local WebSocket = require('websocket')
 local Controller = require('controller')
+local Pipe = require('pipe')
 
 local SERVER_URL = "ws://localhost:3000"
 
@@ -49,7 +50,13 @@ local function init ()
   -- 3. check for websocket messages and update factory
   parallel.waitForAll(
     function () WebSocket.attachSession(ws) end,
-    function () Controller.listenForCcpipesEvents(ws.send, factory) end
+    function () Controller.listenForCcpipesEvents(ws.send, factory) end,
+    function () Pipe.processAllPipesForever(factory) end,
+    -- HACK TODO: the following makes the os keep going
+    -- basically the os is getting stuck on something, and only something like
+    -- os.queueEvent or os.sleep will make it keep going
+    -- I think a coroutine isn't properly implemented or something. Maybe pipe.lua?
+    function () while 1 do os.sleep(0.05); coroutine.yield() end end 
   )
 end
 
