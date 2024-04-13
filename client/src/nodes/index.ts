@@ -20,7 +20,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
 
 
     for (let [i, group] of Object.values(machine.groups).entries()) {
-      console.log(group.id)
       nodes.push({
         id: group.id,
         type: "slot-group",
