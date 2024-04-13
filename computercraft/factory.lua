@@ -16,7 +16,6 @@ end
 ---@param pipe Pipe Pipe to add
 local function pipeAdd (factory, pipe)
   factory.pipes[pipe.id] = pipe
-  saveFactory(factory)
 end
 
 ---Get peripheral IDs connected to this factory

@@ -15,6 +15,7 @@ local function handlePipeAdd (request, sendMessage, factory)
   local pipe = request.pipe
   print("adding pipe from", pipe.from, "to", pipe.to)
   Factory.pipeAdd(factory, pipe)
+  Factory.saveFactory(factory)
 end
 
 local function listenForCcpipesEvents (sendMessage, factory)
