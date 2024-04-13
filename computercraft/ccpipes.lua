@@ -1,19 +1,9 @@
-local Machine = require('machine')
-local WebSocket = require('websocket')
 local Controller = require('controller')
+local Factory = require('factory')
 local Pipe = require('pipe')
+local WebSocket = require('websocket')
 
 local SERVER_URL = "ws://localhost:3000"
-
-local function getPeripheralIds ()
-  local periphs = {}
-  for i, periphId in ipairs(peripheral.getNames()) do
-    if string.find(periphId, ':') then
-      table.insert(periphs, periphId)
-    end
-  end
-  return periphs
-end
 
 local function absolutePathTo (relativePath)
   return '/' .. shell.dir() .. '/' .. relativePath
@@ -24,13 +14,8 @@ local function init ()
   local factory
   
   -- if there's no existing json file, generate a factory from detected peripherals
-  if factoryJsonFile == nil then
-    factory = {}
-
-    for i, periphId in ipairs(getPeripheralIds()) do
-      local machine = Machine.fromPeriphId(periphId)
-      factory[machine.id] = machine
-    end
+  if true or factoryJsonFile == nil then
+    factory = Factory.autodetectFactory()
 
     -- save it as json
     local json = textutils.serializeJSON(factory)

@@ -7,6 +7,12 @@
  * a lot since it's faster than searching through an array.
  */
 
+export interface Factory {
+    pipes: PipeMap,
+    machines: MachineMap,
+    groups: GroupMap,
+}
+
 export type PipeId = string;
 export type PipeMap = { [key: PipeId]: Pipe };
 
@@ -29,15 +35,14 @@ export interface Group {
     id: GroupId,
     slots: Slot[],
     distribution: string,
-    outputs: PipeMap,
     nickname?: string,
 };
 
 export type MachineId = string;
-export type Factory = { [key: MachineId]: Machine };
+export type MachineMap = { [key: MachineId]: Machine };
 
 export interface Machine {
     id: MachineId,
-    groups: GroupMap,
+    groups: GroupId[],
     nickname?: string,
 }

@@ -12,8 +12,8 @@ local function processPipe (pipe, groupMap)
       local fromPeriph = peripheral.wrap(fromSlot.periphId)
 
       fromPeriph.pushItems(toSlot.periphId, fromSlot.slot)
-      
-      -- stop trying to transfer if the from slot is empty
+
+      -- stop trying to transfer if the origin slot is empty
       local fromSlotDetail = fromPeriph.getItemDetail(fromSlot.slot)
       if not fromSlotDetail then
         break
@@ -24,14 +24,8 @@ local function processPipe (pipe, groupMap)
 end
 
 local function processAllPipes (factory)
-  local globalGroupMap = Factory.getGlobalGroupMap(factory)
-
-  for machineId, machine in pairs(factory) do
-    for groupId, group in pairs(machine.groups) do
-      for pipeId, pipe in pairs(group.outputs) do
-        processPipe(pipe, globalGroupMap)
-      end
-    end
+  for pipeId, pipe in pairs(factory.pipes) do
+    processPipe(pipe, factory.groups)
   end
 end
 

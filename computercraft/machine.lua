@@ -16,6 +16,7 @@ end
 ---Initialize a machine from a CC peripheral where every slot has its own group
 ---@param periphId string CC Peripheral ID
 ---@return Machine machine New machine
+---@return Group[] groups List of groups for this machine
 function Machine.fromPeriphId (periphId)
   local o = Machine.new(periphId)
 
@@ -24,6 +25,7 @@ function Machine.fromPeriphId (periphId)
   end
 
   local peripheral = peripheral.wrap(periphId)
+  local groups = {}
 
   -- create 1 group for each slot
   for slotNbr=1, peripheral.size() do
@@ -37,19 +39,20 @@ function Machine.fromPeriphId (periphId)
       id = groupId,
       slots = {slot},
       distribution = 'roundRobin',
-      outputs = {},
       nickname = 'Slot ' .. slotNbr,
     }
 
-    o.groups[groupId] = group
+    groups[groupId] = group
+    table.insert(o.groups, groupId)
   end
 
-  return o
+  return o, groups
 end
 
 ---Initialize a chest machine from a CC peripheral where every slot is in one big group
 ---@param periphId string CC Peripheral ID
 ---@return Machine machine New machine
+---@return Group[] groups List of one group representing the inventory
 function Machine.fromChestPeriphId (periphId)
   local o = Machine.new(periphId)
 
@@ -58,11 +61,11 @@ function Machine.fromChestPeriphId (periphId)
     id = groupId,
     slots = {},
     distribution = 'roundRobin',
-    outputs = {},
     nickname = 'Inventory',
   }
 
   local peripheral = peripheral.wrap(periphId)
+  local groups = {}
 
   for slotNbr=1, peripheral.size() do
     local slot = {
@@ -70,12 +73,13 @@ function Machine.fromChestPeriphId (periphId)
       slot = slotNbr,
     }
 
+    groups[groupId] = group
     table.insert(group.slots, slot)
   end
 
-  o.groups[groupId] = group
+  table.insert(o.groups, groupId)
 
-  return o
+  return o, groups
 end
 
 return Machine

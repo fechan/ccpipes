@@ -6,7 +6,7 @@ import { GroupNode } from "./GroupNode";
 export function getNodesForFactory(factory: Factory): Node[] {
   const nodes = [];
 
-  for (let [i, machine] of Object.values(factory).entries()) {
+  for (let [i, machine] of Object.values(factory.machines).entries()) {
     nodes.push({
       id: machine.id,
       type: "machine",
@@ -19,7 +19,8 @@ export function getNodesForFactory(factory: Factory): Node[] {
     } as Node);
 
 
-    for (let [i, group] of Object.values(machine.groups).entries()) {
+    for (let groupId of machine.groups) {
+      const group = factory.groups[groupId];
       nodes.push({
         id: group.id,
         type: "slot-group",

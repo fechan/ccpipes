@@ -1,27 +1,40 @@
 --- factory.lua: Functions for modifying the factory data structure (in place)
+local Machine = require('machine')
 
 local function pipeAdd (factory, pipe)
-  for machineId, machine in pairs(factory) do
-    for groupId, group in pairs(machine.groups) do
-      if groupId == pipe.from then
-        group.outputs[pipe.id] = pipe
-        return
-      end
-    end
-  end
+  factory.pipes[pipe.id] = pipe
 end
 
-local function getGlobalGroupMap (factory)
-  local groupMap = {}
-  for machineId, machine in pairs(factory) do
-    for groupId, group in pairs(machine.groups) do
-      groupMap[groupId] = group
+local function getPeripheralIds ()
+  local periphs = {}
+  for i, periphId in ipairs(peripheral.getNames()) do
+    if string.find(periphId, ':') then
+      table.insert(periphs, periphId)
     end
   end
-  return groupMap
+  return periphs
+end
+
+local function autodetectFactory ()
+  local factory = {
+    machines = {},
+    groups = {},
+    pipes = {},
+  }
+  for i, periphId in ipairs(getPeripheralIds()) do
+    local machine, groups = Machine.fromPeriphId(periphId)
+    factory.machines[machine.id] = machine
+
+    for groupId, group in pairs(groups) do
+      factory.groups[groupId] = group
+    end
+  end
+
+  return factory
 end
 
 return {
   pipeAdd = pipeAdd,
-  getGlobalGroupMap = getGlobalGroupMap
+  getGlobalGroupMap = getGlobalGroupMap,
+  autodetectFactory = autodetectFactory,
 }

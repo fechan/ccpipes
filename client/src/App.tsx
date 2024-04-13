@@ -28,7 +28,7 @@ export default function App() {
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
-  const [ factory, setFactory ] = useState({} as Factory);
+  const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
   const [nodes, setNodes , onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect: OnConnect = useCallback(
