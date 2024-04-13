@@ -23,7 +23,7 @@ end
 local function getPeripheralIds ()
   local periphs = {}
   for i, periphId in ipairs(peripheral.getNames()) do
-    if string.find(periphId, ':') then
+    if peripheral.wrap(periphId)['pushItems'] then -- check if the peripheral has an inventory
       table.insert(periphs, periphId)
     end
   end
