@@ -14,7 +14,7 @@ local function init ()
   local factory
   
   -- if there's no existing json file, generate a factory from detected peripherals
-  if true or factoryJsonFile == nil then
+  if factoryJsonFile == nil then
     factory = Factory.autodetectFactory()
 
     -- save it as json
