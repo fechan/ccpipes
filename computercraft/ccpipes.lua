@@ -2,26 +2,18 @@ local Controller = require('controller')
 local Factory = require('factory')
 local Pipe = require('pipe')
 local WebSocket = require('websocket')
+local Utils = require('utils')
 
 local SERVER_URL = "ws://localhost:3000"
 
-local function absolutePathTo (relativePath)
-  return '/' .. shell.dir() .. '/' .. relativePath
-end
-
 local function init ()
-  local factoryJsonFile = io.open(absolutePathTo('factory.json'), 'r')
+  local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
   
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then
     factory = Factory.autodetectFactory()
-
-    -- save it as json
-    local json = textutils.serializeJSON(factory)
-    local f = fs.open(absolutePathTo('factory.json'), 'w')
-    f.write(json)
-    f.close()
+    Factory.saveFactory(Factory)
   else
     -- TODO: we should detect any added/removed machines after reading from JSON
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))

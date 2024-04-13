@@ -1,3 +1,6 @@
+---Generate a random string of some length
+---@param length number Length of string
+---@return string res Random string
 local function randomString (length)
 	math.randomseed(os.time('utc')^5)
 
@@ -8,6 +11,14 @@ local function randomString (length)
 	return res
 end
 
+---Convert a relative to absolute path
+---@param relativePath string Relative path
+---@return string absolutePath Absolute path
+local function absolutePathTo (relativePath)
+  return '/' .. shell.dir() .. '/' .. relativePath
+end
+
 return {
   randomString = randomString,
+	absolutePathTo = absolutePathTo,
 }

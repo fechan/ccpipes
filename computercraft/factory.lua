@@ -1,10 +1,26 @@
 --- factory.lua: Functions for modifying the factory data structure (in place)
 local Machine = require('machine')
+local Utils = require('utils')
 
-local function pipeAdd (factory, pipe)
-  factory.pipes[pipe.id] = pipe
+---Save a factory as a JSON file
+---@param factory Factory Factory to save
+local function saveFactory(factory)
+  local json = textutils.serializeJSON(factory)
+  local f = fs.open(Utils.absolutePathTo('factory.json'), 'w')
+  f.write(json)
+  f.close()
 end
 
+---Add a pipe to a factory
+---@param factory Factory Factory to add to
+---@param pipe Pipe Pipe to add
+local function pipeAdd (factory, pipe)
+  factory.pipes[pipe.id] = pipe
+  saveFactory(factory)
+end
+
+---Get peripheral IDs connected to this factory
+---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
   local periphs = {}
   for i, periphId in ipairs(peripheral.getNames()) do
@@ -15,6 +31,8 @@ local function getPeripheralIds ()
   return periphs
 end
 
+---Autodetect peripherals and generate a Factory
+---@return Factory factory Factory with autodetected peripherals
 local function autodetectFactory ()
   local factory = {
     machines = {},
@@ -35,6 +53,6 @@ end
 
 return {
   pipeAdd = pipeAdd,
-  getGlobalGroupMap = getGlobalGroupMap,
   autodetectFactory = autodetectFactory,
+  saveFactory = saveFactory,
 }
