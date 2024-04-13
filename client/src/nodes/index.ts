@@ -1,10 +1,9 @@
 import type { Node, NodeTypes } from "reactflow";
-import factory from "../factory.json";
 import { Factory } from "@server/types/core-types";
 import { MachineNode } from "./MachineNode";
 import { GroupNode } from "./GroupNode";
 
-function getNodesForFactory(factory: Factory): Node[] {
+export function getNodesForFactory(factory: Factory): Node[] {
   const nodes = [];
 
   for (let [i, machine] of Object.values(factory).entries()) {
@@ -39,7 +38,6 @@ function getNodesForFactory(factory: Factory): Node[] {
   return nodes;
 }
 
-export const initialNodes = getNodesForFactory(factory);
 export const nodeTypes = {
   "machine": MachineNode,
   "slot-group": GroupNode,

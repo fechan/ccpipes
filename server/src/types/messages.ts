@@ -29,6 +29,7 @@ export interface Request extends Message {
  */
 export interface ConfirmationResponse extends Message {
   type: "ConfirmationResponse"
+  respondingTo: MessageType,
   reqId: string,
   ok: boolean,
 };
@@ -80,8 +81,8 @@ export interface FactoryGetReq extends Request {
  * - Emitted from CC after receiving FactoryGet
  * - Not emitted from the editor
  */
-export interface FactoryGetRes extends Message {
-  type: "FactoryGetResponse",
+export interface FactoryGetRes extends SuccessResponse {
+  respondingTo: "FactoryGet"
   reqId: string,
   factory: Factory,
 }

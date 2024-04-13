@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { FailResponse, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
+import { FailResponse, MessageType, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
 import { Session, SessionId } from "./types/session";
 
 type Role = ('CC' | 'editor');
@@ -49,20 +49,22 @@ wss.on("connection", function connection(ws) {
  */
 function relayMessage(message: string, sessionId: SessionId, to: Role) {
   if (to === 'CC') {
-    sessions[sessionId].editor.send(message);
-  } else {
     sessions[sessionId].computerCraft.send(message);
+  } else {
+    sessions[sessionId].editor.send(message);
   }
 }
 
 /**
  * Send a generic success response for the given request ID
+ * @param messageType Type of request that this is a response to
  * @param reqId Request ID
  * @param ws Websocket to send to
  */
-function sendGenericSuccess(reqId: string, ws: WebSocket) {
+function sendGenericSuccess(respondingTo: MessageType, reqId: string, ws: WebSocket) {
   const res: SuccessResponse = {
     type: "ConfirmationResponse",
+    respondingTo: respondingTo,
     ok: true,
     reqId: reqId,
   };
@@ -79,6 +81,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
   if (!(sessionId in sessions)) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
+      respondingTo: "SessionJoin",
       ok: false,
       message: "Session ID does not exist",
       reqId: reqId,
@@ -90,6 +93,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
   if (sessions[sessionId].editor) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
+      respondingTo: "SessionJoin",
       ok: false,
       message: "Someone is already editing the factory",
       reqId: reqId,
@@ -100,7 +104,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
 
   sessions[sessionId].editor = editor;
 
-  sendGenericSuccess(reqId, editor);
+  sendGenericSuccess("SessionJoin", reqId, editor);
   return sessionId;
 }
 
@@ -114,6 +118,7 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
   if (sessionId in sessions) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
+      respondingTo: "SessionCreate",
       ok: false,
       message: "Session ID already exists",
       reqId: reqId,
@@ -127,6 +132,6 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
     computerCraft: computerCraft
   };
 
-  sendGenericSuccess(reqId, computerCraft);
+  sendGenericSuccess("SessionCreate", reqId, computerCraft);
   return sessionId;
 }

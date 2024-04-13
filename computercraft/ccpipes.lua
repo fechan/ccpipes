@@ -1,7 +1,17 @@
 local Machine = require('machine')
+local WebSocket = require('websocket')
+local Controller = require('controller')
+
+local SERVER_URL = "ws://localhost:3000"
 
 local function getPeripheralIds ()
-  return {'minecraft:chest_0', 'minecraft:furnace_0', 'create:depot_0', 'create:deployer_0'}
+  local periphs = {}
+  for i, periphId in ipairs(peripheral.getNames()) do
+    if string.find(periphId, ':') then
+      table.insert(periphs, periphId)
+    end
+  end
+  return periphs
 end
 
 local function absolutePathTo (relativePath)
@@ -27,16 +37,19 @@ local function init ()
     f.write(json)
     f.close()
   else
+    -- TODO: we should detect any added/removed machines after reading from JSON
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))
     io.close(factoryJsonFile)
   end
 
+  local ws = WebSocket.connect(SERVER_URL)
   -- TODO: constantly loop between three coloutines:
   -- 1. move items across all pipes
   -- 2. handle when the user wants to start/stop editing pipes
   -- 3. check for websocket messages and update factory
   parallel.waitForAll(
-    
+    function () WebSocket.attachSession(ws) end,
+    function () Controller.listenForCcpipesEvents(ws.send, factory) end
   )
 end
 

@@ -17,6 +17,12 @@ local function requestSession (ws)
   return textutils.unserializeJSON(res), sessionId
 end
 
+local function queueEventFromMessage (message)
+  if message['type'] == "FactoryGet" then
+    os.queueEvent("ccpipes-FactoryGet", message)
+  end
+end
+
 local function attachSession (ws)
   local res, sessionId = requestSession(ws)
   local attempts = 1
@@ -32,13 +38,20 @@ local function attachSession (ws)
 
   -- main ws listening loop
   while true do
-    local res = ws.receive()
-    print(res)
+    local res, isBinary = ws.receive()
+    if (not isBinary) then
+      queueEventFromMessage(res)
+    end
   end
 end
 
-local ws = connect('ws://localhost:3000')
-parallel.waitForAll(
-  function () attachSession(ws) end
-)
-print('done')
+return {
+  connect = connect,
+  attachSession = attachSession,
+}
+
+-- local ws = connect('ws://localhost:3000')
+-- parallel.waitForAll(
+--   function () attachSession(ws) end
+-- )
+-- print('done')
