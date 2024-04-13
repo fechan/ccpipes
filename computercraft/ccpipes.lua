@@ -13,7 +13,7 @@ local function init ()
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then
     factory = Factory.autodetectFactory()
-    Factory.saveFactory(Factory)
+    Factory.saveFactory(factory)
   else
     -- TODO: we should detect any added/removed machines after reading from JSON
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))
