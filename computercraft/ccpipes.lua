@@ -44,10 +44,6 @@ local function init ()
   end
 
   local ws = WebSocket.connect(SERVER_URL)
-  -- TODO: constantly loop between three coloutines:
-  -- 1. move items across all pipes
-  -- 2. handle when the user wants to start/stop editing pipes
-  -- 3. check for websocket messages and update factory
   parallel.waitForAll(
     function () WebSocket.attachSession(ws) end,
     function () Controller.listenForCcpipesEvents(ws.send, factory) end,
