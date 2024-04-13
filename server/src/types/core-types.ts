@@ -10,14 +10,14 @@
 export type PipeId = string;
 export type PipeMap = { [key: PipeId]: Pipe };
 
-export type Pipe = {
+export interface Pipe {
     id: PipeId,
     from: GroupId,
     to: GroupId
     nickname?: string,
 };
 
-export type Slot = {
+export interface Slot {
     periphId: string,
     slot: number,
 };
@@ -25,7 +25,7 @@ export type Slot = {
 export type GroupId = string;
 export type GroupMap = { [key: GroupId]: Group };
 
-export type Group = {
+export interface Group {
     id: GroupId,
     slots: Slot[],
     distribution: string,
@@ -36,7 +36,7 @@ export type Group = {
 export type MachineId = string;
 export type Factory = { [key: MachineId]: Machine };
 
-export type Machine = {
+export interface Machine {
     id: MachineId,
     groups: GroupMap,
     nickname?: string,
