@@ -1,5 +1,5 @@
 import useWebSocket from "react-use-websocket";
-import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
+import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
 import type { OnConnect } from "reactflow";
@@ -32,8 +32,22 @@ export default function App() {
   const [nodes, setNodes , onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((edges) => addEdge(connection, edges)),
-    [setEdges]
+    (connection) => {
+      if (connection.source && connection.target) {
+        const pipeAddReq: PipeAddReq = {
+          type: "PipeAdd",
+          reqId: uuidv4(),
+          pipe: {
+            id: uuidv4(),
+            from: connection.source,
+            to: connection.target,
+          }
+        };
+        sendMessage(JSON.stringify(pipeAddReq));
+      }
+      return setEdges((edges) => addEdge(connection, edges));
+    },
+    [setEdges, factory]
   );
 
   useEffect(() => {
