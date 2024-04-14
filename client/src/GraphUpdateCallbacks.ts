@@ -1,7 +1,7 @@
 import { Pipe, PipeId } from "@server/types/core-types";
 import { PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
-import { SendMessage, WebSocketMessage } from "react-use-websocket/dist/lib/types";
+import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, Connection, Edge, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 

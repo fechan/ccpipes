@@ -1,3 +1,6 @@
+---machine.lua: Functions for initializing Machines
+---@class Group
+---@class Machine
 Machine = {}
 
 ---Initialize a new machine

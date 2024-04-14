@@ -1,4 +1,7 @@
 --- factory.lua: Functions for modifying the factory data structure (in place)
+---@class Factory
+---@class Pipe
+
 local Machine = require('machine')
 local Utils = require('utils')
 

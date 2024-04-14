@@ -20,7 +20,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsData) {
   };
 
   useOnSelectionChange({
-    onChange: ({ nodes, edges }) => {
+    onChange: ({ edges }) => {
       setSelectedEdges(edges);
       setFilter(edges.length === 1 ? (edges[0]?.data?.filter || "") : "...");
       setNickname(edges.length === 1 ? (edges[0]?.data?.nickname || "") : "...");
