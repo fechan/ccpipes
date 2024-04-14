@@ -43,9 +43,11 @@ wss.on("connection", function connection(ws) {
   });
 
   ws.on("close", (data) => {
-    if (role === "CC" && sessionId) {
+    if (role === "CC" && sessionId && sessions[sessionId]) {
       sessions[sessionId].editor?.close();
       delete sessions[sessionId];
+    } else if (role === "editor" && sessionId && sessions[sessionId]) {
+      sessions[sessionId].editor = undefined;
     }
   });
 });

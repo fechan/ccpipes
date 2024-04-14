@@ -23,6 +23,11 @@ local function handlePipeDel (request, factory, sendMessage)
   Factory.saveFactory(factory)
 end
 
+local function handlePipeEdit (request, factory, sendMessage)
+  Factory.pipeEdit(factory, request.pipeId, request.edits)
+  Factory.saveFactory(factory)
+end
+
 local function listenForCcpipesEvents (sendMessage, factory)
   while true do
     local event, message = os.pullEvent()
@@ -31,6 +36,7 @@ local function listenForCcpipesEvents (sendMessage, factory)
       ['ccpipes-FactoryGet'] = handleFactoryGet,
       ['ccpipes-PipeAdd'] = handlePipeAdd,
       ['ccpipes-PipeDel'] = handlePipeDel,
+      ['ccpipes-PipeEdit'] = handlePipeEdit,
     }
 
     if handlers[event] then

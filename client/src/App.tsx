@@ -2,7 +2,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Edge, OnConnect, OnEdgesDelete } from "reactflow";
+import type { Edge, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc } from "reactflow";
 
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -13,6 +13,7 @@ import {
   addEdge,
   useNodesState,
   useEdgesState,
+  Panel,
 } from "reactflow";
 
 import "reactflow/dist/style.css";
@@ -23,6 +24,7 @@ import { edgeTypes, getEdgesForFactory } from "./edges";
 
 import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
+import { EdgeOptions } from "./components/EdgeOptions";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -45,6 +47,12 @@ export default function App() {
     (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage),
     []
   );
+
+  const onEdgeUpdate: OnEdgeUpdateFunc = useCallback(
+    (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, setEdges),
+    []
+  );
+
   /**
    * End handlers for React Flow events
    */
@@ -106,9 +114,11 @@ export default function App() {
         edgeTypes={edgeTypes}
         onEdgesChange={onEdgesChange}
         onEdgesDelete={onEdgesDelete}
+        onEdgeUpdate={onEdgeUpdate}
         onConnect={onConnect}
         fitView
       >
+        <Panel position="top-left"><EdgeOptions /></Panel>
         <Background />
         <MiniMap />
         <Controls />

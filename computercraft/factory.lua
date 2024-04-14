@@ -25,6 +25,17 @@ local function pipeDel (factory, pipeId)
   factory.pipes[pipeId] = nil
 end
 
+---Edit a pipe in the factory
+---@param factory Factory Factory the pipe is in
+---@param pipeId string ID of pipe to edit
+---@param edits table Map of keys to edit -> new values
+local function pipeEdit (factory, pipeId, edits)
+  local pipe = factory.pipes[pipeId]
+  for k, v in pairs(edits) do
+    pipe[k] = v
+  end
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
@@ -61,6 +72,7 @@ end
 return {
   pipeAdd = pipeAdd,
   pipeDel = pipeDel,
+  pipeEdit = pipeEdit,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
 }

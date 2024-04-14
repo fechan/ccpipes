@@ -1,4 +1,4 @@
-import type { Edge, EdgeTypes } from "reactflow";
+import { MarkerType, type Edge, type EdgeTypes } from "reactflow";
 import { Factory } from "@server/types/core-types";
 
 export function getEdgesForFactory(factory: Factory): Edge[] {
@@ -6,6 +6,14 @@ export function getEdgesForFactory(factory: Factory): Edge[] {
     id: pipe.id,
     source: pipe.from,
     target: pipe.to,
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      width: 20,
+      height: 20,
+    },
+    style: {
+      strokeWidth: 2,
+    },
   }));
 }
 
