@@ -20,19 +20,29 @@ export function NewSessionModal({ sendMessage }: NewSessionModalData) {
   }
 
   return (
-    <div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50">
-      <div className="relative p-4 w-full max-w-2xl max-h-full bg-white border rounded-lg shadow">
-        <div className="flex flex-col">
-          <input
-            type="text"
-            className="bg-gray-50 border border-gray-300 rounded-lg p-2.5"
-            onInput={ e => setSessionId((e.target as HTMLInputElement).value.toUpperCase()) }
-            value={ sessionId }
-          />
-          <button onClick={ joinSession } >
-            Start editing
-          </button>
-        </div>
+    <div className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full h-full md:inset-0 bg-black/50">
+      <div className="relative p-4 max-w-2xl max-h-full bg-white border rounded-lg shadow">
+        <iframe name="dummy" id="dummy" className="hidden"></iframe>
+        <form target="dummy" className="flex flex-col items-center">
+          <label className="mb-3" htmlFor="sessionCode">Enter the code displayed on the ComputerCraft computer:</label>
+          <div>
+            <input
+              name="sessionCode"
+              id="sessionCode"
+              type="text"
+              className="bg-gray-50 border border-gray-300 rounded-lg p-2.5 me-3 h-10 shadow-inner"
+              onInput={ e => setSessionId((e.target as HTMLInputElement).value.toUpperCase()) }
+              value={ sessionId }
+            />
+            <button
+              className="rounded-lg disabled:bg-gray-500 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white w-40 h-10"
+              onClick={ joinSession }
+              disabled={ sessionId.length < 1 }
+            >
+              Start editing
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
