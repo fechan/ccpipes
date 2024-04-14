@@ -27,6 +27,8 @@ function Machine.fromPeriphId (periphId)
     string.find(periphId, 'minecraft:chest_') or
     string.find(periphId, 'minecraft:trapped_chest_') or
     string.find(periphId, 'minecraft:barrel_') or
+    string.find(periphId, 'minecraft:dispenser_') or
+    string.find(periphId, 'minecraft:observer_') or
     (string.find(periphId, 'minecraft:') and string.find(periphId, '_shulker_box_'))
   ) then
     return Machine.fromChestPeriphId(periphId)
