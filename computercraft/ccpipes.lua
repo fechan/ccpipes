@@ -6,7 +6,22 @@ local Utils = require('utils')
 
 local SERVER_URL = "ws://localhost:3000"
 
+---Wait for the quit key (q) to be pressed, and quit gracefully
+---@param ws WebSocket Websocket to close before program exits
+local function waitForQuitKey (ws)
+  while true do
+    local event, key = os.pullEvent('key')
+    if keys.getName(key) == 'q' then
+      ws.close()
+      -- there's no canonical exit function, so we just raise an error to stop
+      error("Program quit successfully. Thank you for using CCPipes!")
+    end
+  end
+end
+
 local function init ()
+  print("Welcome to CCPipes! Press Q to quit.\n")
+
   local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
   
@@ -21,15 +36,17 @@ local function init ()
   end
 
   local ws = WebSocket.connect(SERVER_URL)
+
   parallel.waitForAll(
     function () WebSocket.attachSession(ws) end,
     function () Controller.listenForCcpipesEvents(ws.send, factory) end,
     function () Pipe.processAllPipesForever(factory) end,
+    function () waitForQuitKey(ws) end,
     -- HACK TODO: the following makes the os keep going
     -- basically the os is getting stuck on something, and only something like
     -- os.queueEvent or os.sleep will make it keep going
     -- I think a coroutine isn't properly implemented or something. Maybe pipe.lua?
-    function () while 1 do os.sleep(0.05); coroutine.yield() end end 
+    function () while true do os.sleep(0.05) end end
   )
 end
 

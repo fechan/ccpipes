@@ -3,9 +3,8 @@
 
 local Factory = require('factory')
 
-local function getFilledSlots (slots)
+local function getFilledSlots (slots, periphItemLists)
   local filledSlots = {}
-  local periphItemLists = {}
   for i, slot in ipairs(slots) do
     if periphItemLists[slot.periphId] == nil then
       periphItemLists[slot.periphId] = peripheral.wrap(slot.periphId).list()
@@ -20,41 +19,31 @@ local function getFilledSlots (slots)
   return filledSlots
 end
 
-local function getDestinationSlots (slots, name)
-  local destinationSlots = {}
-  local periphItemLists = {}
-  for i, slot in ipairs(slots) do
-    if periphItemLists[slot.periphId] == nil then
-      periphItemLists[slot.periphId] = peripheral.wrap(slot.periphId).list()
-    end
-    local slotDetail = periphItemLists[slot.periphId][slot.slot]
-
-    if slotDetail == nil then
-      table.insert(destinationSlots, slot)
-    elseif (slotDetail.name == name and slotDetail.count < slotDetail.maxCount) then
-      table.insert(destinationSlots, slot)
-    end
-  end
-
-  return destinationSlots
-end
-
 local function processPipe (pipe, groupMap)
   local fromGroup = groupMap[pipe.from]
   local toGroup = groupMap[pipe.to]
 
   local start = os.epoch('utc')
-  
-  for i, fromSlot in ipairs(getFilledSlots(fromGroup.slots)) do
-    local fromPeriph = peripheral.wrap(fromSlot.periphId)
-    local fromSlotDetail = fromPeriph.getItemDetail(fromSlot.slot)
 
+  -- cache item lists for peripherals
+  local periphItemLists = {}
+
+  for i, fromSlot in ipairs(getFilledSlots(fromGroup.slots, periphItemLists)) do
+    -- try to access the item list from cache
+    local fromPeriph = peripheral.wrap(fromSlot.periphId)
+    if periphItemLists[fromSlot.periphId] == nil then
+      periphItemLists[fromSlot.periphId] = fromPeriph.list()
+    end
+    local itemList = periphItemLists[fromSlot.periphId]
+
+    local fromSlotDetail = itemList[fromSlot.slot]
     if fromSlotDetail then
       local itemsToTransfer = fromSlotDetail.count
 
       for j, toSlot in ipairs(toGroup.slots) do
-        local transferred = fromPeriph.pushItems(toSlot.periphId, fromSlot.slot)
+        local transferred = fromPeriph.pushItems(toSlot.periphId, fromSlot.slot, nil, toSlot.slot)
 
+        -- move on to the next origin slot the origin slot is empty
         itemsToTransfer = itemsToTransfer - transferred
         if itemsToTransfer <= 0 then
           break
