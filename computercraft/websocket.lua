@@ -22,7 +22,8 @@ local MESSAGE_TYPES = {
 local function connect (url)
   local websocket, err = http.websocket(url)
   if websocket == false then
-    error(err)
+    print("Failed to connect to editor session server... pipes will continue to run but you cannot edit them.")
+    print("Reason:", err)
   end
   return websocket
 end
@@ -56,6 +57,7 @@ local function attachSession (ws)
   while res == nil or not res.ok do
     if attempts > 5 then
       print("Failed to create session for editor... pipes will continue to run but you cannot edit them.")
+      print("Reason:", res.message)
       return
     end
     res, sessionId = requestSession(ws)

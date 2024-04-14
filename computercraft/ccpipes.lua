@@ -7,12 +7,12 @@ local Utils = require('utils')
 local SERVER_URL = "ws://localhost:3000"
 
 ---Wait for the quit key (q) to be pressed, and quit gracefully
----@param ws WebSocket Websocket to close before program exits
+---@param ws WebSocket|boolean Websocket to close before program exits
 local function waitForQuitKey (ws)
   while true do
     local event, key = os.pullEvent('key')
     if keys.getName(key) == 'q' then
-      ws.close()
+      if ws then ws.close() end
       -- there's no canonical exit function, so we just raise an error to stop
       error("Program quit successfully. Thank you for using CCPipes!")
     end
@@ -38,8 +38,8 @@ local function init ()
   local ws = WebSocket.connect(SERVER_URL)
 
   parallel.waitForAll(
-    function () WebSocket.attachSession(ws) end,
-    function () Controller.listenForCcpipesEvents(ws.send, factory) end,
+    function () if ws then WebSocket.attachSession(ws) end end,
+    function () if ws then Controller.listenForCcpipesEvents(ws.send, factory) end end,
     function () Pipe.processAllPipesForever(factory) end,
     function () waitForQuitKey(ws) end,
     -- HACK TODO: the following makes the os keep going
