@@ -19,6 +19,12 @@ local function getFilledSlots (slots, periphItemLists)
   return filledSlots
 end
 
+local function matchFilter (slot, filter)
+  --TODO: getItemDetail takes 50 ms... wtf??
+  local displayName = peripheral.wrap(slot.periphId).getItemDetail(slot.slot).displayName
+  return displayName and filter and string.match(displayName, filter) ~= nil
+end
+
 local function processPipe (pipe, groupMap)
   local fromGroup = groupMap[pipe.from]
   local toGroup = groupMap[pipe.to]
@@ -37,9 +43,16 @@ local function processPipe (pipe, groupMap)
     local itemList = periphItemLists[fromSlot.periphId]
 
     local fromSlotDetail = itemList[fromSlot.slot]
-    if fromSlotDetail then
+    if fromSlotDetail and matchFilter(fromSlot, pipe.filter) then
       local itemsToTransfer = fromSlotDetail.count
 
+      --TODO: you'll notice if you try transferring a bunch of stacks of an item from
+      --one chest to another that the transferring slows down the more stacks it sends.
+      --I think it's because every time it moves on to the next stack, it still tries to
+      --transfer the items to a destination stack that's already full, and it's trying
+      --(and failing) to transfer them, which takes time.
+      --I think the fix is to keep track of which slots are full after transferring,
+      --and then ignore them for the next origin slot
       for j, toSlot in ipairs(toGroup.slots) do
         local transferred = fromPeriph.pushItems(toSlot.periphId, fromSlot.slot, nil, toSlot.slot)
 
