@@ -47,7 +47,7 @@ wss.on("connection", function connection(ws) {
       sessions[sessionId].editor?.close();
       delete sessions[sessionId];
     }
-  })
+  });
 });
 
 /**

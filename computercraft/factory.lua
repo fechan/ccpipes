@@ -23,7 +23,8 @@ end
 local function getPeripheralIds ()
   local periphs = {}
   for i, periphId in ipairs(peripheral.getNames()) do
-    if peripheral.wrap(periphId)['pushItems'] then -- check if the peripheral has an inventory
+    -- add if the peripheral has an inventory and is connected via a modem
+    if peripheral.wrap(periphId)['pushItems'] and string.match(periphId, ':') then 
       table.insert(periphs, periphId)
     end
   end
