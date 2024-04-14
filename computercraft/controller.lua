@@ -34,7 +34,7 @@ local function listenForCcpipesEvents (sendMessage, factory)
     }
 
     if handlers[event] then
-      handlers[event](request, factory, sendMessage)
+      handlers[event](message, factory, sendMessage)
     end
 
   end

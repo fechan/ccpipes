@@ -2,7 +2,7 @@ import useWebSocket from "react-use-websocket";
 import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
-import type { OnConnect } from "reactflow";
+import type { Edge, OnConnect, OnEdgesDelete } from "reactflow";
 
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -22,6 +22,7 @@ import { nodeTypes, getNodesForFactory } from "./nodes";
 import { edgeTypes, getEdgesForFactory } from "./edges";
 
 import { NewSessionModal } from "./components/NewSessionModal";
+import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -34,21 +35,34 @@ export default function App() {
   const onConnect: OnConnect = useCallback(
     (connection) => {
       if (connection.source && connection.target) {
+        const pipeId = uuidv4();
+
         const pipeAddReq: PipeAddReq = {
           type: "PipeAdd",
           reqId: uuidv4(),
           pipe: {
-            id: uuidv4(),
+            id: pipeId,
             from: connection.source,
             to: connection.target,
           }
         };
         sendMessage(JSON.stringify(pipeAddReq));
+
+        const newEdge: Edge = {
+          source: connection.source!,
+          target: connection.target!,
+          id: pipeId,
+        };
+  
+        return setEdges((edges) => addEdge(newEdge, edges));
       }
-      return setEdges((edges) => addEdge(connection, edges));
+
     },
     [setEdges, factory]
   );
+
+  const onEdgesDelete: OnEdgesDelete = useCallback(
+    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage), []);
 
   useEffect(() => {
     setNodes(getNodesForFactory(factory));
@@ -101,6 +115,7 @@ export default function App() {
         edges={edges}
         edgeTypes={edgeTypes}
         onEdgesChange={onEdgesChange}
+        onEdgesDelete={onEdgesDelete}
         onConnect={onConnect}
         fitView
       >
