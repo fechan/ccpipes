@@ -15,7 +15,7 @@ local function getFilledSlots (slots, periphItemLists)
       table.insert(filledSlots, slot)
     end
   end
-  
+
   return filledSlots
 end
 
@@ -23,7 +23,7 @@ local function processPipe (pipe, groupMap)
   local fromGroup = groupMap[pipe.from]
   local toGroup = groupMap[pipe.to]
 
-  local start = os.epoch('utc')
+  -- local start = os.epoch('utc')
 
   -- cache item lists for peripherals
   local periphItemLists = {}
@@ -52,8 +52,8 @@ local function processPipe (pipe, groupMap)
       end
     end
   end
-  
-  print(os.epoch('utc') - start)
+
+  -- print(os.epoch('utc') - start)
 
 end
 

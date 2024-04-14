@@ -18,6 +18,13 @@ local function pipeAdd (factory, pipe)
   factory.pipes[pipe.id] = pipe
 end
 
+---Delete a pipe from the factory
+---@param factory Factory Factory to delete from
+---@param pipeId string ID of pipe to remove
+local function pipeDel (factory, pipeId)
+  factory.pipes[pipeId] = nil
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
@@ -53,6 +60,7 @@ end
 
 return {
   pipeAdd = pipeAdd,
+  pipeDel = pipeDel,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
 }

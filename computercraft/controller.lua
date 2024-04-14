@@ -1,6 +1,6 @@
 local Factory = require('factory')
 
-local function handleFactoryGet (request, sendMessage, factory)
+local function handleFactoryGet (request, factory, sendMessage)
   local factoryGetRes = {
     type = 'ConfirmationResponse',
     respondingTo = 'FactoryGet',
@@ -11,10 +11,15 @@ local function handleFactoryGet (request, sendMessage, factory)
   sendMessage(textutils.serializeJSON(factoryGetRes))
 end
 
-local function handlePipeAdd (request, sendMessage, factory)
+local function handlePipeAdd (request, factory, sendMessage)
   local pipe = request.pipe
-  print("adding pipe from", pipe.from, "to", pipe.to)
   Factory.pipeAdd(factory, pipe)
+  Factory.saveFactory(factory)
+end
+
+local function handlePipeDel (request, factory, sendMessage)
+  local pipeId = request.pipeId
+  Factory.pipeDel(factory, pipeId)
   Factory.saveFactory(factory)
 end
 
@@ -22,10 +27,14 @@ local function listenForCcpipesEvents (sendMessage, factory)
   while true do
     local event, message = os.pullEvent()
 
-    if event == 'ccpipes-FactoryGet' then
-      handleFactoryGet(message, sendMessage, factory)
-    elseif event == 'ccpipes-PipeAdd' then
-      handlePipeAdd(message, sendMessage, factory)
+    local handlers = {
+      ['ccpipes-FactoryGet'] = handleFactoryGet,
+      ['ccpipes-PipeAdd'] = handlePipeAdd,
+      ['ccpipes-PipeDel'] = handlePipeDel,
+    }
+
+    if handlers[event] then
+      handlers[event](request, factory, sendMessage)
     end
 
   end
