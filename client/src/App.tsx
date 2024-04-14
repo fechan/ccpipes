@@ -1,4 +1,4 @@
-import useWebSocket from "react-use-websocket";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
@@ -68,6 +68,11 @@ export default function App() {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
   }, [factory]);
+
+  useEffect(() => {
+    if (readyState === ReadyState.CLOSED)
+      setShowNewSessionModal(true)
+  }, [readyState])
 
   useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
