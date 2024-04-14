@@ -32,37 +32,22 @@ export default function App() {
   const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
   const [nodes, setNodes , onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  /**
+   * Handlers for React Flow events
+   */
   const onConnect: OnConnect = useCallback(
-    (connection) => {
-      if (connection.source && connection.target) {
-        const pipeId = uuidv4();
-
-        const pipeAddReq: PipeAddReq = {
-          type: "PipeAdd",
-          reqId: uuidv4(),
-          pipe: {
-            id: pipeId,
-            from: connection.source,
-            to: connection.target,
-          }
-        };
-        sendMessage(JSON.stringify(pipeAddReq));
-
-        const newEdge: Edge = {
-          source: connection.source!,
-          target: connection.target!,
-          id: pipeId,
-        };
-  
-        return setEdges((edges) => addEdge(newEdge, edges));
-      }
-
-    },
+    (connection) => GraphUpdateCallbacks.onConnect(connection, sendMessage, setEdges),
     [setEdges, factory]
   );
 
   const onEdgesDelete: OnEdgesDelete = useCallback(
-    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage), []);
+    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage),
+    []
+  );
+  /**
+   * End handlers for React Flow events
+   */
 
   useEffect(() => {
     setNodes(getNodesForFactory(factory));
