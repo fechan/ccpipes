@@ -21,6 +21,7 @@ export interface Pipe {
     from: GroupId,
     to: GroupId
     nickname?: string,
+    filter?: string,
 };
 
 export interface Slot {

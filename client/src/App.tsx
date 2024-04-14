@@ -32,8 +32,8 @@ export default function App() {
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
   const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
-  const [nodes, setNodes , onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
+  const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
 
   /**
    * Handlers for React Flow events
@@ -118,7 +118,12 @@ export default function App() {
         onConnect={onConnect}
         fitView
       >
-        <Panel position="top-left"><EdgeOptions /></Panel>
+        <Panel position="top-right">
+          <EdgeOptions
+            sendMessage={ sendMessage }
+           />
+        </Panel>
+
         <Background />
         <MiniMap />
         <Controls />

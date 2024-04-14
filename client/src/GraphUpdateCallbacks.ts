@@ -1,12 +1,11 @@
+import { Pipe, PipeId } from "@server/types/core-types";
 import { PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
-import { WebSocketMessage } from "react-use-websocket/dist/lib/types";
+import { SendMessage, WebSocketMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, Connection, Edge, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
-type SendMessageFn = (message: WebSocketMessage) => void;
-
-function onEdgesDelete(edges: Edge[], sendMessage: SendMessageFn) {
+function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
     const pipeDelReq: PipeDelReq = {
       type: "PipeDel",
@@ -17,7 +16,7 @@ function onEdgesDelete(edges: Edge[], sendMessage: SendMessageFn) {
   }
 }
 
-function onConnect(connection: Connection, sendMessage: SendMessageFn, setEdges: Dispatch<SetStateAction<Edge[]>>) {
+function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {
   if (connection.source !== null && connection.target !== null) {
     const pipeId = uuidv4();
 
@@ -42,7 +41,7 @@ function onConnect(connection: Connection, sendMessage: SendMessageFn, setEdges:
   }
 }
 
-function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: SendMessageFn, setEdges: Dispatch<SetStateAction<Edge[]>>) {
+function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {
   if (newConnection.source !== null && newConnection.target !== null) {
     const pipeEditReq: PipeEditReq = {
       type: "PipeEdit",
@@ -59,8 +58,19 @@ function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: Sen
   }
 }
 
+function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMessage) {
+  const pipeEditReq: PipeEditReq = {
+    type: "PipeEdit",
+    reqId: uuidv4(),
+    pipeId: pipeId,
+    edits: edits,
+  }
+  sendMessage(JSON.stringify(pipeEditReq));
+}
+
 export const GraphUpdateCallbacks = {
   onEdgesDelete: onEdgesDelete,
   onEdgeUpdate: onEdgeUpdate,
   onConnect: onConnect,
+  onPipeUpdate: onPipeUpdate,
 }
