@@ -2,7 +2,7 @@
 ---@param length number Length of string
 ---@return string res Random string
 local function randomString (length)
-	math.randomseed(os.time('utc')^5)
+	math.randomseed((os.epoch('utc'))^5)
 
 	local res = ""
 	for i = 1, length do
