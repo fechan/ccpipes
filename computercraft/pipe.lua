@@ -43,7 +43,7 @@ local function processPipe (pipe, groupMap)
       for j, toSlot in ipairs(toGroup.slots) do
         local transferred = fromPeriph.pushItems(toSlot.periphId, fromSlot.slot, nil, toSlot.slot)
 
-        -- move on to the next origin slot the origin slot is empty
+        -- move on to the next origin slot if the origin slot is empty
         itemsToTransfer = itemsToTransfer - transferred
         if itemsToTransfer <= 0 then
           break
