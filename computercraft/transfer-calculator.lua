@@ -8,10 +8,6 @@ local Utils = require('utils')
 ---@field limit number Number of items to transfer
 
 ---Get slots in the given Group that match the filter.
----
----Optionally, you can provide a listCache, which will cause this function to
----use item details from inventory.list() instead of getItemDetail(), which is
----faster but less detailed. You should make sure your filter is compatible.
 ---@param group Group Group to check for matching slots
 ---@param filter function Filter function accepting item details
 ---@param inventoryLists table Detailed inventory lists (as fulfilled by getDetailedInvList)
@@ -44,8 +40,8 @@ local function popBestPossibleSlot (possibleSlotsEmpty, possibleSlotsFull)
   return table.remove(possibleSlotsFull, 1) or table.remove(possibleSlotsEmpty, 1)
 end
 
-local function getNumExistingItemsAt (slot, itemListCache)
-  local periphItemList = itemListCache[slot.periphId]
+local function getNumExistingItemsAt (slot, itemLists)
+  local periphItemList = itemLists[slot.periphId]
 
   if periphItemList[slot.slot] then
     return periphItemList[slot.slot].count
