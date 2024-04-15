@@ -49,9 +49,6 @@ local function getNumExistingItemsAt (slot, itemLists)
   return 0
 end
 
--- TODO: move this to utils
-
-
 ---Get a list of items in the given inventory peripheral, with all the details
 ---from getItemDetail.
 ---
