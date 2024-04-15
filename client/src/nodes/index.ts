@@ -19,7 +19,7 @@ export function getNodesForFactory(factory: Factory): Node[] {
     } as Node);
 
 
-    for (let groupId of machine.groups) {
+    for (let [i, groupId] of machine.groups.entries()) {
       const group = factory.groups[groupId];
       nodes.push({
         id: group.id,
