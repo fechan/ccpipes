@@ -116,10 +116,8 @@ local function getTransferOrders (origin, destination, filter)
   local orders = {}
 
   local itemMaxCountCache = CacheMap.new() -- could be reused across calls of this func
-
-  local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
-
   local itemLimitCache = CacheMap.new()
+  local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
 
   local possibleSlotsEmpty = getEmptySlots(destination, inventoryLists)
   local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryLists)
