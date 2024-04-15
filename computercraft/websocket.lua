@@ -19,16 +19,11 @@ local MESSAGE_TYPES = {
   GroupDel = true,
 }
 
-local function connect (url)
-  local websocket, err = http.websocket(url)
-  if websocket == false then
-    print("Failed to connect to editor session server... pipes will continue to run but you cannot edit them.")
-    print("Reason:", err)
-  end
-  return websocket
-end
-
-local function requestSession (ws)
+---Request a session from the editor session server once
+---@param ws Websocket ComputerCraft Websocket handle
+---@return table response ConfirmationResponse as a Lua table
+---@return string sessionId Session ID requested
+local function requestSessionOnce (ws)
   local sessionId = Utils.randomString(1)
   local req = {
     type = 'SessionCreate',
@@ -41,6 +36,50 @@ local function requestSession (ws)
   return textutils.unserializeJSON(res), sessionId
 end
 
+---Connect to the editor session server and request a session, retrying if needed
+---@param wsContext table Shared WebSocket context
+---@param maxAttempts number Max attempts to connect and get a session
+---@return boolean ok True if session was acquired, false otherwise
+local function connectAndRequestSession (wsContext, maxAttempts)
+  local attempts = 1
+
+  local ws, err = http.websocket(wsContext.wsUrl)
+  while not ws do
+    if attempts > maxAttempts then
+      print("Failed to connect to editor session server... pipes will continue to run but you cannot edit them.")
+      print("Reason:", err)
+      return false
+    end
+
+    print("Trying to connect. Attempt", attempts)
+    os.sleep(3)
+    ws, err = http.websocket(wsContext.wsUrl)
+    attempts = attempts + 1
+  end
+  wsContext.ws = ws
+
+  local res, sessionId = requestSessionOnce(ws)
+  while res == nil or not res.ok do
+    if attempts > maxAttempts then
+      print("Failed to create session for editor... pipes will continue to run but you cannot edit them.")
+      print("Reason:", res.message)
+      return false
+    end
+    print("Trying to create session. Attempt", attempts)
+    res, sessionId = requestSessionOnce(ws)
+    attempts = attempts + 1
+  end
+
+  print()
+  print("Insert code", sessionId, "into web editor to edit pipes.")
+  return true
+end
+
+---Queue an OS event for a given message. The event name will always be in the
+---format `ccpipes-{message.type}` and have the message body as its data.
+---
+---The purpose of this is to notify the factory controller of user edits.
+---@param message table Any message from the session server
 local function queueEventFromMessage (message)
   local messageType = message['type']
 
@@ -51,30 +90,26 @@ local function queueEventFromMessage (message)
   end
 end
 
-local function attachSession (ws)
-  local res, sessionId = requestSession(ws)
-  local attempts = 1
-  while res == nil or not res.ok do
-    if attempts > 5 then
-      print("Failed to create session for editor... pipes will continue to run but you cannot edit them.")
-      print("Reason:", res.message)
-      return
-    end
-    res, sessionId = requestSession(ws)
-    attempts = attempts + 1
-  end
-  print("Insert code", sessionId, "into web editor to edit pipes.")
+---Connect to the editor session server and request a session. Stops if it fails
+---to connect after a few attempts.
+---@param wsContext table Shared WebSocket context
+local function attachSession (wsContext)
+  local established = connectAndRequestSession(wsContext, 5)
+  if not established then return end
 
-  -- main ws listening loop
   while true do
-    local res, isBinary = ws.receive()
-    if (res ~= nil and not isBinary) then
+    local ok, res, isBinary = pcall(function () return wsContext.ws.receive() end)
+    if not ok then
+      print("Lost connection to editor session server. Trying to reconnect...")
+      os.sleep(3)
+      established = connectAndRequestSession(wsContext, 5)
+      if not established then return end
+    elseif (res ~= nil and not isBinary) then
       queueEventFromMessage(textutils.unserializeJSON(res))
     end
   end
 end
 
 return {
-  connect = connect,
   attachSession = attachSession,
 }

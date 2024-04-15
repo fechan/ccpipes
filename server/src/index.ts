@@ -19,26 +19,31 @@ wss.on("connection", function connection(ws) {
     const message = JSON.parse(json);
     console.log(message.type)
 
-
-    if ("reqId" in message) {
-      const request: Request = message;
-      
-      switch (request.type) {
-        case "SessionCreate":
-          sessionId = createSession(request as SessionCreateReq, ws);
-          if (sessionId) role = 'CC';
-          break;
-          
-        case "SessionJoin":
-          sessionId = joinSession(request as SessionJoinReq, ws);
-          if (sessionId) role = 'editor';
-          break;
-      
-        default:
-          const destination = role === 'CC' ? 'editor' : 'CC';
-          relayMessage(json, sessionId, destination);
-          break;
+    try {
+      if ("reqId" in message) {
+        const request: Request = message;
+        
+        switch (request.type) {
+          case "SessionCreate":
+            sessionId = createSession(request as SessionCreateReq, ws);
+            if (sessionId) role = 'CC';
+            break;
+            
+          case "SessionJoin":
+            sessionId = joinSession(request as SessionJoinReq, ws);
+            if (sessionId) role = 'editor';
+            break;
+        
+          default:
+            const destination = role === 'CC' ? 'editor' : 'CC';
+            // TODO: if either client sends WS messages when the other isn't there, this throw
+            // we should probably check beforehand, and respond to the sender with an error
+            relayMessage(json, sessionId, destination);
+            break;
+        }
       }
+    } catch (error) {
+      console.error(`Caught error ${error.name}: ${error.message}`);
     }
   });
 

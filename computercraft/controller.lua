@@ -28,21 +28,25 @@ local function handlePipeEdit (request, factory, sendMessage)
   Factory.saveFactory(factory)
 end
 
-local function listenForCcpipesEvents (sendMessage, factory)
+local function listenForCcpipesEvents (wsContext, factory)
   while true do
-    local event, message = os.pullEvent()
+    if wsContext.ws then
+      local sendMessage = wsContext.ws.send
+      local event, message = os.pullEvent()
 
-    local handlers = {
-      ['ccpipes-FactoryGet'] = handleFactoryGet,
-      ['ccpipes-PipeAdd'] = handlePipeAdd,
-      ['ccpipes-PipeDel'] = handlePipeDel,
-      ['ccpipes-PipeEdit'] = handlePipeEdit,
-    }
+      local handlers = {
+        ['ccpipes-FactoryGet'] = handleFactoryGet,
+        ['ccpipes-PipeAdd'] = handlePipeAdd,
+        ['ccpipes-PipeDel'] = handlePipeDel,
+        ['ccpipes-PipeEdit'] = handlePipeEdit,
+      }
 
-    if handlers[event] then
-      handlers[event](message, factory, sendMessage)
+      if handlers[event] then
+        handlers[event](message, factory, sendMessage)
+      end
+    else
+      coroutine.yield()
     end
-
   end
 end
 

@@ -7,12 +7,12 @@ local Utils = require('utils')
 local SERVER_URL = "ws://localhost:3000"
 
 ---Wait for the quit key (q) to be pressed, and quit gracefully
----@param ws WebSocket|boolean Websocket to close before program exits
-local function waitForQuitKey (ws)
+---@param wsContext table|boolean WebSocket context containing a websocket `ws` to close
+local function waitForQuitKey (wsContext)
   while true do
     local event, key = os.pullEvent('key')
     if keys.getName(key) == 'q' then
-      if ws then ws.close() end
+      if wsContext.ws then wsContext.ws.close() end
       -- there's no canonical exit function, so we just raise an error to stop
       error("Program quit successfully. Thank you for using CCPipes!")
     end
@@ -35,13 +35,21 @@ local function init ()
     io.close(factoryJsonFile)
   end
 
-  local ws = WebSocket.connect(SERVER_URL)
+  -- When attachSession is called, the wsContext updates wsContext.ws with a
+  -- CC WebSocket handle.
+  -- If the socket dies and it successfully reconnects, the ws will be replaced.
+  -- Basically the point of this context is to be able to pass the socket handle
+  -- by reference to other coroutines that use it
+  local wsContext = {
+    wsUrl = SERVER_URL,
+    ws = nil,
+  }
 
   parallel.waitForAll(
-    function () if ws then WebSocket.attachSession(ws) end end,
-    function () if ws then Controller.listenForCcpipesEvents(ws.send, factory) end end,
+    function () WebSocket.attachSession(wsContext) end,
+    function () Controller.listenForCcpipesEvents(wsContext, factory) end,
     function () Pipe.processAllPipesForever(factory) end,
-    function () waitForQuitKey(ws) end,
+    function () waitForQuitKey(wsContext) end,
     -- HACK TODO: the following makes the os keep going
     -- basically the os is getting stuck on something, and only something like
     -- os.queueEvent or os.sleep will make it keep going
