@@ -1,5 +1,10 @@
----@class CacheMap
 local CacheMap = require('CacheMap')
+
+---A request to transfer `limit` items from the `from` slot to the `to` slot
+---@class TransferOrder
+---@field from Slot Origin slot
+---@field to Slot Desitnation slot
+---@field limit number Number of items to transfer
 
 ---Get slots in the given Group that match the filter.
 ---
@@ -87,7 +92,7 @@ end
 ---@param origin Group Origin group to transfer from
 ---@param destination Group Destination group to transfer to
 ---@param filter function Filter function that accepts the result of inventory.getItemDetail()
----@return table transferOrders List of transfer orders
+---@return TransferOrder[] transferOrders List of transfer orders
 local function getTransferOrders (origin, destination, filter)
   local orders = {}
 
@@ -99,6 +104,8 @@ local function getTransferOrders (origin, destination, filter)
   local possibleSlotsEmpty = getEmptySlots(destination, periphCache, inventoryListCache)
   local shouldTransfer = getSlotsWithMatchingItems(origin, filter, periphCache, itemMaxCountCache)
   reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
+
+  local possibleSlotsFullByItem = CacheMap.new()
 
   while #shouldTransfer > 0 do
     local originSlot = table.remove(shouldTransfer)
@@ -113,12 +120,14 @@ local function getTransferOrders (origin, destination, filter)
     end)
     local originItem = originPeriphList[originSlot.slot]
 
-    local possibleSlotsFull = getSlotsWithMatchingItems(
-      destination,
-      function (item) return item.name == originItem.name end,
-      periphCache,
-      inventoryListCache
-    )
+    local possibleSlotsFull = possibleSlotsFullByItem:Get(originItem.name, function ()
+      return getSlotsWithMatchingItems(
+        destination,
+        function (item) return item.name == originItem.name end,
+        periphCache,
+        inventoryListCache
+      )
+    end)
 
     -- start calculating how many of the item we can transfer
     local possibleDestSlot = popBestPossibleSlot(possibleSlotsEmpty, possibleSlotsFull)

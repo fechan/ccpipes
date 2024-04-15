@@ -1,3 +1,8 @@
+---A map data structure that when you Get from it, will see if you've tried to
+---Get from it before. If you have, it will return the previous result,
+---otherwise it evaluates the fallback function and returns that, caching the
+---result for next time.
+---@class CacheMap
 local CacheMap = {}
 
 function CacheMap.new (initialMap)
