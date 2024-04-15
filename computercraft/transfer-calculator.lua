@@ -14,26 +14,15 @@ local Utils = require('utils')
 ---faster but less detailed. You should make sure your filter is compatible.
 ---@param group Group Group to check for matching slots
 ---@param filter function Filter function accepting item details
----@param listCache CacheMap? Optional inventory.list() cache. If provided, inventory lists are used instead of getItemDetail
+---@param inventoryLists table Detailed inventory lists (as fulfilled by getDetailedInvList)
 ---@return Slot[] matchingSlots Slots with matching items
-local function getSlotsWithMatchingItems (group, filter, listCache)
+local function getSlotsWithMatchingItems (group, filter, inventoryLists)
   local matchingSlots = {}
   for i, slot in pairs(group.slots) do
-
-    if listCache then -- providing a list is faster but the filtering cannot be as detailed
-      local list = listCache[slot.periphId]
-      if list[slot.slot] and filter(list[slot.slot]) then
-        table.insert(matchingSlots, slot)
-      end
-    else
-      local periph = peripheral.wrap(slot.periphId)
-
-      local itemDetail = periph.getItemDetail(slot.slot)
-      if itemDetail and filter(itemDetail) then
-        table.insert(matchingSlots, slot)
-      end
+    local list = inventoryLists[slot.periphId]
+    if list[slot.slot] and filter(list[slot.slot]) then
+      table.insert(matchingSlots, slot)
     end
-
   end
   return matchingSlots
 end
