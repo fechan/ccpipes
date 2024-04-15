@@ -34,11 +34,9 @@ local function processPipe (pipe, groupMap)
 end
 
 local function processAllPipes (factory)
-  local coros = {}
   for pipeId, pipe in pairs(factory.pipes) do
-    table.insert(coros, function () processPipe(pipe, factory.groups) end)
+    processPipe(pipe, factory.groups)
   end
-  parallel.waitForAll(unpack(coros))
 end
 
 local function processAllPipesForever (factory)

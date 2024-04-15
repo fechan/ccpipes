@@ -1,5 +1,10 @@
 ---machine.lua: Functions for initializing Machines
 
+local AUTO_GROUP_NICKNAMES = {
+  furnace = {'Top', 'Fuel', 'Result'},
+  brewingStand = {'Bottle', 'Bottle', 'Bottle', 'Ingredient', 'Blaze Powder'},
+}
+
 ---A data structure for a machine with slot groups matching `/server/src/types/core-types.ts#Machine`
 ---@class Machine
 Machine = {}
@@ -36,6 +41,7 @@ function Machine.fromPeriphId (periphId)
     string.find(periphId, 'minecraft:barrel_') or
     string.find(periphId, 'minecraft:dispenser_') or
     string.find(periphId, 'minecraft:dropper_') or
+    string.find(periphId, 'minecraft:hopper_') or
     (string.find(periphId, 'minecraft:') and string.find(periphId, '_shulker_box_'))
   ) then
     return Machine.fromChestPeriphId(periphId)
@@ -51,12 +57,22 @@ function Machine.fromPeriphId (periphId)
       slot = slotNbr,
     }
 
+    local nicknames = {}
+    if (
+      (string.find(periphId, 'minecraft:') and string.find(periphId, 'furnace_')) or
+      string.find(periphId, 'minecraft:smoker_')
+    ) then
+      nicknames = AUTO_GROUP_NICKNAMES.furnace
+    elseif string.find(periphId, 'minecraft:brewing_stand_') then
+      nicknames = AUTO_GROUP_NICKNAMES.brewingStand
+    end
+
     local groupId = periphId .. ':g' .. slotNbr
     local group = {
       id = groupId,
       slots = {slot},
       distribution = 'roundRobin',
-      nickname = 'Slot ' .. slotNbr,
+      nickname = nicknames[slotNbr] or ('Slot ' .. slotNbr),
     }
 
     groups[groupId] = group

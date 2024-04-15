@@ -24,7 +24,7 @@ local function init ()
 
   local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
-  
+
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then
     factory = Factory.autodetectFactory()
