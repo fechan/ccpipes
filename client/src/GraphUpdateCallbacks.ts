@@ -2,7 +2,7 @@ import { Pipe, PipeId } from "@server/types/core-types";
 import { PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, Connection, Edge, updateEdge } from "reactflow";
+import { addEdge, Connection, Edge, MarkerType, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
@@ -35,6 +35,14 @@ function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: D
       source: connection.source,
       target: connection.target,
       id: pipeId,
+      markerEnd: {
+        type: MarkerType.Arrow,
+        width: 20,
+        height: 20,
+      },
+      style: {
+        strokeWidth: 2,
+      },
     };
 
     return setEdges((edges) => addEdge(newEdge, edges));

@@ -7,7 +7,7 @@ export function getEdgesForFactory(factory: Factory): Edge[] {
     source: pipe.from,
     target: pipe.to,
     markerEnd: {
-      type: MarkerType.ArrowClosed,
+      type: MarkerType.Arrow,
       width: 20,
       height: 20,
     },
