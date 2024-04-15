@@ -30,7 +30,6 @@ local function init ()
     factory = Factory.autodetectFactory()
     Factory.saveFactory(factory)
   else
-    -- TODO: we should detect any added/removed machines after reading from JSON
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))
     io.close(factoryJsonFile)
   end
