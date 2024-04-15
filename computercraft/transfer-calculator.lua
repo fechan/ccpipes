@@ -21,13 +21,7 @@ local function getSlotsWithMatchingItems (group, filter, periphCache, listCache)
   for i, slot in pairs(group.slots) do
 
     if listCache then -- providing a list is faster but the filtering cannot be as detailed
-      local list = listCache:Get(
-        slot.periphId,
-        function (periphId)
-          local periph = periphCache:Get(periphId, peripheral.wrap)
-          return periph.list(periphId)
-        end
-      )
+      local list = listCache[slot.periphId]
       if list[slot.slot] and filter(list[slot.slot]) then
         table.insert(matchingSlots, slot)
       end
@@ -48,10 +42,7 @@ local function getEmptySlots (group, periphCache, inventoryListCache)
   local emptySlots = {}
   for i, slot in pairs(group.slots) do
     -- get the inv list from this slot's peripheral
-    local invList = inventoryListCache:Get(slot.periphId, function (periphId)
-      local periph = periphCache:Get(periphId, peripheral.wrap)
-      return periph.list()
-    end)
+    local invList = inventoryListCache[slot.periphId]
     -- check if slot.slot is in that list
     if invList[slot.slot] == nil then
       table.insert(emptySlots, slot)
@@ -65,13 +56,7 @@ local function popBestPossibleSlot (possibleSlotsEmpty, possibleSlotsFull)
 end
 
 local function getNumExistingItemsAt (slot, itemListCache, periphCache)
-  local periphItemList = itemListCache:Get(
-    slot.periphId,
-    function (periphId)
-      local periph = periphCache:Get(periphId, peripheral.wrap)
-      return periph.list(periphId)
-    end
-  )
+  local periphItemList = itemListCache[slot.periphId]
 
   if periphItemList[slot.slot] then
     return periphItemList[slot.slot].count
@@ -79,12 +64,70 @@ local function getNumExistingItemsAt (slot, itemListCache, periphCache)
   return 0
 end
 
+-- TODO: move this to utils
 local function reverse(tbl)
   for i=1, math.floor(#tbl / 2) do
     local tmp = tbl[i]
     tbl[i] = tbl[#tbl - i + 1]
     tbl[#tbl - i + 1] = tmp
   end
+end
+
+---Get a list of items in the given inventory peripheral, with all the details
+---from getItemDetail.
+---
+---This runs all the getItemDetail() calls in parallel, so it should take about
+---50 ms more or less for all of them, even if the inventory is really big.
+---@param periphId string Peripheral ID of inventory
+---@return table detailedInvList Detailed item list
+local function getDetailedInvList (periphId)
+  local detailedInvList = {} -- maps slot -> itemDetails
+  local periph = peripheral.wrap(periphId)
+
+  local itemDetailCoros = {}
+  for slot, slotInfo in pairs(periph.list()) do
+    table.insert(itemDetailCoros,
+      function ()
+        detailedInvList[slot] = periph.getItemDetail(slot)
+      end
+    )
+  end
+
+  parallel.waitForAll(unpack(itemDetailCoros))
+  return detailedInvList
+end
+
+local function getManyDetailedInvLists (periphs)
+  local invLists = {} -- maps periphId -> detailed inventory list
+
+  local listCoros = {}
+  for i,periphId in ipairs(periphs) do
+    table.insert(listCoros,
+      function ()
+        invLists[periphId] = getDetailedInvList(periphId)
+      end
+    )
+  end
+
+  parallel.waitForAll(unpack(listCoros))
+
+  return invLists
+end
+
+local function getAllPeripheralIds (groups)
+  local periphIdSet = {}
+  for i, group in ipairs(groups) do
+    for j, slot in ipairs(group.slots) do
+      periphIdSet[slot.periphId] = true
+    end
+  end
+
+  local periphIdList = {}
+  for periphId, _ in pairs(periphIdSet) do
+    table.insert(periphIdList, periphId)
+  end
+
+  return periphIdList
 end
 
 ---Get the transfer orders needed to transfer as many items as possible from the
@@ -98,11 +141,13 @@ local function getTransferOrders (origin, destination, filter)
 
   local periphCache = CacheMap.new() -- could be reused across calls of this func
   local itemMaxCountCache = CacheMap.new() -- could be reused across calls of this func
-  local inventoryListCache = CacheMap.new()
+
+  local inventoryListCache = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
+
   local itemLimitCache = CacheMap.new()
 
   local possibleSlotsEmpty = getEmptySlots(destination, periphCache, inventoryListCache)
-  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, periphCache, itemMaxCountCache)
+  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, periphCache, inventoryListCache)
   reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
 
   local possibleSlotsFullByItem = CacheMap.new()
@@ -114,10 +159,7 @@ local function getTransferOrders (origin, destination, filter)
     ---this uses info from inventory.list(), but if you need expanded info
     ---(to check for items with different NBT, which may not be stackable)
     ---this will need to change to use getItemDetail, even though it's slower
-    local originPeriphList = inventoryListCache:Get(originSlot.periphId, function (periphId)
-      local periph = periphCache:Get(periphId, peripheral.wrap)
-      return periph.list()
-    end)
+    local originPeriphList = inventoryListCache[originSlot.periphId]
     local originItem = originPeriphList[originSlot.slot]
 
     local possibleSlotsFull = possibleSlotsFullByItem:Get(originItem.name, function ()
