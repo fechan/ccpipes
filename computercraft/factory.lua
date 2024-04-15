@@ -1,9 +1,9 @@
 --- factory.lua: Functions for modifying the factory data structure (in place)
----@class Factory
----@class Pipe
-
 local Machine = require('machine')
 local Utils = require('utils')
+
+---A data structure for a Factory matching `/server/src/types/core-types.ts#Factory`
+---@class Factory
 
 ---Save a factory as a JSON file
 ---@param factory Factory Factory to save

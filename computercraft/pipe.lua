@@ -1,6 +1,9 @@
 --- pipe.lua: Functions for making pipes in the factory actually
 --- transfer items
 
+---A data structure for a Pipe matching `/server/src/types/core-types.ts#Pipe`
+---@class Pipe
+
 local Factory = require('factory')
 
 local function getFilledSlots (slots, periphItemLists)
