@@ -115,7 +115,6 @@ end
 local function getTransferOrders (origin, destination, filter)
   local orders = {}
 
-  local itemMaxCountCache = CacheMap.new() -- could be reused across calls of this func
   local itemLimitCache = CacheMap.new()
   local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
 
@@ -153,7 +152,6 @@ local function getTransferOrders (origin, destination, filter)
     local possibleDestSlot = popBestPossibleSlot(possibleSlotsEmpty, possibleSlotsFull)
 
     if possibleDestSlot ~= nil then
-      -- TODO: account for destination max stack size limit
       local destSlotStackLimit = itemLimitCache:Get(possibleDestSlot.periphId .. "/" .. possibleDestSlot.slot, function ()
         local periph = peripheral.wrap(possibleDestSlot.periphId)
         return periph.getItemLimit(possibleDestSlot.slot)
