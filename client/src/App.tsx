@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import type { Edge, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc } from "reactflow";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Background,
   Controls,
@@ -28,7 +28,11 @@ import { EdgeOptions } from "./components/EdgeOptions";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
-  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl);
+  const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
+    shouldReconnect: () => true,
+    reconnectAttempts: 10,
+    reconnectInterval: 3000,
+  });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
   const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
