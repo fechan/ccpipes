@@ -1,11 +1,14 @@
 ---machine.lua: Functions for initializing Machines
 
----A data structure for a Machine with slot groups matching `/server/src/types/core-types.ts#Machine`
+---A data structure for a machine with slot groups matching `/server/src/types/core-types.ts#Machine`
 ---@class Machine
 Machine = {}
 
----A data structure for a Machine with slot groups matching `/server/src/types/core-types.ts#Group`
+---A data structure for a group of slots matching `/server/src/types/core-types.ts#Group`
 ---@class Group
+
+---A data structure for an inventory slot on a peripheral matching `/server/src/types/core-types.ts#Group`
+---@class Slot
 
 ---Initialize a new machine
 ---@param periphId string CC Peripheral ID
