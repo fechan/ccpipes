@@ -29,14 +29,16 @@ local function processPipe (pipe, groupMap)
     end
     parallel.waitForAll(unpack(coros))
   else
-    print('caught err')
+    print('caught err', transferOrders)
   end
 end
 
 local function processAllPipes (factory)
+  local coros = {}
   for pipeId, pipe in pairs(factory.pipes) do
-    processPipe(pipe, factory.groups)
+    table.insert(coros, function () processPipe(pipe, factory.groups) end)
   end
+  parallel.waitForAll(unpack(coros))
 end
 
 local function processAllPipesForever (factory)
