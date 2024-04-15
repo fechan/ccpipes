@@ -32,6 +32,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsData) {
     edits[option] = value;
 
     for (let edge of selectedEdges) {
+      edge.data[option] = value;
       GraphUpdateCallbacks.onPipeUpdate(edge.id, edits, sendMessage)
     }
     setters[option](value);
