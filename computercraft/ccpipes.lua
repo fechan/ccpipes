@@ -50,11 +50,7 @@ local function init ()
     function () Controller.listenForCcpipesEvents(wsContext, factory) end,
     function () Pipe.processAllPipesForever(factory) end,
     function () waitForQuitKey(wsContext) end,
-    -- HACK TODO: the following makes the os keep going
-    -- basically the os is getting stuck on something, and only something like
-    -- os.queueEvent or os.sleep will make it keep going
-    -- I think a coroutine isn't properly implemented or something. Maybe pipe.lua?
-    function () while true do os.sleep(0.05) end end
+    function () while true do os.sleep(0.05) end end -- forces the OS not to lock up
   )
 end
 
