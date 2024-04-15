@@ -131,13 +131,20 @@ local function getTransferOrders (origin, destination, filter)
     local originPeriphList = inventoryLists[originSlot.periphId]
     local originItem = originPeriphList[originSlot.slot]
 
-    ---@note: This ONLY checks itemID to see if the origin item can be stacked at the destination.
-    ---we may want to change this to account for NBT or something, which may render
-    ---two items unstackable
+    -- originSlot.remainderStackSize is only defined if we tried to transfer this stack before but couldn't transfer all of it
+    local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryLists)
+
+    -- get possible slots where we can stack more items into it
     local possibleSlotsFull = possibleSlotsFullByItem:Get(originItem.name, function ()
       return getSlotsWithMatchingItems(
         destination,
-        function (item) return item.name == originItem.name end,
+        function (item)
+          return (item.name == originItem.name and
+            item.nbt == nil and
+            item.durability == nil and
+            item.maxCount > item.count
+          )
+        end,
         inventoryLists
       )
     end)
@@ -156,9 +163,6 @@ local function getTransferOrders (origin, destination, filter)
       local transferLimit = destSlotStackLimit - numExistingItemsAtDest
 
       -- can I transfer all of the origin stack?
-      -- (originSlot.remainderStackSize is only defined if we tried to transfer this stack before but couldn't transfer all of it)
-      local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryLists)
-
       if originStackSize <= transferLimit then -- if yes, transfer the whole stack and move on
         table.insert(orders, {from=originSlot, to=possibleDestSlot, limit=originStackSize})
       else -- if no, transfer the transferLimit and add the remainder of the stack to shouldTransfer
