@@ -13,10 +13,9 @@ local CacheMap = require('CacheMap')
 ---faster but less detailed. You should make sure your filter is compatible.
 ---@param group Group Group to check for matching slots
 ---@param filter function Filter function accepting item details
----@param periphCache CacheMap Peripheral cache
 ---@param listCache CacheMap? Optional inventory.list() cache. If provided, inventory lists are used instead of getItemDetail
 ---@return Slot[] matchingSlots Slots with matching items
-local function getSlotsWithMatchingItems (group, filter, periphCache, listCache)
+local function getSlotsWithMatchingItems (group, filter, listCache)
   local matchingSlots = {}
   for i, slot in pairs(group.slots) do
 
@@ -26,7 +25,7 @@ local function getSlotsWithMatchingItems (group, filter, periphCache, listCache)
         table.insert(matchingSlots, slot)
       end
     else
-      local periph = periphCache:Get(slot.periphId, peripheral.wrap)
+      local periph = peripheral.wrap(slot.periphId)
 
       local itemDetail = periph.getItemDetail(slot.slot)
       if itemDetail and filter(itemDetail) then
@@ -38,7 +37,7 @@ local function getSlotsWithMatchingItems (group, filter, periphCache, listCache)
   return matchingSlots
 end
 
-local function getEmptySlots (group, periphCache, inventoryListCache)
+local function getEmptySlots (group, inventoryListCache)
   local emptySlots = {}
   for i, slot in pairs(group.slots) do
     -- get the inv list from this slot's peripheral
@@ -55,7 +54,7 @@ local function popBestPossibleSlot (possibleSlotsEmpty, possibleSlotsFull)
   return table.remove(possibleSlotsFull, 1) or table.remove(possibleSlotsEmpty, 1)
 end
 
-local function getNumExistingItemsAt (slot, itemListCache, periphCache)
+local function getNumExistingItemsAt (slot, itemListCache)
   local periphItemList = itemListCache[slot.periphId]
 
   if periphItemList[slot.slot] then
@@ -139,15 +138,14 @@ end
 local function getTransferOrders (origin, destination, filter)
   local orders = {}
 
-  local periphCache = CacheMap.new() -- could be reused across calls of this func
   local itemMaxCountCache = CacheMap.new() -- could be reused across calls of this func
 
   local inventoryListCache = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
 
   local itemLimitCache = CacheMap.new()
 
-  local possibleSlotsEmpty = getEmptySlots(destination, periphCache, inventoryListCache)
-  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, periphCache, inventoryListCache)
+  local possibleSlotsEmpty = getEmptySlots(destination, inventoryListCache)
+  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryListCache)
   reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
 
   local possibleSlotsFullByItem = CacheMap.new()
@@ -166,7 +164,6 @@ local function getTransferOrders (origin, destination, filter)
       return getSlotsWithMatchingItems(
         destination,
         function (item) return item.name == originItem.name end,
-        periphCache,
         inventoryListCache
       )
     end)
@@ -175,17 +172,18 @@ local function getTransferOrders (origin, destination, filter)
     local possibleDestSlot = popBestPossibleSlot(possibleSlotsEmpty, possibleSlotsFull)
 
     if possibleDestSlot ~= nil then
+      -- TODO: account for destination max stack size limit
       local destSlotStackLimit = itemLimitCache:Get(possibleDestSlot.periphId .. "/" .. possibleDestSlot.slot, function ()
-        local periph = periphCache:Get(possibleDestSlot.periphId, peripheral.wrap)
+        local periph = peripheral.wrap(possibleDestSlot.periphId)
         return periph.getItemLimit(possibleDestSlot.slot)
       end)
-      local numExistingItemsAtDest = getNumExistingItemsAt(possibleDestSlot, inventoryListCache, periphCache)
+      local numExistingItemsAtDest = getNumExistingItemsAt(possibleDestSlot, inventoryListCache)
 
       local transferLimit = destSlotStackLimit - numExistingItemsAtDest
 
       -- can I transfer all of the origin stack?
       -- (originSlot.remainderStackSize is only defined if we tried to transfer this stack before but couldn't transfer all of it)
-      local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryListCache, periphCache)
+      local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryListCache)
 
       if originStackSize <= transferLimit then -- if yes, transfer the whole stack and move on
         table.insert(orders, {from=originSlot, to=possibleDestSlot, limit=originStackSize})
