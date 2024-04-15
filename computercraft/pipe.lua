@@ -13,20 +13,24 @@ local function matchNameFilter (query)
 end
 
 local function processPipe (pipe, groupMap)
-
-  local start = os.epoch('utc')
-
   local filter = matchNameFilter(pipe.filter)
-  local transferOrders = TransferCalculator.getTransferOrders(groupMap[pipe.from], groupMap[pipe.to], filter)
-  for i, order in ipairs(transferOrders) do
-    local fromPeriph = peripheral.wrap(order.from.periphId)
-    print('xfer', order.limit, 'items from', order.from.periphId, 'slot', order.from.slot, 'to', order.to.periphId, 'slot', order.to.slot)
-    local xfered = fromPeriph.pushItems(order.to.periphId, order.from.slot, order.limit, order.to.slot)
-    print(xfered)
+  local ok, transferOrders = pcall(
+    function ()
+      return TransferCalculator.getTransferOrders(groupMap[pipe.from], groupMap[pipe.to], filter)
+    end
+  )
+
+  if ok then
+    local coros = {}
+    for i, order in ipairs(transferOrders) do
+      local fromPeriph = peripheral.wrap(order.from.periphId)
+      local coro = function () fromPeriph.pushItems(order.to.periphId, order.from.slot, order.limit, order.to.slot) end
+      table.insert(coros, coro)
+    end
+    parallel.waitForAll(unpack(coros))
+  else
+    print('caught err')
   end
-
-  print(os.epoch('utc') - start)
-
 end
 
 local function processAllPipes (factory)
