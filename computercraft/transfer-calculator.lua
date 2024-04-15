@@ -37,11 +37,11 @@ local function getSlotsWithMatchingItems (group, filter, listCache)
   return matchingSlots
 end
 
-local function getEmptySlots (group, inventoryListCache)
+local function getEmptySlots (group, inventoryLists)
   local emptySlots = {}
   for i, slot in pairs(group.slots) do
     -- get the inv list from this slot's peripheral
-    local invList = inventoryListCache[slot.periphId]
+    local invList = inventoryLists[slot.periphId]
     -- check if slot.slot is in that list
     if invList[slot.slot] == nil then
       table.insert(emptySlots, slot)
@@ -140,12 +140,12 @@ local function getTransferOrders (origin, destination, filter)
 
   local itemMaxCountCache = CacheMap.new() -- could be reused across calls of this func
 
-  local inventoryListCache = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
+  local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
 
   local itemLimitCache = CacheMap.new()
 
-  local possibleSlotsEmpty = getEmptySlots(destination, inventoryListCache)
-  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryListCache)
+  local possibleSlotsEmpty = getEmptySlots(destination, inventoryLists)
+  local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryLists)
   reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
 
   local possibleSlotsFullByItem = CacheMap.new()
@@ -157,14 +157,14 @@ local function getTransferOrders (origin, destination, filter)
     ---this uses info from inventory.list(), but if you need expanded info
     ---(to check for items with different NBT, which may not be stackable)
     ---this will need to change to use getItemDetail, even though it's slower
-    local originPeriphList = inventoryListCache[originSlot.periphId]
+    local originPeriphList = inventoryLists[originSlot.periphId]
     local originItem = originPeriphList[originSlot.slot]
 
     local possibleSlotsFull = possibleSlotsFullByItem:Get(originItem.name, function ()
       return getSlotsWithMatchingItems(
         destination,
         function (item) return item.name == originItem.name end,
-        inventoryListCache
+        inventoryLists
       )
     end)
 
@@ -177,13 +177,13 @@ local function getTransferOrders (origin, destination, filter)
         local periph = peripheral.wrap(possibleDestSlot.periphId)
         return periph.getItemLimit(possibleDestSlot.slot)
       end)
-      local numExistingItemsAtDest = getNumExistingItemsAt(possibleDestSlot, inventoryListCache)
+      local numExistingItemsAtDest = getNumExistingItemsAt(possibleDestSlot, inventoryLists)
 
       local transferLimit = destSlotStackLimit - numExistingItemsAtDest
 
       -- can I transfer all of the origin stack?
       -- (originSlot.remainderStackSize is only defined if we tried to transfer this stack before but couldn't transfer all of it)
-      local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryListCache)
+      local originStackSize = originSlot.remainderStackSize or getNumExistingItemsAt(originSlot, inventoryLists)
 
       if originStackSize <= transferLimit then -- if yes, transfer the whole stack and move on
         table.insert(orders, {from=originSlot, to=possibleDestSlot, limit=originStackSize})
