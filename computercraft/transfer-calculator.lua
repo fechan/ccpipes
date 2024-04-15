@@ -148,13 +148,12 @@ local function getTransferOrders (origin, destination, filter)
   while #shouldTransfer > 0 do
     local originSlot = table.remove(shouldTransfer)
 
-    ---@note This will get information about the item at the originSlot
-    ---this uses info from inventory.list(), but if you need expanded info
-    ---(to check for items with different NBT, which may not be stackable)
-    ---this will need to change to use getItemDetail, even though it's slower
     local originPeriphList = inventoryLists[originSlot.periphId]
     local originItem = originPeriphList[originSlot.slot]
 
+    ---@note: This ONLY checks itemID to see if the origin item can be stacked at the destination.
+    ---we may want to change this to account for NBT or something, which may render
+    ---two items unstackable
     local possibleSlotsFull = possibleSlotsFullByItem:Get(originItem.name, function ()
       return getSlotsWithMatchingItems(
         destination,
