@@ -18,7 +18,18 @@ local function absolutePathTo (relativePath)
   return '/' .. shell.dir() .. '/' .. relativePath
 end
 
+---Reverse a list in-place
+---@param tbl table List to reverse
+local function reverse(tbl)
+  for i=1, math.floor(#tbl / 2) do
+    local tmp = tbl[i]
+    tbl[i] = tbl[#tbl - i + 1]
+    tbl[#tbl - i + 1] = tmp
+  end
+end
+
 return {
   randomString = randomString,
 	absolutePathTo = absolutePathTo,
+	reverse = reverse,
 }

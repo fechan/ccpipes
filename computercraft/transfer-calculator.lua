@@ -1,4 +1,5 @@
 local CacheMap = require('CacheMap')
+local Utils = require('utils')
 
 ---A request to transfer `limit` items from the `from` slot to the `to` slot
 ---@class TransferOrder
@@ -64,13 +65,7 @@ local function getNumExistingItemsAt (slot, itemListCache)
 end
 
 -- TODO: move this to utils
-local function reverse(tbl)
-  for i=1, math.floor(#tbl / 2) do
-    local tmp = tbl[i]
-    tbl[i] = tbl[#tbl - i + 1]
-    tbl[#tbl - i + 1] = tmp
-  end
-end
+
 
 ---Get a list of items in the given inventory peripheral, with all the details
 ---from getItemDetail.
@@ -146,7 +141,7 @@ local function getTransferOrders (origin, destination, filter)
 
   local possibleSlotsEmpty = getEmptySlots(destination, inventoryLists)
   local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryLists)
-  reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
+  Utils.reverse(shouldTransfer) -- reverse list so table.remove(shouldTransfer) pops the head of the queue
 
   local possibleSlotsFullByItem = CacheMap.new()
 
