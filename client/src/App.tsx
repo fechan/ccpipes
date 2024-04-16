@@ -125,6 +125,7 @@ export default function App() {
         <Panel position="top-right">
           <EdgeOptions
             sendMessage={ sendMessage }
+            setEdges={ setEdges }
            />
         </Panel>
 

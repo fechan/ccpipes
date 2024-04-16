@@ -6,9 +6,10 @@ import { Pipe } from "@server/types/core-types";
 
 export interface EdgeOptionsData {
   sendMessage: SendMessage,
+  setEdges: React.Dispatch<React.SetStateAction<Edge<any>[]>>,
 };
 
-export function EdgeOptions({ sendMessage }: EdgeOptionsData) {
+export function EdgeOptions({ sendMessage, setEdges }: EdgeOptionsData) {
   const [ selectedEdges, setSelectedEdges ] = useState([] as Edge[]);
 
   const [ nickname, setNickname ] = useState("");
@@ -28,15 +29,22 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsData) {
   });
 
   function onPipeOptionChanged(option: keyof Pipe, value: string) {
-    const edits: Partial<Pipe> = {}
-    edits[option] = value;
+    const selectedEdgeIds = selectedEdges.map(edge => edge.id);
+    setEdges((edges) =>
+      edges.map((edge) => {
+        if (selectedEdgeIds.includes(edge.id)) {
+          edge.data = {
+            ...edge.data,
+            [option]: value,
+          };
+        }
+
+        return edge;
+      })
+    );
 
     for (let edge of selectedEdges) {
-      if (!('data' in edge)) {
-        edge.data = {}
-      }
-      edge.data[option] = value;
-      GraphUpdateCallbacks.onPipeUpdate(edge.id, edits, sendMessage)
+      GraphUpdateCallbacks.onPipeUpdate(edge.id, { [option]: value }, sendMessage)
     }
     setters[option](value);
   }

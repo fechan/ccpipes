@@ -35,6 +35,7 @@ function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: D
       source: connection.source,
       target: connection.target,
       id: pipeId,
+      type: "pipe",
       markerEnd: {
         type: MarkerType.Arrow,
         width: 20,
