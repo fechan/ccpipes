@@ -24,17 +24,6 @@ export function GroupNode({ data }: NodeProps<GroupNodeData>) {
         { group.nickname || group.id }
       </div>
 
-      <div>
-        <ul className="flex gap-1 flex-wrap">
-          {
-            group.slots.map(slot => <ItemSlot
-              key={ `${slot.periphId}-${slot.slot}` }
-              slot={ slot }
-              />)
-          }
-        </ul>
-      </div>
-
       <Handle type="target" position={ Position.Left } />
       <Handle type="source" position={ Position.Right } />
     </div>
