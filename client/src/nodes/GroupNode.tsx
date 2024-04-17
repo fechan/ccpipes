@@ -1,5 +1,5 @@
 import { Handle, NodeProps, Position } from "reactflow";
-import { Group, Slot } from "@server/types/core-types";
+import { Group } from "@server/types/core-types";
 
 export type GroupNodeData = {
   group: Group,
