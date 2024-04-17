@@ -8,16 +8,6 @@ export type GroupNodeData = {
 export function GroupNode({ data }: NodeProps<GroupNodeData>) {
   const { group } = data;
 
-  function ItemSlot({ slot }: {slot: Slot}) {
-    return (
-      <li
-        className="border w-8 h-8 grow-0 flex items-center justify-center"
-      >
-        { slot.slot }
-      </li>
-    )
-  }
-
   return (
     <div className="react-flow__node-default w-full h-full">
       <div className="absolute -top-5 left-0 text-xs">
