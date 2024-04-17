@@ -12,10 +12,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
       type: "machine",
       position: { x: 100 + 100*i, y: 100 },
       data: { machine: machine },
-      style: {
-        width: 350,
-        height: 300,
-      }
     } as Node);
 
 
@@ -26,9 +22,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
         type: "slot-group",
         position: { x: 10 + 50*i, y: 30 },
         data: { group: group },
-        style: {
-          width: 35 + 10 * group.slots.length,
-        },
         parentId: machine.id,
         extent: "parent",
       } as Node);
