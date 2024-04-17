@@ -47,7 +47,7 @@ export function getNodesForFactory(factory: Factory): Node[] {
           },
           parentId: group.id,
           extent: "parent",
-        });
+        } as Node);
       }
     }
   }
