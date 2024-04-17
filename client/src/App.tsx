@@ -2,9 +2,9 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Edge, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc } from "reactflow";
+import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc } from "reactflow";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
   Controls,
@@ -14,6 +14,7 @@ import {
   useNodesState,
   useEdgesState,
   Panel,
+  useReactFlow,
 } from "reactflow";
 
 import "reactflow/dist/style.css";
@@ -35,6 +36,7 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
+  const { getIntersectingNodes } = useReactFlow();
   const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
@@ -44,17 +46,22 @@ export default function App() {
    */
   const onConnect: OnConnect = useCallback(
     (connection) => GraphUpdateCallbacks.onConnect(connection, sendMessage, setEdges),
-    [setEdges, factory]
+    [setEdges]
   );
 
   const onEdgesDelete: OnEdgesDelete = useCallback(
     (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage),
-    []
+    [sendMessage]
   );
 
   const onEdgeUpdate: OnEdgeUpdateFunc = useCallback(
     (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, setEdges),
-    []
+    [sendMessage, setEdges]
+  );
+
+  const onNodeDrag: NodeDragHandler = useCallback(
+    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDrag(mouseEvent, node, setNodes, getIntersectingNodes),
+    [setNodes, getIntersectingNodes]
   );
 
   /**
@@ -120,6 +127,7 @@ export default function App() {
         onEdgesDelete={onEdgesDelete}
         onEdgeUpdate={onEdgeUpdate}
         onConnect={onConnect}
+        onNodeDrag={onNodeDrag}
         fitView
       >
         <Panel position="top-right">

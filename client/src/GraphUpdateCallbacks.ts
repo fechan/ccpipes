@@ -1,8 +1,8 @@
 import { Pipe, PipeId } from "@server/types/core-types";
 import { PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, Connection, Edge, MarkerType, updateEdge } from "reactflow";
+import { addEdge, Connection, Edge, Instance, MarkerType, Node, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
@@ -77,9 +77,26 @@ function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMes
   sendMessage(JSON.stringify(pipeEditReq));
 }
 
+function onNodeDrag(
+  mouseEvent: MouseEvent,
+  draggedNode: Node,
+  setNodes: Dispatch<SetStateAction<Node[]>>,
+  getIntersectingNodes: Instance.GetIntersectingNodes<any>
+) {
+  const intersections = getIntersectingNodes(draggedNode).map(n => n.id);
+
+  setNodes(nodes =>
+    nodes.map(node => ({
+      ...node,
+      data: { ...node.data, intersectedBy: intersections.includes(node.id) && draggedNode.type }
+    })
+  ));
+}
+
 export const GraphUpdateCallbacks = {
   onEdgesDelete: onEdgesDelete,
   onEdgeUpdate: onEdgeUpdate,
   onConnect: onConnect,
   onPipeUpdate: onPipeUpdate,
+  onNodeDrag: onNodeDrag,
 }
