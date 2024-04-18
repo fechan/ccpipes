@@ -5,6 +5,7 @@ import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { DropTargetContext } from "./contexts/DropTargetContext";
+import { CombineHandlers } from "./CombineHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -136,34 +137,7 @@ function onNodeDragStop(
 ) {
   if (dropTarget) {
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      // get the machine's groups and tell cc to add them to the drop target's group list
-      sendMessage(JSON.stringify({
-        type: "MachineEdit",
-        reqId: uuidv4(),
-        machineId: dropTarget.id,
-        edits: {
-          groups: [ ...dropTarget.data.machine.groups, ...draggedNode.data.machine.groups ]
-        }
-      } as MachineEditReq));
-
-      // tell cc to delete the dragged machine
-      sendMessage(JSON.stringify({
-        type: "MachineDel",
-        reqId: uuidv4(),
-        machineId: draggedNode.id,
-      } as MachineDelReq));
-
-      // set the parent of the dragged machine's group nodes to the target machine
-      // and delete the dragged machine's node
-      setNodes(nodes => nodes
-        .filter(node => node.id !== draggedNode.id)
-        .map(node => {
-          if (node.parentId === draggedNode.id) {
-            return {...node, parentId: dropTarget.id}
-          }
-          return node
-        })
-      );
+      CombineHandlers.combineTwoMachines(draggedNode, dropTarget, setNodes, sendMessage);
     }
 
     setDropTarget(null);
