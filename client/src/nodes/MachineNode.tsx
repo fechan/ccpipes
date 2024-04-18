@@ -5,7 +5,6 @@ import { useContext } from "react";
 
 export type MachineNodeData = {
   machine: Machine,
-  intersectedBy? : keyof NodeTypes,
 };
 
 export function MachineNode({ id, data }: NodeProps<MachineNodeData>) {

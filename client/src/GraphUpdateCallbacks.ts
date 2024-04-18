@@ -80,7 +80,10 @@ function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMes
 }
 
 function nodeIsCompatibleDropTarget(draggedNode: Node, targetNode: Node) {
-  return draggedNode.type === "machine" && targetNode.type === "machine";
+  return (
+    (draggedNode.type === "machine" && targetNode.type === "machine") ||
+    (draggedNode.type === "slot-group" && targetNode.type === "slot-group" )
+  );
 }
 
 function onNodeDrag(
@@ -140,6 +143,8 @@ function onNodeDragStop(
     let combineResult: CombineResult | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
       combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes());
+    } else if (draggedNode.type === "slot-group" && dropTarget.type === "slot-group") {
+      combineResult = CombineHandlers.combineGroups([draggedNode], dropTarget, reactFlowInstance.getNodes());
     }
 
     if (combineResult) {
