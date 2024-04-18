@@ -1,4 +1,4 @@
-import { MachineDelReq, MachineEditReq } from "@server/types/messages";
+import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket";
 import { Node } from "reactflow";
@@ -49,6 +49,42 @@ function combineTwoMachines(
   );
 }
 
+function combineTwoGroups(
+  sourceGroupNode: Node,
+  targetGroupNode: Node,
+  setNodes: Dispatch<SetStateAction<Node[]>>,
+  sendMessage: SendMessage
+) {
+  // get the group's slots and tell cc to add them to the target group's slot list
+  sendMessage(JSON.stringify({
+    type: "GroupEdit",
+    groupId: sourceGroupNode.id,
+    edits: {
+      slots: [ ...targetGroupNode.data.group.slots, ...sourceGroupNode.data.group.slots ],
+    }
+  } as GroupEditReq));
+
+  // tell cc to delete the source group
+  // TODO: make the CC side remove the group from the source machine's list of groups
+  sendMessage(JSON.stringify({
+    type: "GroupDel",
+    groupId: sourceGroupNode.id,
+  } as GroupDelReq));
+
+  // set the parent of the group's slot nodes to the target group
+  // and delete the source group's node
+  setNodes(nodes => nodes
+    .filter(node => node.id !== sourceGroupNode.id)
+    .map(node => {
+      if (node.parentId === sourceGroupNode.id) {
+        return { ...node, parentId: targetGroupNode.id }
+      }
+      return node
+    })
+  )
+}
+
 export const CombineHandlers = {
   combineTwoMachines: combineTwoMachines,
+  combineTwoGroups: combineTwoGroups,
 };
