@@ -1,7 +1,5 @@
 import { GroupId, Slot } from "@server/types/core-types";
-import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Message } from "@server/types/messages";
-import { Dispatch, SetStateAction } from "react";
-import { SendMessage } from "react-use-websocket";
+import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Request } from "@server/types/messages";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
  * combining operation, and the final React Flow node state after combining.
  */
 export interface CombineResult {
-  messages: Message[],
+  messages: Request[],
   finalNodeState: Node[],
 };
 
@@ -29,7 +27,7 @@ function combineMachines(
   targetMachineNode: Node,
   allNodes: Node[],
 ): CombineResult {
-  const messages: Message[] = [];
+  const messages: Request[] = [];
 
   // get the machine's groups and tell cc to add them to the drop target's group list
   const combinedGroupList: GroupId[] = sourceMachineNodes.reduce(
@@ -85,7 +83,7 @@ function combineGroups(
   targetGroupNode: Node,
   allNodes: Node[],
 ): CombineResult {
-  const messages: Message[] = [];
+  const messages: Request[] = [];
 
   // get the group's slots and tell cc to add them to the target group's slot list
   const combinedSlotList: Slot[] = sourceGroupNodes.reduce(
@@ -95,6 +93,7 @@ function combineGroups(
 
   messages.push({
     type: "GroupEdit",
+    reqId: uuidv4(),
     groupId: targetGroupNode.id,
     edits: {
       slots: combinedSlotList,
@@ -106,6 +105,7 @@ function combineGroups(
   for (let groupNode of sourceGroupNodes) {
     messages.push({
       type: "GroupDel",
+      reqId: uuidv4(),
       groupId: groupNode.id,
     } as GroupDelReq);
   }
