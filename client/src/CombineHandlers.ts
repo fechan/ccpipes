@@ -4,6 +4,15 @@ import { SendMessage } from "react-use-websocket";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Combine two Machines together
+ * - Groups from the source machine will be moved into the target machine
+ * - The source machine will then de deleted
+ * @param sourceMachineNode Machine that will be combined into the target
+ * @param targetMachineNode Machine that will be combined into
+ * @param setNodes React Flow node setter
+ * @param sendMessage WebSocket sendMessage handle
+ */
 function combineTwoMachines(
   sourceMachineNode: Node,
   targetMachineNode: Node,
