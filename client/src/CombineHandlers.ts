@@ -1,4 +1,4 @@
-import { GroupId } from "@server/types/core-types";
+import { GroupId, Slot } from "@server/types/core-types";
 import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket";
@@ -58,34 +58,51 @@ function combineMachines(
   );
 }
 
-function combineTwoGroups(
-  sourceGroupNode: Node,
+/**
+ * Combine 1 or more source groups with a target group
+ * - Slots from the source groups will be moved into the target group
+ * - The source groups will then be deleted
+ * @param sourceGroupNodes Groups that will be combined into the target
+ * @param targetGroupNode Group to combine into
+ * @param setNodes React Flow node setter
+ * @param sendMessage WebSocket sendMessage handle
+ */
+function combineGroups(
+  sourceGroupNodes: Node[],
   targetGroupNode: Node,
   setNodes: Dispatch<SetStateAction<Node[]>>,
   sendMessage: SendMessage
 ) {
   // get the group's slots and tell cc to add them to the target group's slot list
+  const combinedSlotList: Slot[] = sourceGroupNodes.reduce(
+    (combinedList, sourceGroupNodes) => [...combinedList, ...sourceGroupNodes.data.group.slots],
+    [...targetGroupNode.data.group.slots]
+  );
+
   sendMessage(JSON.stringify({
     type: "GroupEdit",
-    groupId: sourceGroupNode.id,
+    groupId: targetGroupNode.id,
     edits: {
-      slots: [ ...targetGroupNode.data.group.slots, ...sourceGroupNode.data.group.slots ],
+      slots: combinedSlotList,
     }
   } as GroupEditReq));
 
   // tell cc to delete the source group
   // TODO: make the CC side remove the group from the source machine's list of groups
-  sendMessage(JSON.stringify({
-    type: "GroupDel",
-    groupId: sourceGroupNode.id,
-  } as GroupDelReq));
+  for (let groupNode of sourceGroupNodes) {
+    sendMessage(JSON.stringify({
+      type: "GroupDel",
+      groupId: groupNode.id,
+    } as GroupDelReq));
+  }
 
   // set the parent of the group's slot nodes to the target group
   // and delete the source group's node
+  const sourceGroupNodeIds = sourceGroupNodes.map(node => node.id);
   setNodes(nodes => nodes
-    .filter(node => node.id !== sourceGroupNode.id)
+    .filter(node => !sourceGroupNodeIds.includes(node.id))
     .map(node => {
-      if (node.parentId === sourceGroupNode.id) {
+      if ( sourceGroupNodeIds.includes(node.parentId as string) ) {
         return { ...node, parentId: targetGroupNode.id }
       }
       return node
@@ -95,5 +112,5 @@ function combineTwoGroups(
 
 export const CombineHandlers = {
   combineMachines: combineMachines,
-  combineTwoGroups: combineTwoGroups,
+  combineGroups: combineGroups,
 };
