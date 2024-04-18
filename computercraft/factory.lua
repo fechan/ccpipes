@@ -39,6 +39,25 @@ local function pipeEdit (factory, pipeId, edits)
   end
 end
 
+
+---Edit a machine in the factory
+---@param factory Factory Factory the machine is in
+---@param machineId string ID of machine to edit
+---@param edits table Map of keys to edit -> new values
+local function machineEdit (factory, machineId, edits)
+  local machine = factory.machines[machineId]
+  for k, v in pairs(edits) do
+    machine[k] = v
+  end
+end
+
+---Delete a machine from the factory
+---@param factory Factory Factory the machine is in
+---@param machineId string ID of machine to remove
+local function machineDel (factory, machineId)
+  factory.machines[machineId] = nil
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
@@ -76,6 +95,8 @@ return {
   pipeAdd = pipeAdd,
   pipeDel = pipeDel,
   pipeEdit = pipeEdit,
+  machineEdit = machineEdit,
+  machineDel = machineDel,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
 }

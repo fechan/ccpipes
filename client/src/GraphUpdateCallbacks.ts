@@ -134,7 +134,7 @@ function onNodeDragStop(
       sendMessage(JSON.stringify({
         type: "MachineEdit",
         reqId: uuidv4(),
-        machineId: draggedNode.id,
+        machineId: dropTarget.id,
         edits: {
           groups: [ ...dropTarget.data.machine.groups, ...draggedNode.data.machine.groups ]
         }
