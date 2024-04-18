@@ -1,4 +1,4 @@
-import { Factory, Machine, MachineId, Pipe, PipeId } from "./core-types"
+import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "./core-types"
 import { SessionId } from "./session";
 
 export type MessageType = (
@@ -136,7 +136,7 @@ export interface MachineAddReq extends Request {
 /**
  * Request to edit a Machine in the factory.
  * 
- * - Emitted from the editor if any attribute of the 
+ * - Emitted from the editor when Machines are combined or Machine attributes are edited by the user
  */
 export interface MachineEditReq extends Request {
   type: "MachineEdit",
@@ -144,7 +144,42 @@ export interface MachineEditReq extends Request {
   edits: Partial<Machine>,
 }
 
+/**
+ * Request to delete a Machine in the factory
+ * 
+ * - Emitted from the editor when Machines are combined
+ */
 export interface MachineDelReq extends Request {
   type: "MachineDel",
+  machineId: MachineId,
+}
+
+/**
+ * Request to delete a Group in the factory
+ * 
+ * - Emitted from the editor when Groups are combined, or when Machines with similarly named Groups are combined
+ */
+export interface GroupDelReq extends Request {
+  type: "GroupDel",
+  groupId: GroupId,
+}
+
+/**
+ * Request to edit a Group in the factory.
+ * 
+ * - Emitted from the editor when Groups are combined, Machines with similar Groups are combined, or Group attributes are edited by the user
+ */
+export interface GroupEditReq extends Request {
+  type: "GroupEdit",
+  groupId: GroupId,
+  edits: Partial<Group>,
+}
+
+/**
+ * Request to add a Group to the factory under a Machine
+ */
+export interface GroupAddReq extends Request {
+  type: "GroupAdd",
+  group: Group,
   machineId: MachineId,
 }
