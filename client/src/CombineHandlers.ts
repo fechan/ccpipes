@@ -22,6 +22,7 @@ export interface CombineResult {
  * @param targetMachineNode Machine that will be combined into
  * @param allNodes All Nodes in the React Flow
  * @param sendMessage WebSocket sendMessage handle
+ * @returns Messages needed to combine and final node state after combination
  */
 function combineMachines(
   sourceMachineNodes: Node[],
@@ -77,48 +78,51 @@ function combineMachines(
  * @param targetGroupNode Group to combine into
  * @param setNodes React Flow node setter
  * @param sendMessage WebSocket sendMessage handle
+ * @returns Messages needed to combine and final node state after combination
  */
 function combineGroups(
   sourceGroupNodes: Node[],
   targetGroupNode: Node,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
-  sendMessage: SendMessage
-) {
+  allNodes: Node[],
+): CombineResult {
+  const messages: Message[] = [];
+
   // get the group's slots and tell cc to add them to the target group's slot list
   const combinedSlotList: Slot[] = sourceGroupNodes.reduce(
     (combinedList, sourceGroupNodes) => [...combinedList, ...sourceGroupNodes.data.group.slots],
     [...targetGroupNode.data.group.slots]
   );
 
-  sendMessage(JSON.stringify({
+  messages.push({
     type: "GroupEdit",
     groupId: targetGroupNode.id,
     edits: {
       slots: combinedSlotList,
     }
-  } as GroupEditReq));
+  } as GroupEditReq);
 
   // tell cc to delete the source group
   // TODO: make the CC side remove the group from the source machine's list of groups
   for (let groupNode of sourceGroupNodes) {
-    sendMessage(JSON.stringify({
+    messages.push({
       type: "GroupDel",
       groupId: groupNode.id,
-    } as GroupDelReq));
+    } as GroupDelReq);
   }
 
   // set the parent of the group's slot nodes to the target group
   // and delete the source group's node
   const sourceGroupNodeIds = sourceGroupNodes.map(node => node.id);
-  setNodes(nodes => nodes
+  const finalNodeState = allNodes
     .filter(node => !sourceGroupNodeIds.includes(node.id))
     .map(node => {
       if ( sourceGroupNodeIds.includes(node.parentId as string) ) {
         return { ...node, parentId: targetGroupNode.id }
       }
       return node
-    })
-  )
+    });
+
+  return { messages, finalNodeState };
 }
 
 export const CombineHandlers = {
