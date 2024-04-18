@@ -2,6 +2,7 @@ import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "./cor
 import { SessionId } from "./session";
 
 export type MessageType = (
+  "BatchRequest" |
   "ConfirmationResponse" |
   "SessionCreate" | "SessionJoin" |
   "FactoryGet" | "FactoryGetResponse" |
@@ -17,6 +18,19 @@ export interface Message {
 export interface Request extends Message {
   reqId: string,
 };
+
+/**
+ * A series of requests for ComputerCraft to execute in order.
+ * 
+ * This should be used if multiple related requests need to be issued, such as
+ * for Machine-to-Machine combination.
+ * 
+ * - Only emitted from the editor
+ */
+export interface BatchRequest extends Request {
+  type: "BatchRequest",
+  requests: Request[],
+}
 
 /**
  * A response confirming the success of a request.

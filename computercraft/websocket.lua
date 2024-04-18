@@ -3,6 +3,7 @@ local Utils = require('utils')
 -- This is a table with message type names as keys and not an array
 -- so it's easy to check if a string is in the list of message types
 local MESSAGE_TYPES = {
+  BatchRequest = true,
   ConfirmationResponse = true,
   SessionCreate = true,
   SessionJoin = true,
@@ -87,7 +88,7 @@ local function queueEventFromMessage (message)
   if MESSAGE_TYPES[messageType] then
     os.queueEvent("ccpipes-" .. messageType, message)
   else
-    print("Unhandled message type: " .. messageType)
+    print("Unhandled message type in websocket.lua: " .. messageType)
   end
 end
 

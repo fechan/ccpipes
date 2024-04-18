@@ -1,5 +1,5 @@
 import { Pipe, PipeId } from "@server/types/core-types";
-import { MachineDelReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { BatchRequest, MachineDelReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, MouseEvent, SetStateAction, useContext } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
@@ -148,9 +148,12 @@ function onNodeDragStop(
     }
 
     if (combineResult) {
-      for (let message of combineResult.messages) {
-        sendMessage(JSON.stringify(message));
-      }
+      const batchReq: BatchRequest = {
+        type: "BatchRequest",
+        reqId: uuidv4(),
+        requests: combineResult.messages,
+      };
+      sendMessage(JSON.stringify(batchReq));
 
       setNodes(() => combineResult.finalNodeState);
     }
