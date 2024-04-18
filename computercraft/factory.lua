@@ -57,10 +57,17 @@ end
 local function groupDel (factory, groupId)
   factory.groups[groupId] = nil
 
+  -- delete all pipes that have this group at either end
+  for pipeId, pipe in pairs(factory.pipes) do
+    if pipe.from == groupId or pipe.to == groupId then
+      factory.pipes[pipeId] = nil
+    end
+  end
+
   -- find the machine that had the group in it and remove the group from it
   for machineId, machine in pairs(factory.machines) do
     for groupIdxInMachine, groupIdInMachine in ipairs(machine.groups) do
-      if groupIdInMachine == groupid then
+      if groupIdInMachine == groupId then
         table.remove(machine.groups, groupIdxInMachine)
         return
       end
