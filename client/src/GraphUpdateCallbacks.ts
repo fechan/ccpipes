@@ -2,7 +2,7 @@ import { Pipe, PipeId } from "@server/types/core-types";
 import { MachineDelReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, MouseEvent, SetStateAction, useContext } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
+import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { DropTargetContext } from "./contexts/DropTargetContext";
 
@@ -93,14 +93,20 @@ function onNodeDrag(
     return;
   }
 
-  // TODO: we should restrict to a single drop target based on the criteria in Issue #9
-  const intersections = getIntersectingNodes(draggedNode)
-    .filter(node => nodeIsCompatibleDropTarget(draggedNode, node));
-
   const mousePosition = reactFlowInstance.screenToFlowPosition({
     x: mouseEvent.clientX,
     y: mouseEvent.clientY,
   });
+
+  // Get nodes that are under the mouse cursor AND are not the dragged node AND are compatible drop targets
+  // For the mouse checking, there's probably a dedicated function for it but I don't know what it is
+  const intersections = getIntersectingNodes(boxToRect({
+    x: mousePosition.x,
+    x2: mousePosition.x+.1,
+    y: mousePosition.y,
+    y2: mousePosition.y+.1
+  }))
+    .filter(node => node.id !== draggedNode.id && nodeIsCompatibleDropTarget(draggedNode, node));
 
   let closestNode: Node | null = null;
   let closestDistance = Number.MAX_VALUE;
@@ -148,6 +154,7 @@ function onNodeDragStop(
       } as MachineDelReq));
 
       // set the parent of the dragged machine's group nodes to the target machine
+      // and delete the dragged machine's node
       setNodes(nodes => nodes
         .filter(node => node.id !== draggedNode.id)
         .map(node => {
@@ -157,8 +164,6 @@ function onNodeDragStop(
           return node
         })
       );
-
-      // delete the machine from nodes
     }
 
     setDropTarget(null);
