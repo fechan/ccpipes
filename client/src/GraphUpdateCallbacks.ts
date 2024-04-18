@@ -139,7 +139,7 @@ function onNodeDragStop(
   if (dropTarget && reactFlowInstance) {
     let combineResult: CombineResult | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes(), sendMessage);
+      combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes());
     }
 
     if (combineResult) {

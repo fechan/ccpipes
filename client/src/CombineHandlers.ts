@@ -27,7 +27,6 @@ function combineMachines(
   sourceMachineNodes: Node[],
   targetMachineNode: Node,
   allNodes: Node[],
-  sendMessage: SendMessage
 ): CombineResult {
   const messages: Message[] = [];
 
