@@ -1,9 +1,10 @@
 import { Pipe, PipeId } from "@server/types/core-types";
-import { PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
-import { Dispatch, MouseEvent, SetStateAction } from "react";
+import { MachineDelReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { Dispatch, MouseEvent, SetStateAction, useContext } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, Connection, Edge, Instance, MarkerType, Node, updateEdge } from "reactflow";
+import { addEdge, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
+import { DropTargetContext } from "./contexts/DropTargetContext";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -77,20 +78,91 @@ function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMes
   sendMessage(JSON.stringify(pipeEditReq));
 }
 
+function nodeIsCompatibleDropTarget(draggedNode: Node, targetNode: Node) {
+  return draggedNode.type === "machine" && targetNode.type === "machine";
+}
+
 function onNodeDrag(
   mouseEvent: MouseEvent,
   draggedNode: Node,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
-  getIntersectingNodes: Instance.GetIntersectingNodes<any>
+  getIntersectingNodes: Instance.GetIntersectingNodes<any>,
+  reactFlowInstance: (ReactFlowInstance | null),
+  setDropTarget: Dispatch<SetStateAction<Node | null>>
 ) {
-  const intersections = getIntersectingNodes(draggedNode).map(n => n.id);
+  if (reactFlowInstance == null) {
+    return;
+  }
 
-  setNodes(nodes =>
-    nodes.map(node => ({
-      ...node,
-      data: { ...node.data, intersectedBy: intersections.includes(node.id) && draggedNode.type }
-    })
-  ));
+  // TODO: we should restrict to a single drop target based on the criteria in Issue #9
+  const intersections = getIntersectingNodes(draggedNode)
+    .filter(node => nodeIsCompatibleDropTarget(draggedNode, node));
+
+  const mousePosition = reactFlowInstance.screenToFlowPosition({
+    x: mouseEvent.clientX,
+    y: mouseEvent.clientY,
+  });
+
+  let closestNode: Node | null = null;
+  let closestDistance = Number.MAX_VALUE;
+  for (let node of intersections) {
+    if (node.positionAbsolute) {
+      const dx = node.positionAbsolute.x - mousePosition.x;
+      const dy = node.positionAbsolute.y - mousePosition.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (closestDistance > distance) {
+        closestDistance = distance;
+        closestNode = node;
+      }
+    }
+  }
+
+ setDropTarget(closestNode);
+}
+
+function onNodeDragStop(
+  mouseEvent: MouseEvent,
+  draggedNode: Node,
+  dropTarget: Node | null,
+  setNodes: Dispatch<SetStateAction<Node[]>>,
+  setDropTarget: Dispatch<SetStateAction<Node | null>>,
+  sendMessage: SendMessage,
+) {
+  if (dropTarget) {
+    if (draggedNode.type === "machine" && dropTarget.type === "machine") {
+      // get the machine's groups and tell cc to add them to the drop target's group list
+      sendMessage(JSON.stringify({
+        type: "MachineEdit",
+        reqId: uuidv4(),
+        machineId: draggedNode.id,
+        edits: {
+          groups: [ ...dropTarget.data.machine.groups, ...draggedNode.data.machine.groups ]
+        }
+      } as MachineEditReq));
+
+      // tell cc to delete the dragged machine
+      sendMessage(JSON.stringify({
+        type: "MachineDel",
+        reqId: uuidv4(),
+        machineId: draggedNode.id,
+      } as MachineDelReq));
+
+      // set the parent of the dragged machine's group nodes to the target machine
+      setNodes(nodes => nodes
+        .filter(node => node.id !== draggedNode.id)
+        .map(node => {
+          if (node.parentId === draggedNode.id) {
+            return {...node, parentId: dropTarget.id}
+          }
+          return node
+        })
+      );
+
+      // delete the machine from nodes
+    }
+
+    setDropTarget(null);
+  }
 }
 
 export const GraphUpdateCallbacks = {
@@ -99,4 +171,5 @@ export const GraphUpdateCallbacks = {
   onConnect: onConnect,
   onPipeUpdate: onPipeUpdate,
   onNodeDrag: onNodeDrag,
+  onNodeDragStop: onNodeDragStop,
 }

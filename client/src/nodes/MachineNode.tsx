@@ -1,18 +1,23 @@
 import { Machine } from "@server/types/core-types";
 import type { NodeProps, NodeTypes } from "reactflow";
+import { DropTargetContext } from "../contexts/DropTargetContext";
+import { useContext } from "react";
 
 export type MachineNodeData = {
   machine: Machine,
   intersectedBy? : keyof NodeTypes,
 };
 
-export function MachineNode({ data }: NodeProps<MachineNodeData>) {
-  const { machine, intersectedBy } = data;
+export function MachineNode({ id, data }: NodeProps<MachineNodeData>) {
+  const { machine } = data;
+
+  const { dropTarget } = useContext(DropTargetContext);
+
   return (
     <div 
       className={ 
         "react-flow__node-default w-full h-full" +
-        (intersectedBy === "machine" ? " bg-green-200" : "")
+        (dropTarget?.id === id ? " bg-green-200" : "")
       }
     >
       <div className="absolute -top-5 left-0">
