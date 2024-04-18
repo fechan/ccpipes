@@ -51,6 +51,34 @@ local function machineEdit (factory, machineId, edits)
   end
 end
 
+---Delete a group from the factory
+---@param factory Factory Factory the group is in
+---@param groupId string ID of group to remove
+local function groupDel (factory, groupId)
+  factory.groups[groupId] = nil
+
+  -- find the machine that had the group in it and remove the group from it
+  for machineId, machine in pairs(factory.machines) do
+    for groupIdxInMachine, groupIdInMachine in ipairs(machine.groups) do
+      if groupIdInMachine == groupid then
+        table.remove(machine.groups, groupIdxInMachine)
+        return
+      end
+    end
+  end
+end
+
+---Edit a group in the factory
+---@param factory Factory Factory the group is in
+---@param groupId string ID of group to edit
+---@param edits table Map of keys to edit -> new values
+local function groupEdit (factory, groupId, edits)
+  local group = factory.groups[groupId]
+  for k, v in pairs(edits) do
+    group[k] = v
+  end
+end
+
 ---Delete a machine from the factory
 ---@param factory Factory Factory the machine is in
 ---@param machineId string ID of machine to remove
@@ -97,6 +125,8 @@ return {
   pipeEdit = pipeEdit,
   machineEdit = machineEdit,
   machineDel = machineDel,
+  groupEdit = groupEdit,
+  groupDel = groupDel,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
 }

@@ -38,6 +38,16 @@ local function handleMachineEdit (request, factory, sendMessage)
   Factory.saveFactory(factory)
 end
 
+local function handleGroupDel (request, factory, sendMessage)
+  Factory.groupDel(factory, request.groupId)
+  Factory.saveFactory(factory)
+end
+
+local function handleGroupEdit (request, factory, sendMessage)
+  Factory.groupEdit(factory, request.groupId, request.edits)
+  Factory.saveFactory(factory)
+end
+
 local function listenForCcpipesEvents (wsContext, factory)
   while true do
     if wsContext.ws then
@@ -51,6 +61,8 @@ local function listenForCcpipesEvents (wsContext, factory)
         ['ccpipes-PipeEdit'] = handlePipeEdit,
         ['ccpipes-MachineDel'] = handleMachineDel,
         ['ccpipes-MachineEdit'] = handleMachineEdit,
+        ['ccpipes-GroupDel'] = handleGroupDel,
+        ['ccpipes-GroupEdit'] = handleGroupEdit,
       }
 
       if handlers[event] then
