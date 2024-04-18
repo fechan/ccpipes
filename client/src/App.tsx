@@ -69,8 +69,8 @@ export default function App() {
   );
 
   const onNodeDragStop: NodeDragHandler = useCallback(
-    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, setDropTarget, sendMessage),
-    [setNodes, setDropTarget, dropTarget, sendMessage]
+    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, setDropTarget, sendMessage, reactFlowInstance),
+    [setNodes, setDropTarget, dropTarget, sendMessage, reactFlowInstance]
   );
 
   /**

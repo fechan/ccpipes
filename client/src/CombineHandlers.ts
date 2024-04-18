@@ -1,61 +1,73 @@
 import { GroupId, Slot } from "@server/types/core-types";
-import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq } from "@server/types/messages";
+import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Message } from "@server/types/messages";
 import { Dispatch, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 /**
- * Combine 1 or more source machines into a target Machine
+ * The CCPipes messages that need to be sent to ComputerCraft to enact a
+ * combining operation, and the final React Flow node state after combining.
+ */
+export interface CombineResult {
+  messages: Message[],
+  finalNodeState: Node[],
+};
+
+/**
+ * Combine 1 or more source machines into a target Machine.
  * - Groups from the source machines will be moved into the target machine
  * - The source machines will then de deleted
  * @param sourceMachineNodes Machines that will be combined into the target
  * @param targetMachineNode Machine that will be combined into
- * @param setNodes React Flow node setter
+ * @param allNodes All Nodes in the React Flow
  * @param sendMessage WebSocket sendMessage handle
  */
 function combineMachines(
   sourceMachineNodes: Node[],
   targetMachineNode: Node,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
+  allNodes: Node[],
   sendMessage: SendMessage
-) {
+): CombineResult {
+  const messages: Message[] = [];
+
   // get the machine's groups and tell cc to add them to the drop target's group list
   const combinedGroupList: GroupId[] = sourceMachineNodes.reduce(
     (combinedList, sourceMachineNode) => [...combinedList, ...sourceMachineNode.data.machine.groups],
     [...targetMachineNode.data.machine.groups]
   );
   
-  sendMessage(JSON.stringify({
+  messages.push({
     type: "MachineEdit",
     reqId: uuidv4(),
     machineId: targetMachineNode.id,
     edits: {
       groups: combinedGroupList,
     }
-  } as MachineEditReq));
+  } as MachineEditReq);
 
   // tell cc to delete the dragged machine
   for (let machineNode of sourceMachineNodes) {
-    sendMessage(JSON.stringify({
+    messages.push({
       type: "MachineDel",
       reqId: uuidv4(),
       machineId: machineNode.id,
-    } as MachineDelReq));
+    } as MachineDelReq);
   }
 
   // set the parent of the dragged machine's group nodes to the target machine
   // and delete the dragged machine's node
   const sourceMachineNodeIds = sourceMachineNodes.map(node => node.id);
-  setNodes(nodes => nodes
+  const finalNodeState = allNodes
     .filter(node => !sourceMachineNodeIds.includes(node.id))
     .map(node => {
       if ( sourceMachineNodeIds.includes(node.parentId as string) ) {
         return {...node, parentId: targetMachineNode.id}
       }
       return node
-    })
-  );
+    });
+
+  return { messages, finalNodeState }
 }
 
 /**

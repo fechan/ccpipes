@@ -5,7 +5,7 @@ import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { DropTargetContext } from "./contexts/DropTargetContext";
-import { CombineHandlers } from "./CombineHandlers";
+import { CombineHandlers, CombineResult } from "./CombineHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -134,10 +134,20 @@ function onNodeDragStop(
   setNodes: Dispatch<SetStateAction<Node[]>>,
   setDropTarget: Dispatch<SetStateAction<Node | null>>,
   sendMessage: SendMessage,
+  reactFlowInstance: (ReactFlowInstance | null),
 ) {
-  if (dropTarget) {
+  if (dropTarget && reactFlowInstance) {
+    let combineResult: CombineResult | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      CombineHandlers.combineMachines([draggedNode], dropTarget, setNodes, sendMessage);
+      combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes(), sendMessage);
+    }
+
+    if (combineResult) {
+      for (let message of combineResult.messages) {
+        sendMessage(JSON.stringify(message));
+      }
+
+      setNodes(() => combineResult.finalNodeState);
     }
 
     setDropTarget(null);
