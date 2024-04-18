@@ -62,6 +62,11 @@ function combineMachines(
       if ( sourceMachineNodeIds.includes(node.parentId as string) ) {
         return {...node, parentId: targetMachineNode.id}
       }
+      if ( node.id === targetMachineNode.id ) {
+        const newTargetNodeState = {...node };
+        newTargetNodeState.data.machine.groups = combinedGroupList;
+        return newTargetNodeState;
+      }
       return node
     });
 
@@ -101,7 +106,6 @@ function combineGroups(
   } as GroupEditReq);
 
   // tell cc to delete the source group
-  // TODO: make the CC side remove the group from the source machine's list of groups
   for (let groupNode of sourceGroupNodes) {
     messages.push({
       type: "GroupDel",
@@ -117,7 +121,12 @@ function combineGroups(
     .filter(node => !sourceGroupNodeIds.includes(node.id))
     .map(node => {
       if ( sourceGroupNodeIds.includes(node.parentId as string) ) {
-        return { ...node, parentId: targetGroupNode.id }
+        return { ...node, parentId: targetGroupNode.id };
+      }
+      if ( node.id === targetGroupNode.id ) {
+        const newTargetNodeState = { ...node };
+        newTargetNodeState.data.group.slots = combinedSlotList;
+        return newTargetNodeState;
       }
       return node
     });
