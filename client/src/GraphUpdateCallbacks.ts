@@ -137,7 +137,7 @@ function onNodeDragStop(
 ) {
   if (dropTarget) {
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      CombineHandlers.combineTwoMachines(draggedNode, dropTarget, setNodes, sendMessage);
+      CombineHandlers.combineMachines([draggedNode], dropTarget, setNodes, sendMessage);
     }
 
     setDropTarget(null);
