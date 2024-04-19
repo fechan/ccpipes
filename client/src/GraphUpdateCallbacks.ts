@@ -2,7 +2,7 @@ import { Pipe, PipeId } from "@server/types/core-types";
 import { BatchRequest, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
 import { Dispatch, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
+import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge, useUpdateNodeInternals } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers, CombineResult } from "./CombineHandlers";
 
