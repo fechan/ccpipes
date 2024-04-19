@@ -1,5 +1,5 @@
 import { Machine } from "@server/types/core-types";
-import type { NodeProps, NodeTypes } from "reactflow";
+import type { NodeProps } from "reactflow";
 import { DropTargetContext } from "../contexts/DropTargetContext";
 import { useContext } from "react";
 

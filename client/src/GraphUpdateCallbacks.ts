@@ -1,10 +1,9 @@
 import { Pipe, PipeId } from "@server/types/core-types";
-import { BatchRequest, MachineDelReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
-import { Dispatch, MouseEvent, SetStateAction, useContext } from "react";
+import { BatchRequest, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { Dispatch, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
-import { DropTargetContext } from "./contexts/DropTargetContext";
 import { CombineHandlers, CombineResult } from "./CombineHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
