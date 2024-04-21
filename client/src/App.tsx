@@ -25,6 +25,7 @@ import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
 import { EdgeOptions } from "./components/EdgeOptions";
 import { useDropTargetStore } from "./stores/dropTarget";
+import { useFactoryStore } from "./stores/factory";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -35,8 +36,9 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
+  const { factory, setFactory } = useFactoryStore();
+
   const { getIntersectingNodes } = useReactFlow();
-  const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
