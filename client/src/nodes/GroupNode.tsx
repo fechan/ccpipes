@@ -1,8 +1,7 @@
-import { Group, MachineId, Slot } from "@server/types/core-types";
-import { useContext, useEffect } from "react";
-import { Handle, NodeProps, Position, useUpdateNodeInternals } from "reactflow";
-import { DropTargetContext } from "../contexts/DropTargetContext";
+import { Group, MachineId } from "@server/types/core-types";
+import { Handle, NodeProps, Position } from "reactflow";
 import { ItemSlot } from "../components/ItemSlot";
+import { useDropTargetStore } from "../stores/dropTarget";
 
 export const SIZES = {
   slot: 30,
@@ -16,7 +15,7 @@ export type GroupNodeData = {
 
 export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
   const { group, machineId } = data;
-  const { dropTarget } = useContext(DropTargetContext);
+  const dropTarget = useDropTargetStore(state => state.dropTarget);
   
   return (
     <div

@@ -1,21 +1,18 @@
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
+import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, OnInit, ReactFlowInstance } from "reactflow";
+import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
 
 import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
   Controls,
   MiniMap,
-  ReactFlow,
-  addEdge,
-  useNodesState,
+  ReactFlow, useNodesState,
   useEdgesState,
   Panel,
-  useReactFlow,
-  useStore,
+  useReactFlow
 } from "reactflow";
 
 import "reactflow/dist/style.css";
@@ -27,7 +24,7 @@ import { edgeTypes, getEdgesForFactory } from "./edges";
 import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
 import { EdgeOptions } from "./components/EdgeOptions";
-import { DropTargetContext } from "./contexts/DropTargetContext";
+import { useDropTargetStore } from "./stores/dropTarget";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -43,7 +40,9 @@ export default function App() {
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
-  const [ dropTarget, setDropTarget ] = useState(null as (Node | null));
+
+  const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
+  // const [ dropTarget, setDropTarget ] = useState(null as (Node | null));
 
   /**
    * Handlers for React Flow events
@@ -69,8 +68,8 @@ export default function App() {
   );
 
   const onNodeDragStop: NodeDragHandler = useCallback(
-    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, setDropTarget, sendMessage, reactFlowInstance),
-    [setNodes, setDropTarget, dropTarget, sendMessage, reactFlowInstance]
+    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, clearDropTarget, sendMessage, reactFlowInstance),
+    [setNodes, clearDropTarget, dropTarget, sendMessage, reactFlowInstance]
   );
 
   const onDragOver: DragEventHandler = useCallback(
@@ -136,35 +135,33 @@ export default function App() {
     <div className="w-full h-full">
       { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
 
-      <DropTargetContext.Provider value={{ dropTarget, setDropTarget }}>
-        <ReactFlow
-          nodes={nodes}
-          nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange}
-          edges={edges}
-          edgeTypes={edgeTypes}
-          onEdgesChange={onEdgesChange}
-          onEdgesDelete={onEdgesDelete}
-          onEdgeUpdate={onEdgeUpdate}
-          onConnect={onConnect}
-          onInit={setReactFlowInstance}
-          onNodeDrag={onNodeDrag}
-          onNodeDragStop={onNodeDragStop}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          fitView
-        >
-          <Panel position="top-right">
-            <EdgeOptions
-              sendMessage={ sendMessage }
-              setEdges={ setEdges }
-             />
-          </Panel>
-          <Background />
-          <MiniMap />
-          <Controls />
-        </ReactFlow>
-      </DropTargetContext.Provider>
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        onEdgesChange={onEdgesChange}
+        onEdgesDelete={onEdgesDelete}
+        onEdgeUpdate={onEdgeUpdate}
+        onConnect={onConnect}
+        onInit={setReactFlowInstance}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        fitView
+      >
+        <Panel position="top-right">
+          <EdgeOptions
+            sendMessage={ sendMessage }
+            setEdges={ setEdges }
+            />
+        </Panel>
+        <Background />
+        <MiniMap />
+        <Controls />
+      </ReactFlow>
     </div>
   );
 }

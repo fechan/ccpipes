@@ -1,7 +1,6 @@
 import { Machine } from "@server/types/core-types";
 import type { NodeProps } from "reactflow";
-import { DropTargetContext } from "../contexts/DropTargetContext";
-import { useContext } from "react";
+import { useDropTargetStore } from "../stores/dropTarget";
 
 export type MachineNodeData = {
   machine: Machine,
@@ -10,7 +9,7 @@ export type MachineNodeData = {
 export function MachineNode({ id, data }: NodeProps<MachineNodeData>) {
   const { machine } = data;
 
-  const { dropTarget } = useContext(DropTargetContext);
+  const dropTarget = useDropTargetStore(state => state.dropTarget);
 
   return (
     <div 

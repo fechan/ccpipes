@@ -91,7 +91,7 @@ function onNodeDrag(
   draggedNode: Node,
   getIntersectingNodes: Instance.GetIntersectingNodes<any>,
   reactFlowInstance: (ReactFlowInstance | null),
-  setDropTarget: Dispatch<SetStateAction<Node | null>>
+  setDropTarget: (dropTarget: Node | null) => void
 ) {
   if (reactFlowInstance == null) {
     return;
@@ -135,7 +135,7 @@ function onNodeDragStop(
   draggedNode: Node,
   dropTarget: Node | null,
   setNodes: Dispatch<SetStateAction<Node[]>>,
-  setDropTarget: Dispatch<SetStateAction<Node | null>>,
+  clearDropTarget: () => void,
   sendMessage: SendMessage,
   reactFlowInstance: (ReactFlowInstance | null),
 ) {
@@ -158,7 +158,7 @@ function onNodeDragStop(
       setNodes(() => combineResult.finalNodeState);
     }
 
-    setDropTarget(null);
+    clearDropTarget();
   }
 }
 
