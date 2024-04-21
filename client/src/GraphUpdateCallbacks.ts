@@ -242,7 +242,7 @@ function onDrop(
       .concat({
         id: newGroupId,
         type: "slot-group",
-        position: { x: 10 + 50, y: 30 },
+        position: { x: mousePosition.x - machineNode.position.x, y: mousePosition.y - machineNode.position.y },
         data: {
           group: newGroup,
           parentId: machineId,
