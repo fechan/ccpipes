@@ -1,14 +1,21 @@
 import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "./core-types"
 import { SessionId } from "./session";
+import { Delta } from "jsondiffpatch";
+
+export const FACTORY_UPDATE_REQUEST_TYPES = [
+  "PipeAdd", "PipeEdit", "PipeDel",
+  "MachineAdd", "MachineEdit", "MachineDel",
+  "GroupAdd", "GroupEdit", "GroupDel"
+] as const;
+
+export type FactoryUpdateRequest = typeof FACTORY_UPDATE_REQUEST_TYPES[number];
 
 export type MessageType = (
   "BatchRequest" |
   "ConfirmationResponse" |
   "SessionCreate" | "SessionJoin" |
   "FactoryGet" | "FactoryGetResponse" |
-  "PipeAdd" | "PipeEdit" | "PipeDel" |
-  "MachineAdd" | "MachineEdit" | "MachineDel" |
-  "GroupAdd" | "GroupEdit" | "GroupDel"
+  FactoryUpdateRequest
 );
 
 export interface Message {
@@ -99,6 +106,18 @@ export interface FactoryGetRes extends SuccessResponse {
   respondingTo: "FactoryGet"
   reqId: string,
   factory: Factory,
+}
+
+/**
+ * Response to any request that updates the factory
+ * 
+ * - Emitted from CC after modifying the factory due to an editor request
+ * - Not emitted from the editor
+ */
+export interface FactoryUpdateRes extends SuccessResponse {
+  respondingTo: FactoryUpdateRequest,
+  reqId: string,
+  diff: Delta,
 }
 
 /**

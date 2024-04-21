@@ -13,16 +13,40 @@ end
 
 local function handlePipeAdd (request, factory, sendMessage)
   local pipe = request.pipe
-  Factory.pipeAdd(factory, pipe)
+  local diff = Factory.pipeAdd(factory, pipe)
+  local factoryUpdateRes = {
+    type = 'ConfirmationResponse',
+    respondingTo = 'PipeAdd',
+    reqId = request.reqId,
+    ok = true,
+    diff = diff
+  }
+  sendMessage(textutils.serializeJSON(factoryUpdateRes))
 end
 
 local function handlePipeDel (request, factory, sendMessage)
   local pipeId = request.pipeId
-  Factory.pipeDel(factory, pipeId)
+  local diff = Factory.pipeDel(factory, pipeId)
+  local factoryUpdateRes = {
+    type = 'ConfirmationResponse',
+    respondingTo = 'PipeDel',
+    reqId = request.reqId,
+    ok = true,
+    diff = diff
+  }
+  sendMessage(textutils.serializeJSON(factoryUpdateRes))
 end
 
 local function handlePipeEdit (request, factory, sendMessage)
-  Factory.pipeEdit(factory, request.pipeId, request.edits)
+  local diff = Factory.pipeEdit(factory, request.pipeId, request.edits)
+  local factoryUpdateRes = {
+    type = 'ConfirmationResponse',
+    respondingTo = 'PipeEdit',
+    reqId = request.reqId,
+    ok = true,
+    diff = diff
+  }
+  sendMessage(textutils.serializeJSON(factoryUpdateRes))
 end
 
 local function handleMachineDel (request, factory, sendMessage)

@@ -19,13 +19,30 @@ end
 ---@param pipe Pipe Pipe to add
 local function pipeAdd (factory, pipe)
   factory.pipes[pipe.id] = pipe
+
+  local diff = {
+    pipes = {
+      [pipe.id] = {pipe}
+    }
+  }
+  return diff
 end
 
 ---Delete a pipe from the factory
 ---@param factory Factory Factory to delete from
 ---@param pipeId string ID of pipe to remove
 local function pipeDel (factory, pipeId)
+  local oldPipe = factory.pipes[pipeId]
   factory.pipes[pipeId] = nil
+
+  local diff = {
+    pipes = {
+      [pipeId] = {
+        oldPipe, 0, 0
+      }
+    }
+  }
+  return diff
 end
 
 ---Edit a pipe in the factory
@@ -34,9 +51,19 @@ end
 ---@param edits table Map of keys to edit -> new values
 local function pipeEdit (factory, pipeId, edits)
   local pipe = factory.pipes[pipeId]
+
+  local diff = {
+    pipes = {
+      [pipeId] = {}
+    }
+  }
+
   for k, v in pairs(edits) do
+    diff.pipes[pipe.id][k] = {pipe[k], v}
     pipe[k] = v
   end
+
+  return diff
 end
 
 

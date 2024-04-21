@@ -1,5 +1,5 @@
+import { ConfirmationResponse, FACTORY_UPDATE_REQUEST_TYPES, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
 import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
@@ -9,23 +9,25 @@ import {
   Background,
   Controls,
   MiniMap,
-  ReactFlow, useNodesState,
-  useEdgesState,
   Panel,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
   useReactFlow
 } from "reactflow";
 
 import "reactflow/dist/style.css";
 
 import { Factory } from "@server/types/core-types";
-import { nodeTypes, getNodesForFactory } from "./nodes";
 import { edgeTypes, getEdgesForFactory } from "./edges";
+import { getNodesForFactory, nodeTypes } from "./nodes";
 
+import { EdgeOptions } from "./components/EdgeOptions";
 import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
-import { EdgeOptions } from "./components/EdgeOptions";
 import { useDropTargetStore } from "./stores/dropTarget";
 import { useFactoryStore } from "./stores/factory";
+import { patch } from "jsondiffpatch";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -36,7 +38,7 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
-  const { factory, setFactory } = useFactoryStore();
+  const { factory, setFactory, patchFactory } = useFactoryStore();
 
   const { getIntersectingNodes } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
@@ -119,6 +121,12 @@ export default function App() {
           if (successRes.respondingTo === "FactoryGet") {
             const factoryGetRes = message as FactoryGetRes;
             setFactory(factoryGetRes.factory);
+            return;
+          }
+
+          if ((FACTORY_UPDATE_REQUEST_TYPES as readonly string[]).includes(successRes.respondingTo)) {
+            const factoryUpdateRes = successRes as FactoryUpdateRes;
+            patchFactory(factoryUpdateRes.diff);
             return;
           }
         } else {
