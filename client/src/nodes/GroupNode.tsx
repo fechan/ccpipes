@@ -1,35 +1,22 @@
-import { Group, Slot } from "@server/types/core-types";
+import { Group, MachineId, Slot } from "@server/types/core-types";
 import { useContext, useEffect } from "react";
 import { Handle, NodeProps, Position, useUpdateNodeInternals } from "reactflow";
 import { DropTargetContext } from "../contexts/DropTargetContext";
+import { ItemSlot } from "../components/ItemSlot";
 
-const SIZES = {
+export const SIZES = {
   slot: 30,
   slotContainerPadding: 10,
 };
 
 export type GroupNodeData = {
   group: Group,
+  machineId: MachineId,
 };
 
 export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
-  const { group } = data;
+  const { group, machineId } = data;
   const { dropTarget } = useContext(DropTargetContext);
-
-  function Slot(slot: Slot, slotIdx: number) {
-    return (
-      <div
-        className="nodrag absolute border w-[30px] h-[30px] flex items-center justify-center"
-        style={{
-          top: Math.floor(slotIdx / 9) * SIZES.slot + SIZES.slotContainerPadding,
-          left: (slotIdx % 9) * SIZES.slot + SIZES.slotContainerPadding,
-        }}
-        key={slot.periphId + slot.slot}
-      >
-        {slot.slot}
-      </div>
-    );
-  }
   
   return (
     <div
@@ -47,7 +34,17 @@ export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
       </div>
 
       <div>
-        { data.group.slots.map((slot, i) => Slot(slot, i)) }
+        {
+          data.group.slots.map((slot, i) =>
+            <ItemSlot
+              key={slot.periphId + slot.slot}
+              slotIdx={ i }
+              slot={ slot }
+              machineId={ machineId }
+              oldGroupId={ id }
+            />
+          )
+        }
       </div>
 
       <Handle type="target" position={ Position.Left } />

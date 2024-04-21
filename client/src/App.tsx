@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, OnInit, ReactFlowInstance } from "reactflow";
 
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
   Controls,
@@ -71,6 +71,16 @@ export default function App() {
   const onNodeDragStop: NodeDragHandler = useCallback(
     (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, setDropTarget, sendMessage, reactFlowInstance),
     [setNodes, setDropTarget, dropTarget, sendMessage, reactFlowInstance]
+  );
+
+  const onDragOver: DragEventHandler = useCallback(
+    (event: DragEvent) => GraphUpdateCallbacks.onDragOver(event),
+    []
+  );
+
+  const onDrop: DragEventHandler = useCallback(
+    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, setNodes),
+    [reactFlowInstance, sendMessage, setNodes]
   );
 
   /**
@@ -140,6 +150,8 @@ export default function App() {
           onInit={setReactFlowInstance}
           onNodeDrag={onNodeDrag}
           onNodeDragStop={onNodeDragStop}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
           fitView
         >
           <Panel position="top-right">

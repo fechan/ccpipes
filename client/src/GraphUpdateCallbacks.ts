@@ -1,10 +1,11 @@
-import { Pipe, PipeId } from "@server/types/core-types";
-import { BatchRequest, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
-import { Dispatch, MouseEvent, SetStateAction } from "react";
+import { Group, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
+import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge, useUpdateNodeInternals } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers, CombineResult } from "./CombineHandlers";
+import { ItemSlotDragData } from "./components/ItemSlot";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -161,6 +162,97 @@ function onNodeDragStop(
   }
 }
 
+function onDragOver(event: DragEvent) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+}
+
+function onDrop(
+  event: DragEvent,
+  reactFlowInstance: (ReactFlowInstance | null),
+  sendMessage: SendMessage,
+  setNodes: Dispatch<SetStateAction<Node[]>>,
+) {
+  event.preventDefault();
+  const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
+  
+  if (slotData === undefined || !slotData || reactFlowInstance === undefined || !reactFlowInstance) {
+    return;
+  }
+
+  const { slot, machineId, oldGroupId }: ItemSlotDragData = JSON.parse(slotData);
+
+  const mousePosition = reactFlowInstance.screenToFlowPosition({
+    x: event.clientX,
+    y: event.clientY,
+  });
+
+  // check if we're over a machine node of the same ID as machineId
+  const intersections = reactFlowInstance.getIntersectingNodes(boxToRect({
+    x: mousePosition.x,
+    x2: mousePosition.x+.1,
+    y: mousePosition.y,
+    y2: mousePosition.y+.1
+  })).filter(node => node.id === machineId);
+
+  // if yes we'll create a new group inside that node with just this slot in it
+  // and remove this slot from its old group
+  if (intersections.length > 0) {
+    const machineNode = intersections[0];
+
+    const newGroupId = uuidv4();
+    const newGroup: Group = {
+      id: newGroupId,
+      slots: [slot],
+      distribution: "roundrobin",
+    };
+    const groupAddReq: GroupAddReq = {
+      type: "GroupAdd",
+      reqId: uuidv4(),
+      machineId: machineId,
+      group: newGroup
+    };
+
+    const oldGroup = reactFlowInstance.getNode(oldGroupId);
+    const oldGroupSlots = oldGroup?.data.group.slots;
+    const oldGroupSlotsUpdated = oldGroupSlots.filter((oldSlot: Slot) => oldSlot.periphId !== slot.periphId || oldSlot.slot !== slot.slot);
+    const groupEditReq: GroupEditReq = {
+      type: "GroupEdit",
+      reqId: uuidv4(),
+      groupId: oldGroupId,
+      edits: { slots: oldGroupSlotsUpdated }
+    }
+
+    const batchReq: BatchRequest = {
+      type: "BatchRequest",
+      reqId: uuidv4(),
+      requests: [groupAddReq, groupEditReq],
+    }
+
+    sendMessage(JSON.stringify(batchReq));
+    setNodes(nodes => nodes
+      .map(node => {
+        if (node.id === oldGroupId) {
+          const updatedGroup = {...node};
+          updatedGroup.data.group.slots = oldGroupSlotsUpdated;
+          return updatedGroup;
+        }
+        return node;
+      })
+      .concat({
+        id: newGroupId,
+        type: "slot-group",
+        position: { x: 10 + 50, y: 30 },
+        data: {
+          group: newGroup,
+          parentId: machineId,
+        },
+        parentId: machineId,
+        extent: "parent",
+      }))
+  }  
+}
+
 export const GraphUpdateCallbacks = {
   onEdgesDelete: onEdgesDelete,
   onEdgeUpdate: onEdgeUpdate,
@@ -168,4 +260,6 @@ export const GraphUpdateCallbacks = {
   onPipeUpdate: onPipeUpdate,
   onNodeDrag: onNodeDrag,
   onNodeDragStop: onNodeDragStop,
+  onDragOver: onDragOver,
+  onDrop: onDrop,
 }

@@ -25,7 +25,10 @@ export function getNodesForFactory(factory: Factory): Node[] {
         id: group.id,
         type: "slot-group",
         position: { x: 10 + 50*groupIdx, y: 30 },
-        data: { group: group },
+        data: {
+          group: group,
+          machineId: machine.id,
+        },
         parentId: machine.id,
         extent: "parent",
       } as Node);

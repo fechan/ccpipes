@@ -51,6 +51,15 @@ local function machineEdit (factory, machineId, edits)
   end
 end
 
+---Add a newly created group to a machine in the factory
+---@param factory Factory Factory the machine is in
+---@param group Group New group to add
+---@param machineId string ID of machine to add the group to
+local function groupAdd (factory, group, machineId)
+  factory.groups[group.id] = group
+  table.insert(factory.machines[machineId].groups, group.id)
+end
+
 ---Delete a group from the factory
 ---@param factory Factory Factory the group is in
 ---@param groupId string ID of group to remove
@@ -132,6 +141,7 @@ return {
   pipeEdit = pipeEdit,
   machineEdit = machineEdit,
   machineDel = machineDel,
+  groupAdd = groupAdd,
   groupEdit = groupEdit,
   groupDel = groupDel,
   autodetectFactory = autodetectFactory,

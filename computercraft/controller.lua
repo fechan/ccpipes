@@ -33,6 +33,10 @@ local function handleMachineEdit (request, factory, sendMessage)
   Factory.machineEdit(factory, request.machineId, request.edits)
 end
 
+local function handleGroupAdd (request, factory, sendMessage)
+  Factory.groupAdd(factory, request.group, request.machineId)
+end
+
 local function handleGroupDel (request, factory, sendMessage)
   Factory.groupDel(factory, request.groupId)
 end
@@ -54,6 +58,7 @@ local function listenForCcpipesEvents (wsContext, factory)
         ['ccpipes-PipeEdit'] = handlePipeEdit,
         ['ccpipes-MachineDel'] = handleMachineDel,
         ['ccpipes-MachineEdit'] = handleMachineEdit,
+        ['ccpipes-GroupAdd'] = handleGroupAdd,
         ['ccpipes-GroupDel'] = handleGroupDel,
         ['ccpipes-GroupEdit'] = handleGroupEdit,
       }
