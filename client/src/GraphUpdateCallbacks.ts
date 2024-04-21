@@ -82,7 +82,7 @@ function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMes
 function nodeIsCompatibleDropTarget(draggedNode: Node, targetNode: Node) {
   return (
     (draggedNode.type === "machine" && targetNode.type === "machine") ||
-    (draggedNode.type === "slot-group" && targetNode.type === "slot-group" )
+    (draggedNode.type === "slot-group" && targetNode.type === "slot-group" && draggedNode.parentId === targetNode.parentId)
   );
 }
 
