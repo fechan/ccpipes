@@ -1,5 +1,5 @@
 import type { Node, NodeTypes } from "reactflow";
-import { Factory, GroupId, Machine, MachineId, PipeId } from "@server/types/core-types";
+import { Factory } from "@server/types/core-types";
 import { MachineNode } from "./MachineNode";
 import { GroupNode } from "./GroupNode";
 import { FactoryAddsAndDeletes, GroupParentsMap } from "../stores/factory";
