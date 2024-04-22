@@ -25,7 +25,7 @@ local function pipeAdd (factory, pipe)
       [pipe.id] = {pipe}
     }
   }
-  return diff
+  return {diff}
 end
 
 ---Delete a pipe from the factory
@@ -42,7 +42,7 @@ local function pipeDel (factory, pipeId)
       }
     }
   }
-  return diff
+  return {diff}
 end
 
 ---Edit a pipe in the factory
@@ -63,7 +63,7 @@ local function pipeEdit (factory, pipeId, edits)
     pipe[k] = v
   end
 
-  return diff
+  return {diff}
 end
 
 
@@ -90,7 +90,7 @@ local function groupAdd (factory, group, machineId)
     machines = {
       [machineId] = {
         groups = {
-          table.pack(unpack(factory.machines[machineId].groups)), -- pack(unpack()) creates a new array that won't be changed after updating the old one
+          textutils.unserialize(textutils.serialize(factory.machines[machineId].groups)), -- unserializeJSON(serialize()) creates a new array that won't be changed after updating the old one
           factory.machines[machineId].groups,
         }
       }
@@ -100,7 +100,7 @@ local function groupAdd (factory, group, machineId)
   factory.groups[group.id] = group
   table.insert(factory.machines[machineId].groups, group.id)
 
-  return diff
+  return {diff}
 end
 
 ---Delete a group from the factory

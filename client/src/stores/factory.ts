@@ -6,7 +6,7 @@ interface FactoryStore {
   factory: Factory,
   groupParents: {[key: GroupId]: MachineId},
   setFactory: (factory: Factory) => void,
-  patchFactory: (diff: Delta) => void,
+  patchFactory: (diffs: Delta[]) => void,
 };
 
 const emptyFactory: Factory = {
@@ -37,8 +37,12 @@ export const useFactoryStore = create<FactoryStore>()(set => ({
     factory: factory,
     groupParents: getGroupParents(factory),
   })),
-  patchFactory: diff => set(state => {
-    const updatedFactory = patch(state.factory, diff) as Factory;
+  patchFactory: diffs => set(state => {
+    let updatedFactory = state.factory;
+    for (let diff of diffs) {
+      updatedFactory = patch(updatedFactory, diff) as Factory;
+    }
+
     return {
       factory: updatedFactory,
       groupParents: getGroupParents(updatedFactory),
