@@ -163,10 +163,7 @@ export default function App() {
         fitView
       >
         <Panel position="top-right">
-          <EdgeOptions
-            sendMessage={ sendMessage }
-            setEdges={ setEdges }
-            />
+          <EdgeOptions sendMessage={ sendMessage } />
         </Panel>
         <Background />
         <MiniMap />
