@@ -83,8 +83,24 @@ end
 ---@param group Group New group to add
 ---@param machineId string ID of machine to add the group to
 local function groupAdd (factory, group, machineId)
+  local diff = {
+    groups = {
+      [group.id] = {group}
+    },
+    machines = {
+      [machineId] = {
+        groups = {
+          table.pack(unpack(factory.machines[machineId].groups)), -- pack(unpack()) creates a new array that won't be changed after updating the old one
+          factory.machines[machineId].groups,
+        }
+      }
+    }
+  }
+
   factory.groups[group.id] = group
   table.insert(factory.machines[machineId].groups, group.id)
+
+  return diff
 end
 
 ---Delete a group from the factory

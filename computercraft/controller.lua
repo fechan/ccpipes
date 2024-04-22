@@ -58,7 +58,15 @@ local function handleMachineEdit (request, factory, sendMessage)
 end
 
 local function handleGroupAdd (request, factory, sendMessage)
-  Factory.groupAdd(factory, request.group, request.machineId)
+  local diff = Factory.groupAdd(factory, request.group, request.machineId)
+  local factoryUpdateRes = {
+    type = 'ConfirmationResponse',
+    respondingTo = 'GroupAdd',
+    reqId = request.reqId,
+    ok = true,
+    diff = diff
+  }
+  sendMessage(textutils.serializeJSON(factoryUpdateRes))
 end
 
 local function handleGroupDel (request, factory, sendMessage)

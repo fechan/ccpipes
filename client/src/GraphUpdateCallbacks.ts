@@ -230,26 +230,26 @@ function onDrop(
     }
 
     sendMessage(JSON.stringify(batchReq));
-    setNodes(nodes => nodes
-      .map(node => {
-        if (node.id === oldGroupId) {
-          const updatedGroup = {...node};
-          updatedGroup.data.group.slots = oldGroupSlotsUpdated;
-          return updatedGroup;
-        }
-        return node;
-      })
-      .concat({
-        id: newGroupId,
-        type: "slot-group",
-        position: { x: mousePosition.x - machineNode.position.x, y: mousePosition.y - machineNode.position.y },
-        data: {
-          group: newGroup,
-          parentId: machineId,
-        },
-        parentId: machineId,
-        extent: "parent",
-      }))
+    // setNodes(nodes => nodes
+    //   .map(node => {
+    //     if (node.id === oldGroupId) {
+    //       const updatedGroup = {...node};
+    //       updatedGroup.data.group.slots = oldGroupSlotsUpdated;
+    //       return updatedGroup;
+    //     }
+    //     return node;
+    //   })
+    //   .concat({
+    //     id: newGroupId,
+    //     type: "slot-group",
+    //     position: { x: mousePosition.x - machineNode.position.x, y: mousePosition.y - machineNode.position.y },
+    //     data: {
+    //       group: newGroup,
+    //       parentId: machineId,
+    //     },
+    //     parentId: machineId,
+    //     extent: "parent",
+    //   }))
   }  
 }
 
