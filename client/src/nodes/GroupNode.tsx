@@ -2,6 +2,7 @@ import { Group, MachineId } from "@server/types/core-types";
 import { Handle, NodeProps, Position } from "reactflow";
 import { ItemSlot } from "../components/ItemSlot";
 import { useDropTargetStore } from "../stores/dropTarget";
+import { useFactoryStore } from "../stores/factory";
 
 export const SIZES = {
   slot: 30,
@@ -13,9 +14,10 @@ export type GroupNodeData = {
   machineId: MachineId,
 };
 
-export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
-  const { group, machineId } = data;
+export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   const dropTarget = useDropTargetStore(state => state.dropTarget);
+  const group = useFactoryStore(state => state.factory.groups[id]);
+  const parentMachineId = useFactoryStore(state => state.groupParents[id]);
   
   return (
     <div
@@ -24,8 +26,8 @@ export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
         (dropTarget?.id === id ? " bg-green-200" : "")
       }
       style={{
-        width: Math.min(9, data.group.slots.length) * SIZES.slot + SIZES.slotContainerPadding*2,
-        height: Math.ceil(data.group.slots.length / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
+        width: Math.min(9, group.slots.length) * SIZES.slot + SIZES.slotContainerPadding*2,
+        height: Math.ceil(group.slots.length / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
       }}
     >
       <div className="absolute -top-5 left-0 text-xs">
@@ -34,12 +36,12 @@ export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
 
       <div>
         {
-          data.group.slots.map((slot, i) =>
+          group.slots.map((slot, i) =>
             <ItemSlot
               key={slot.periphId + slot.slot}
               slotIdx={ i }
               slot={ slot }
-              machineId={ machineId }
+              machineId={ parentMachineId }
               oldGroupId={ id }
             />
           )
