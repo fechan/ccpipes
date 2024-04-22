@@ -117,7 +117,7 @@ export interface FactoryGetRes extends SuccessResponse {
 export interface FactoryUpdateRes extends SuccessResponse {
   respondingTo: FactoryUpdateRequest,
   reqId: string,
-  diff: Delta,
+  diff: Delta[],
 }
 
 /**

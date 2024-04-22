@@ -28,8 +28,40 @@ local function reverse(tbl)
   end
 end
 
+---Shallow copy a table
+---@param tbl table Table to copy
+---@return table t2 Shallow copy of table
+local function shallowCopy (tbl)
+	local t2 = {}
+  for k,v in pairs(tbl) do
+    t2[k] = v
+  end
+  return t2
+end
+
+function concatArrays(...)
+  local t = {}
+
+  for i = 1, arg.n do
+      local array = arg[i]
+      if (type(array) == "table") then
+          for j = 1, #array do
+              t[#t+1] = array[j]
+          end
+      else
+          t[#t+1] = array
+      end
+  end
+
+  return t
+end
+
+
+
 return {
   randomString = randomString,
 	absolutePathTo = absolutePathTo,
 	reverse = reverse,
+  shallowCopy = shallowCopy,
+  concatArrays = concatArrays,
 }

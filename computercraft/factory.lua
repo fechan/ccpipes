@@ -73,9 +73,22 @@ end
 ---@param edits table Map of keys to edit -> new values
 local function machineEdit (factory, machineId, edits)
   local machine = factory.machines[machineId]
+
+  local diff = {
+    machines = {
+      [machineId] = {}
+    }
+  }
+
   for k, v in pairs(edits) do
+    diff.machines[machineId][k] = {
+      textutils.unserialize(textutils.serialize(machine[k])), -- freeze the state of the old value even if it's an array
+      v
+    }
     machine[k] = v
   end
+
+  return {diff}
 end
 
 ---Add a newly created group to a machine in the factory
@@ -86,21 +99,18 @@ local function groupAdd (factory, group, machineId)
   local diff = {
     groups = {
       [group.id] = {group}
-    },
-    machines = {
-      [machineId] = {
-        groups = {
-          textutils.unserialize(textutils.serialize(factory.machines[machineId].groups)), -- unserializeJSON(serialize()) creates a new array that won't be changed after updating the old one
-          factory.machines[machineId].groups,
-        }
-      }
     }
   }
 
   factory.groups[group.id] = group
-  table.insert(factory.machines[machineId].groups, group.id)
 
-  return {diff}
+  local machineUpdatedGroups = Utils.shallowCopy(factory.machines[machineId].groups)
+  table.insert(machineUpdatedGroups, group.id)
+
+  return concatArrays(
+    {diff},
+    machineEdit(factory, machineId, { groups=machineUpdatedGroups })
+  )
 end
 
 ---Delete a group from the factory

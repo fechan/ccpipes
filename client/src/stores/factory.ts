@@ -43,6 +43,8 @@ export const useFactoryStore = create<FactoryStore>()(set => ({
       updatedFactory = patch(updatedFactory, diff) as Factory;
     }
 
+    console.log(updatedFactory)
+
     return {
       factory: updatedFactory,
       groupParents: getGroupParents(updatedFactory),
