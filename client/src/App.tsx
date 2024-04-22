@@ -18,16 +18,14 @@ import {
 
 import "reactflow/dist/style.css";
 
-import { Factory } from "@server/types/core-types";
 import { edgeTypes, getEdgesForFactory } from "./edges";
-import { getNodesForFactory, nodeTypes } from "./nodes";
+import { getNodesForFactory, nodeTypes, updateNodesForFactory } from "./nodes";
 
 import { EdgeOptions } from "./components/EdgeOptions";
 import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
 import { useDropTargetStore } from "./stores/dropTarget";
 import { useFactoryStore } from "./stores/factory";
-import { patch } from "jsondiffpatch";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -38,7 +36,7 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
-  const { factory, setFactory, patchFactory } = useFactoryStore();
+  const { factory, addsAndDeletes, groupParents, setFactory, patchFactory } = useFactoryStore();
 
   const { getIntersectingNodes } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
@@ -46,7 +44,6 @@ export default function App() {
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
 
   const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
-  // const [ dropTarget, setDropTarget ] = useState(null as (Node | null));
 
   /**
    * Handlers for React Flow events
@@ -94,6 +91,12 @@ export default function App() {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
   }, [factory]);
+
+  useEffect(() => {
+    if (addsAndDeletes.groups.adds.size > 0 || addsAndDeletes.machines.adds.size > 0) {
+      setNodes(nodes => updateNodesForFactory(nodes, factory, addsAndDeletes, groupParents));
+    }
+  }, [addsAndDeletes])
 
   useEffect(() => {
     if (readyState === ReadyState.CLOSED)

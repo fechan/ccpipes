@@ -3,11 +3,11 @@ import { Delta, patch } from "jsondiffpatch";
 import { create } from "zustand";
 
 interface AddsAndDeletes {
-  adds: string[],
-  deletes: string[],
+  adds: Set<string>,
+  deletes: Set<string>,
 }
 
-interface FactoryAddsAndDeletes {
+export interface FactoryAddsAndDeletes {
   pipes: AddsAndDeletes,
   machines: AddsAndDeletes,
   groups: AddsAndDeletes,
@@ -17,7 +17,7 @@ interface FactoryStore {
   /** Factory object */
   factory: Factory,
   /** Map from group IDs in the factory to their parent machine's ID */
-  groupParents: {[key: GroupId]: MachineId},
+  groupParents: GroupParentsMap,
   /** IDs of added or deleted nodes from the last factory update/patch */
   addsAndDeletes: FactoryAddsAndDeletes,
   setFactory: (factory: Factory) => void,
@@ -30,10 +30,14 @@ const emptyFactory: Factory = {
   groups: {},
 };
 
-const emptyFactoryAddsAndDeletes: FactoryAddsAndDeletes = {
-  machines: {adds: [], deletes: []},
-  pipes: {adds: [], deletes: []},
-  groups: {adds: [], deletes: []},
+const getEmptyFactoryAddsAndDeletes = (): FactoryAddsAndDeletes => ({
+  machines: {adds: new Set(), deletes: new Set()},
+  pipes: {adds: new Set(), deletes: new Set()},
+  groups: {adds: new Set(), deletes: new Set()},
+});
+
+export interface GroupParentsMap {
+  [key: GroupId]: MachineId
 };
 
 /**
@@ -42,7 +46,7 @@ const emptyFactoryAddsAndDeletes: FactoryAddsAndDeletes = {
  * @returns Map from group IDs to parent machine IDs
  */
 function getGroupParents(factory: Factory) {
-  const groupParents: {[key: GroupId]: MachineId} = {};
+  const groupParents: GroupParentsMap = {};
   for (const machine of Object.values(factory.machines)) {
     for (const groupId of machine.groups) {
       groupParents[groupId] = machine.id;
@@ -57,20 +61,16 @@ function collectAddsAndDeletes(diff: Delta, addsAndDeletes?: FactoryAddsAndDelet
   }
 
   if (addsAndDeletes === undefined) {
-    addsAndDeletes = {
-      machines: {adds: [], deletes: []},
-      pipes: {adds: [], deletes: []},
-      groups: {adds: [], deletes: []},
-    };
+    addsAndDeletes = getEmptyFactoryAddsAndDeletes();
   }
 
   for (let componentType of Object.keys(diff)) {
     if (["machines", "pipes", "groups"].includes(componentType)) {
       for (let [componentId, delta] of Object.entries(diff[componentType])) {
         if (delta.length === 1) {
-          addsAndDeletes[componentType].adds.push(componentId);
+          addsAndDeletes[componentType].adds.add(componentId);
         } else if (delta.length === 3) {
-          addsAndDeletes[componentType].deletes.push(componentId);
+          addsAndDeletes[componentType].deletes.add(componentId);
         }
       }
     }
@@ -82,7 +82,7 @@ function collectAddsAndDeletes(diff: Delta, addsAndDeletes?: FactoryAddsAndDelet
 export const useFactoryStore = create<FactoryStore>()(set => ({
   factory: emptyFactory,
   groupParents: {},
-  addsAndDeletes: emptyFactoryAddsAndDeletes,
+  addsAndDeletes: getEmptyFactoryAddsAndDeletes(),
   setFactory: factory => set(() => ({
     factory: factory,
     groupParents: getGroupParents(factory),
