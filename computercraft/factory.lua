@@ -107,7 +107,7 @@ local function groupAdd (factory, group, machineId)
   local machineUpdatedGroups = Utils.shallowCopy(factory.machines[machineId].groups)
   table.insert(machineUpdatedGroups, group.id)
 
-  return concatArrays(
+  return Utils.concatArrays(
     {diff},
     machineEdit(factory, machineId, { groups=machineUpdatedGroups })
   )
