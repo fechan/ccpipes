@@ -1,4 +1,5 @@
 local Factory = require('factory')
+local Utils   = require('utils')
 
 local function handleFactoryGet (request, factory, sendMessage)
   local factoryGetRes = {
@@ -13,68 +14,52 @@ end
 
 local function handlePipeAdd (request, factory, sendMessage)
   local pipe = request.pipe
-  local diff = Factory.pipeAdd(factory, pipe)
-  local factoryUpdateRes = {
-    type = 'ConfirmationResponse',
-    respondingTo = 'PipeAdd',
-    reqId = request.reqId,
-    ok = true,
-    diff = diff
-  }
-  sendMessage(textutils.serializeJSON(factoryUpdateRes))
+  return diff
 end
 
 local function handlePipeDel (request, factory, sendMessage)
   local pipeId = request.pipeId
-  local diff = Factory.pipeDel(factory, pipeId)
-  local factoryUpdateRes = {
-    type = 'ConfirmationResponse',
-    respondingTo = 'PipeDel',
-    reqId = request.reqId,
-    ok = true,
-    diff = diff
-  }
-  sendMessage(textutils.serializeJSON(factoryUpdateRes))
+  return diff
 end
 
 local function handlePipeEdit (request, factory, sendMessage)
   local diff = Factory.pipeEdit(factory, request.pipeId, request.edits)
-  local factoryUpdateRes = {
-    type = 'ConfirmationResponse',
-    respondingTo = 'PipeEdit',
-    reqId = request.reqId,
-    ok = true,
-    diff = diff
-  }
-  sendMessage(textutils.serializeJSON(factoryUpdateRes))
+  return diff
 end
 
 local function handleMachineDel (request, factory, sendMessage)
-  Factory.machineDel(factory, request.machineId)
+  local diff = Factory.machineDel(factory, request.machineId)
+  return diff
 end
 
 local function handleMachineEdit (request, factory, sendMessage)
-  Factory.machineEdit(factory, request.machineId, request.edits)
+  local diff = Factory.machineEdit(factory, request.machineId, request.edits)
+  return diff
 end
 
 local function handleGroupAdd (request, factory, sendMessage)
   local diff = Factory.groupAdd(factory, request.group, request.machineId)
-  local factoryUpdateRes = {
-    type = 'ConfirmationResponse',
-    respondingTo = 'GroupAdd',
-    reqId = request.reqId,
-    ok = true,
-    diff = diff
-  }
-  sendMessage(textutils.serializeJSON(factoryUpdateRes))
+  return diff
 end
 
 local function handleGroupDel (request, factory, sendMessage)
-  Factory.groupDel(factory, request.groupId)
+  local diff = Factory.groupDel(factory, request.groupId)
+  return diff
 end
 
 local function handleGroupEdit (request, factory, sendMessage)
-  Factory.groupEdit(factory, request.groupId, request.edits)
+  local diff = Factory.groupEdit(factory, request.groupId, request.edits)
+  return diff
+end
+
+local function createConfirmationResponse(request, ok, diff)
+  return {
+    type = 'ConfirmationResponse',
+    respondingTo = request.type,
+    reqId = request.reqId,
+    ok = ok,
+    diff = diff
+  }
 end
 
 local function listenForCcpipesEvents (wsContext, factory)
@@ -96,14 +81,23 @@ local function listenForCcpipesEvents (wsContext, factory)
       }
 
       if event == 'ccpipes-BatchRequest' then
+        local diffs = {}
         for i, request in pairs(message.requests) do
           local handlerName = 'ccpipes-' .. request.type
           if handlers[handlerName] then
-            handlers[handlerName](request, factory, sendMessage)
+            local diff = handlers[handlerName](request, factory, sendMessage)
+            if (diff ~= nil) then
+              table.insert(diffs, diff)
+            end
           end
         end
+        diffs = Utils.concatArrays(unpack(diffs))
+        sendMessage(textutils.serializeJSON(createConfirmationResponse(message, true, diffs)))
       elseif handlers[event] then
-        handlers[event](message, factory, sendMessage)
+        local diff = handlers[event](message, factory, sendMessage)
+        if (diff ~= nil) then
+          sendMessage(textutils.serializeJSON(createConfirmationResponse(message, true, diff)))
+        end
       end
 
       if (handlers[event] or event == 'ccpipes-BatchRequest') and event ~= 'ccpipes-FactoryGet' then

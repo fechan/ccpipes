@@ -56,12 +56,11 @@ function concatArrays(...)
   return t
 end
 
-
-
 return {
   randomString = randomString,
 	absolutePathTo = absolutePathTo,
 	reverse = reverse,
   shallowCopy = shallowCopy,
   concatArrays = concatArrays,
+  arrayFilter = arrayFilter,
 }

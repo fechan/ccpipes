@@ -1,10 +1,10 @@
 import { Group, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { BatchRequest, GroupAddReq, GroupEditReq, Message, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge, useUpdateNodeInternals } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
-import { CombineHandlers, CombineResult } from "./CombineHandlers";
+import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
@@ -140,22 +140,20 @@ function onNodeDragStop(
   reactFlowInstance: (ReactFlowInstance | null),
 ) {
   if (dropTarget && reactFlowInstance) {
-    let combineResult: CombineResult | undefined;
+    let messages: Request[] | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes());
+      messages = CombineHandlers.combineMachines([draggedNode], dropTarget);
     } else if (draggedNode.type === "slot-group" && dropTarget.type === "slot-group") {
-      combineResult = CombineHandlers.combineGroups([draggedNode], dropTarget, reactFlowInstance.getNodes());
+      messages = CombineHandlers.combineGroups([draggedNode], dropTarget);
     }
 
-    if (combineResult) {
+    if (messages) {
       const batchReq: BatchRequest = {
         type: "BatchRequest",
         reqId: uuidv4(),
-        requests: combineResult.messages,
+        requests: messages,
       };
       sendMessage(JSON.stringify(batchReq));
-
-      setNodes(() => combineResult.finalNodeState);
     }
 
     clearDropTarget();
@@ -230,26 +228,6 @@ function onDrop(
     }
 
     sendMessage(JSON.stringify(batchReq));
-    // setNodes(nodes => nodes
-    //   .map(node => {
-    //     if (node.id === oldGroupId) {
-    //       const updatedGroup = {...node};
-    //       updatedGroup.data.group.slots = oldGroupSlotsUpdated;
-    //       return updatedGroup;
-    //     }
-    //     return node;
-    //   })
-    //   .concat({
-    //     id: newGroupId,
-    //     type: "slot-group",
-    //     position: { x: mousePosition.x - machineNode.position.x, y: mousePosition.y - machineNode.position.y },
-    //     data: {
-    //       group: newGroup,
-    //       parentId: machineId,
-    //     },
-    //     parentId: machineId,
-    //     extent: "parent",
-    //   }))
   }  
 }
 

@@ -117,24 +117,48 @@ end
 ---@param factory Factory Factory the group is in
 ---@param groupId string ID of group to remove
 local function groupDel (factory, groupId)
+  local oldGroup = factory.groups[groupId]
   factory.groups[groupId] = nil
 
+  local diff = {
+    groups = {
+      [groupId] = {
+        oldGroup, 0, 0
+      }
+    }
+  }
+
   -- delete all pipes that have this group at either end
+  local pipeDels = {}
   for pipeId, pipe in pairs(factory.pipes) do
     if pipe.from == groupId or pipe.to == groupId then
-      factory.pipes[pipeId] = nil
+      table.insert(pipeDels, pipeDel(factory, pipeId))
     end
   end
+  pipeDels = Utils.concatArrays(unpack(pipeDels))
 
   -- find the machine that had the group in it and remove the group from it
+  local machineEdits = {}
   for machineId, machine in pairs(factory.machines) do
     for groupIdxInMachine, groupIdInMachine in ipairs(machine.groups) do
       if groupIdInMachine == groupId then
         table.remove(machine.groups, groupIdxInMachine)
-        return
+        table.insert(machineEdits, machineEdit(factory, machineId, { groups = machine.groups }))
+        break
       end
     end
+
+    if #machineEdits > 0 then
+      break
+    end
   end
+  machineEdits = Utils.concatArrays(unpack(machineEdits))
+
+  return Utils.concatArrays(
+    {diff},
+    pipeDels,
+    machineEdits
+  )
 end
 
 ---Edit a group in the factory
@@ -143,16 +167,39 @@ end
 ---@param edits table Map of keys to edit -> new values
 local function groupEdit (factory, groupId, edits)
   local group = factory.groups[groupId]
+
+  local diff = {
+    groups = {
+      [groupId] = {}
+    }
+  }
+
   for k, v in pairs(edits) do
+    diff.groups[groupId][k] = {
+      textutils.unserialize(textutils.serialize(group[k])), -- freeze the state of the old value even if it's an array
+      v
+    }
     group[k] = v
   end
+
+  return {diff}
 end
 
 ---Delete a machine from the factory
 ---@param factory Factory Factory the machine is in
 ---@param machineId string ID of machine to remove
 local function machineDel (factory, machineId)
+  local oldMachine = factory.machines[machineId]
   factory.machines[machineId] = nil
+
+  local diff = {
+    machines = {
+      [machineId] = {
+        oldMachine, 0, 0
+      }
+    }
+  }
+  return {diff}
 end
 
 ---Get peripheral IDs connected to this factory

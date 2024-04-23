@@ -71,11 +71,16 @@ export function createAddedNodes(factory: Factory, addsAndDeletes: FactoryAddsAn
   return newNodes;
 }
 
-export function updateNodesForFactory(oldNodes: Node[], factory: Factory, addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {
-  const newNodes = oldNodes.filter(node => !(addsAndDeletes.groups.deletes.has(node.id) ||
-    addsAndDeletes.machines.deletes.has(node.id) ||
-    addsAndDeletes.pipes.deletes.has(node.id)
-  ));
+export function updateNodesForFactory(oldNodes: Node[], factory: Factory, addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {  
+  const newNodes = oldNodes
+    .filter(node => !addsAndDeletes.groups.deletes.has(node.id) && !addsAndDeletes.machines.deletes.has(node.id))
+    .map(node => {
+      if (node.type === "slot-group") {
+        return {...node, parentId: groupParents[node.id]}
+      }
+      return {...node};
+    }
+  );
   return newNodes.concat(createAddedNodes(factory, addsAndDeletes, groupParents));
 }
 

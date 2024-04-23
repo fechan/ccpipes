@@ -93,7 +93,12 @@ export default function App() {
   }, [factory]);
 
   useEffect(() => {
-    if (addsAndDeletes.groups.adds.size > 0 || addsAndDeletes.machines.adds.size > 0) {
+    if (
+      addsAndDeletes.groups.adds.size > 0 ||
+      addsAndDeletes.groups.deletes.size > 0 ||
+      addsAndDeletes.machines.adds.size > 0 ||
+      addsAndDeletes.machines.deletes.size > 0
+    ) {
       setNodes(nodes => updateNodesForFactory(nodes, factory, addsAndDeletes, groupParents));
     }
   }, [addsAndDeletes])
@@ -127,7 +132,7 @@ export default function App() {
             return;
           }
 
-          if ((FACTORY_UPDATE_REQUEST_TYPES as readonly string[]).includes(successRes.respondingTo)) {
+          if ("diff" in successRes) {
             const factoryUpdateRes = successRes as FactoryUpdateRes;
             patchFactory(factoryUpdateRes.diff);
             return;

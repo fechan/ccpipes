@@ -18,6 +18,12 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   const dropTarget = useDropTargetStore(state => state.dropTarget);
   const group = useFactoryStore(state => state.factory.groups[id]);
   const parentMachineId = useFactoryStore(state => state.groupParents[id]);
+
+  if (group === undefined) {
+    return (
+      <div className="react-flow__node-default"></div>
+    );
+  }
   
   return (
     <div
