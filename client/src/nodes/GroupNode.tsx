@@ -23,6 +23,11 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   })));
   const parentMachineId = useFactoryStore(state => state.groupParents[id]);
 
+  // HACK: for some reason it's possible for a deleted group to still be rendered
+  // as a node by React Flow, in which case group[id] will be undefined.
+  // The node IS being deleted from React Flow at *some point* after updating,
+  // so this doesn't affect the interface as long as the following is here.
+  // This is just a workaround; I want to know what's making this happen.
   if (slots === undefined) {
     return (
       <div className="react-flow__node-default"></div>
