@@ -3,6 +3,7 @@ import { Handle, NodeProps, Position } from "reactflow";
 import { ItemSlot } from "../components/ItemSlot";
 import { useDropTargetStore } from "../stores/dropTarget";
 import { useFactoryStore } from "../stores/factory";
+import { useShallow } from "zustand/react/shallow";
 
 export const SIZES = {
   slot: 30,
@@ -16,10 +17,13 @@ export type GroupNodeData = {
 
 export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   const dropTarget = useDropTargetStore(state => state.dropTarget);
-  const group = useFactoryStore(state => state.factory.groups[id]);
+  const { nickname, numSlots, slots } = useFactoryStore(useShallow(state => ({
+    ...state.factory.groups[id],
+    numSlots: state.factory.groups[id]?.slots.length,
+  })));
   const parentMachineId = useFactoryStore(state => state.groupParents[id]);
 
-  if (group === undefined) {
+  if (slots === undefined) {
     return (
       <div className="react-flow__node-default"></div>
     );
@@ -32,17 +36,17 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
         (dropTarget?.id === id ? " bg-green-200" : "")
       }
       style={{
-        width: Math.min(9, group.slots.length) * SIZES.slot + SIZES.slotContainerPadding*2,
-        height: Math.ceil(group.slots.length / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
+        width: Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2,
+        height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
       }}
     >
       <div className="absolute -top-5 left-0 text-xs">
-        { group.nickname || group.id }
+        { nickname || id }
       </div>
 
       <div>
         {
-          group.slots.map((slot, i) =>
+          slots.map((slot, i) =>
             <ItemSlot
               key={slot.periphId + slot.slot}
               slotIdx={ i }
