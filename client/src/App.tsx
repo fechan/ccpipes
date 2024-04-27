@@ -79,8 +79,8 @@ export default function App() {
   );
 
   const onDrop: DragEventHandler = useCallback(
-    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage),
-    [reactFlowInstance, sendMessage, setNodes]
+    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, factory),
+    [reactFlowInstance, sendMessage, setNodes, factory]
   );
 
   /**

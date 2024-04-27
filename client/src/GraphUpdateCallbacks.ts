@@ -150,6 +150,7 @@ function onDrop(
   event: DragEvent,
   reactFlowInstance: (ReactFlowInstance | null),
   sendMessage: SendMessage,
+  factory: Factory
 ) {
   event.preventDefault();
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
@@ -176,8 +177,6 @@ function onDrop(
   // if yes we'll create a new group inside that node with just this slot in it
   // and remove this slot from its old group
   if (intersections.length > 0) {
-    const machineNode = intersections[0];
-
     const newGroupId = uuidv4();
     const newGroup: Group = {
       id: newGroupId,
@@ -191,8 +190,8 @@ function onDrop(
       group: newGroup
     };
 
-    const oldGroup = reactFlowInstance.getNode(oldGroupId);
-    const oldGroupSlots = oldGroup?.data.group.slots;
+    const oldGroup = factory.groups[oldGroupId];
+    const oldGroupSlots = oldGroup.slots;
     const oldGroupSlotsUpdated = oldGroupSlots.filter((oldSlot: Slot) => oldSlot.periphId !== slot.periphId || oldSlot.slot !== slot.slot);
     const groupEditReq: GroupEditReq = {
       type: "GroupEdit",
