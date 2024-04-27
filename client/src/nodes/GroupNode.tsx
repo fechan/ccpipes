@@ -40,7 +40,8 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   return (
     <div
       className={
-        "react-flow__node-default w-full h-full" + 
+        "react-flow__node-default w-full h-full bg-mcgui-bg p-0 rounded-sm " + 
+        "border border-mcgui-group-border " +
         (dropTarget?.id === id ? " bg-green-200" : "")
       }
       style={{
@@ -48,22 +49,29 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
         height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
       }}
     >
-      <div className="absolute -top-5 left-0 text-xs">
+      <div className="absolute -top-4 left-0 text-xs w-max">
         { nickname || id }
       </div>
 
-      <div>
-        {
-          slots.map((slot, i) =>
-            <ItemSlot
-              key={slot.periphId + slot.slot}
-              slotIdx={ i }
-              slot={ slot }
-              machineId={ parentMachineId }
-              oldGroupId={ id }
-            />
-          )
+      <div
+        className={
+          "h-full rounded-sm " +
+          "border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark "
         }
+      >
+        <div>
+          {
+            slots.map((slot, i) =>
+              <ItemSlot
+                key={slot.periphId + slot.slot}
+                slotIdx={ i }
+                slot={ slot }
+                machineId={ parentMachineId }
+                oldGroupId={ id }
+              />
+            )
+          }
+        </div>
       </div>
 
       <Handle type="target" position={ Position.Left } />
