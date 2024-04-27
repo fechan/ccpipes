@@ -16,10 +16,6 @@ export function getEdgesForFactory(factory: Factory): Edge[] {
     },
     style: {
       strokeWidth: 2,
-    },
-    data: {
-      nickname: pipe.nickname,
-      filter: pipe.filter,
     }
   }));
 }
