@@ -27,6 +27,7 @@ import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
 import { useDropTargetStore } from "./stores/dropTarget";
 import { useFactoryStore } from "./stores/factory";
 import { GroupOptions } from "./components/GroupOptions";
+import { MachineOptions } from "./components/MachineOptions";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -178,6 +179,7 @@ export default function App() {
         <Panel position="top-right">
           <EdgeOptions sendMessage={ sendMessage } />
           <GroupOptions sendMessage={ sendMessage } />
+          <MachineOptions sendMessage={ sendMessage } />
         </Panel>
         <Background />
         <MiniMap />

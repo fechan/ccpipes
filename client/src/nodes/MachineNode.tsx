@@ -32,9 +32,6 @@ export function MachineNode({ id }: NodeProps) {
     >
       <div className="absolute -top-5 left-0">
         { nickname || id }
-        { nickname && 
-            <span>({ nickname })</span>
-        }
       </div>
     </div>
   );
