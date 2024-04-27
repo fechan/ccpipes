@@ -10,12 +10,10 @@ export function getEdgesForFactory(factory: Factory): Edge[] {
     target: pipe.to,
     type: "pipe",
     markerEnd: {
-      type: MarkerType.Arrow,
-      width: 20,
-      height: 20,
-    },
-    style: {
-      strokeWidth: 2,
+      type: MarkerType.ArrowClosed,
+      width: 15,
+      height: 15,
+      color: "black",
     }
   }));
 }
@@ -33,12 +31,10 @@ function createAddedEdges(factory: Factory, addsAndDeletes: FactoryAddsAndDelete
       target: factory.pipes[pipeId].to,
       markerEnd: {
         type: MarkerType.Arrow,
-        width: 20,
-        height: 20,
-      },
-      style: {
-        strokeWidth: 2,
-      },
+        width: 15,
+        height: 15,
+        color: "black"
+      }
     };
     newEdges.push(pipeEdge);
   }

@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath } from "reactflow";
+import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath, MarkerType } from "reactflow";
 import { useFactoryStore } from "../stores/factory";
 
 export const PipeEdge: FC<EdgeProps> = ({
@@ -10,7 +10,7 @@ export const PipeEdge: FC<EdgeProps> = ({
   targetY,
   sourcePosition,
   targetPosition,
-  data,
+  markerEnd
 }) => {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -23,15 +23,20 @@ export const PipeEdge: FC<EdgeProps> = ({
 
   const nickname = useFactoryStore(state => state.factory.pipes[id]?.nickname);
 
+  const style = {
+    strokeWidth: 1,
+    stroke: "black",
+  }
+
   return (
     <>
-      <BaseEdge id={id} path={edgePath} />
+      <BaseEdge id={id} path={edgePath} style={style} markerEnd={markerEnd} />
       { ( nickname ) && <EdgeLabelRenderer>
         <div
           style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
           }}
-          className="absolute text-gray-600"
+          className="absolute text-gray-600 text-xs"
         >
           { nickname }
         </div>

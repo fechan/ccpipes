@@ -56,7 +56,7 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
           "border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark "
         }
       >
-        <div className="w-full text-start px-2 truncate text-xs">
+        <div className="w-full hover:w-max text-start px-2 truncate text-xs">
           { nickname || id }
         </div>
 
