@@ -8,6 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 export const SIZES = {
   slot: 30,
   slotContainerPadding: 10,
+  paddingTop: 10,
 };
 
 export type GroupNodeData = {
@@ -46,19 +47,19 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
       }
       style={{
         width: Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2,
-        height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
+        height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2 + SIZES.paddingTop,
       }}
     >
-      <div className="absolute -top-4 left-0 text-xs w-max">
-        { nickname || id }
-      </div>
-
       <div
         className={
           "h-full rounded-sm " +
           "border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark "
         }
       >
+        <div className="w-full text-start px-2 truncate text-xs">
+          { nickname || id }
+        </div>
+
         <div>
           {
             slots.map((slot, i) =>

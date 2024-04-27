@@ -26,12 +26,12 @@ export function MachineNode({ id }: NodeProps) {
   return (
     <div 
       className={ 
-        "react-flow__node-default w-full h-full " +
+        "react-flow__node-default w-full h-full py-0.5 px-1 " +
         "bg-mcgui-bg border-2 border-t-mcgui-border-light border-s-mcgui-border-light border-b-mcgui-border-dark border-e-mcgui-border-dark " + 
         (dropTarget?.id === id ? "bg-green-200 " : "")
       }
     >
-      <div className="absolute -top-5 left-0">
+      <div className="w-full text-start">
         { nickname || id }
       </div>
     </div>

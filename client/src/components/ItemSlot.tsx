@@ -34,7 +34,7 @@ export function ItemSlot ({ slotIdx, slot, machineId, oldGroupId }: ItemSlotProp
         "border-2 border-b-mcgui-slot-border-light border-e-mcgui-slot-border-light border-t-mcgui-slot-border-dark border-s-mcgui-slot-border-dark "
       }
       style={{
-        top: Math.floor(slotIdx / 9) * SIZES.slot + SIZES.slotContainerPadding,
+        top: Math.floor(slotIdx / 9) * SIZES.slot + SIZES.slotContainerPadding + SIZES.paddingTop,
         left: (slotIdx % 9) * SIZES.slot + SIZES.slotContainerPadding,
       }}
       onDragStart={ onDragStart }
