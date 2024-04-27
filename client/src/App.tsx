@@ -18,7 +18,7 @@ import {
 
 import "reactflow/dist/style.css";
 
-import { edgeTypes, getEdgesForFactory } from "./edges";
+import { edgeTypes, getEdgesForFactory, updateEdgesForFactory } from "./edges";
 import { getNodesForFactory, nodeTypes, updateNodesForFactory } from "./nodes";
 
 import { EdgeOptions } from "./components/EdgeOptions";
@@ -100,6 +100,10 @@ export default function App() {
       addsAndDeletes.machines.deletes.size > 0
     ) {
       setNodes(nodes => updateNodesForFactory(nodes, factory, addsAndDeletes, groupParents));
+    }
+
+    if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
+      setEdges(edges => updateEdgesForFactory(edges, factory, addsAndDeletes))
     }
   }, [addsAndDeletes])
 

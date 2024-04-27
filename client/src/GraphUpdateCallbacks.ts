@@ -32,23 +32,6 @@ function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: D
       }
     };
     sendMessage(JSON.stringify(pipeAddReq));
-
-    const newEdge: Edge = {
-      source: connection.source,
-      target: connection.target,
-      id: pipeId,
-      type: "pipe",
-      markerEnd: {
-        type: MarkerType.Arrow,
-        width: 20,
-        height: 20,
-      },
-      style: {
-        strokeWidth: 2,
-      },
-    };
-
-    return setEdges((edges) => addEdge(newEdge, edges));
   }
 }
 
@@ -64,8 +47,6 @@ function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: Sen
       }
     };
     sendMessage(JSON.stringify(pipeEditReq));
-
-    setEdges((els) => updateEdge(oldEdge, newConnection, els, { shouldReplaceId: false }))
   }
 }
 
