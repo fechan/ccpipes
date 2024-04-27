@@ -12,7 +12,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
       id: machine.id,
       type: "machine",
       position: { x: 100 + 100*machineIdx, y: 100 },
-      data: { machine: machine },
       style: {
         width: 350,
         height: 300,
@@ -26,10 +25,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
         id: group.id,
         type: "slot-group",
         position: { x: 10 + 50*groupIdx, y: 30 },
-        data: {
-          group: group,
-          machineId: machine.id,
-        },
         parentId: machine.id,
         extent: "parent",
       } as Node);
@@ -51,7 +46,7 @@ export function createAddedNodes(factory: Factory, addsAndDeletes: FactoryAddsAn
       type: "machine",
       position: { x: 0, y: 0 },
       style: { width: 350, height: 300 },
-      data: { machine: factory.machines[machineId] }, // TODO: remove after converting everything to use the factory store
+      data: {},
     };
     newNodes.push(machineNode);
   }
@@ -63,7 +58,7 @@ export function createAddedNodes(factory: Factory, addsAndDeletes: FactoryAddsAn
       position: { x: 0, y: 0 },
       parentId: groupParents[groupId],
       extent: "parent",
-      data: { group: factory.groups[groupId], machineId: groupParents[groupId] } // TODO: remove after converting everything to use the factory store
+      data: {},
     };
     newNodes.push(groupNode)
   }
