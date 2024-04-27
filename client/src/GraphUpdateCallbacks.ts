@@ -174,9 +174,15 @@ function onDrop(
     y2: mousePosition.y+.1
   })).filter(node => node.id === machineId);
 
-  // if yes we'll create a new group inside that node with just this slot in it
+  // check if taking the slot out will cause the old group to be empty
+  const oldGroup = factory.groups[oldGroupId];
+  const oldGroupSlots = oldGroup.slots;
+  const oldGroupWillBeEmpty = oldGroupSlots.length === 1;
+
+  // if machineId is the same and the old group will still have a slot,
+  // create a new group inside that node with just this slot in it
   // and remove this slot from its old group
-  if (intersections.length > 0) {
+  if (intersections.length > 0 && !oldGroupWillBeEmpty) {
     const newGroupId = uuidv4();
     const newGroup: Group = {
       id: newGroupId,
@@ -190,8 +196,6 @@ function onDrop(
       group: newGroup
     };
 
-    const oldGroup = factory.groups[oldGroupId];
-    const oldGroupSlots = oldGroup.slots;
     const oldGroupSlotsUpdated = oldGroupSlots.filter((oldSlot: Slot) => oldSlot.periphId !== slot.periphId || oldSlot.slot !== slot.slot);
     const groupEditReq: GroupEditReq = {
       type: "GroupEdit",

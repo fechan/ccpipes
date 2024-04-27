@@ -29,7 +29,7 @@ export function ItemSlot ({ slotIdx, slot, machineId, oldGroupId }: ItemSlotProp
   return (
     <div
       draggable
-      className="nodrag absolute border w-[30px] h-[30px] flex items-center justify-center"
+      className="nodrag absolute border w-[30px] h-[30px] flex items-center justify-center hover:bg-blue-100"
       style={{
         top: Math.floor(slotIdx / 9) * SIZES.slot + SIZES.slotContainerPadding,
         left: (slotIdx % 9) * SIZES.slot + SIZES.slotContainerPadding,
