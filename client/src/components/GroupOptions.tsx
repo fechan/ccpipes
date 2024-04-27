@@ -2,7 +2,7 @@ import { SendMessage } from "react-use-websocket";
 import { Node, useOnSelectionChange } from "reactflow";
 import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Pipe } from "@server/types/core-types";
+import { Group } from "@server/types/core-types";
 import { useFactoryStore } from "../stores/factory";
 
 interface GroupOptionsProps {
@@ -32,7 +32,7 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
     }
   });
 
-  function onGroupOptionChanged(option: keyof Pipe, value: string) {
+  function onGroupOptionChanged(option: keyof Group, value: string) {
     for (let group of selectedGroups) {
       GraphUpdateCallbacks.onGroupUpdate(group.id, { [option]: value }, sendMessage)
     }
