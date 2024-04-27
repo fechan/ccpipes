@@ -1,4 +1,4 @@
-import { ConfirmationResponse, FACTORY_UPDATE_REQUEST_TYPES, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
+import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
