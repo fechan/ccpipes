@@ -14,11 +14,13 @@ end
 
 local function handlePipeAdd (request, factory, sendMessage)
   local pipe = request.pipe
+  local diff = Factory.pipeAdd(factory, pipe)
   return diff
 end
 
 local function handlePipeDel (request, factory, sendMessage)
   local pipeId = request.pipeId
+  local diff = Factory.pipeDel(factory, pipeId)
   return diff
 end
 
