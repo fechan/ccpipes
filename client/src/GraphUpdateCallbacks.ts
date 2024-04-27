@@ -1,8 +1,8 @@
-import { Group, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, Message, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
+import { Factory, Group, Pipe, PipeId, Slot } from "@server/types/core-types";
+import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge, useUpdateNodeInternals } from "reactflow";
+import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
@@ -115,17 +115,17 @@ function onNodeDragStop(
   mouseEvent: MouseEvent,
   draggedNode: Node,
   dropTarget: Node | null,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
   clearDropTarget: () => void,
   sendMessage: SendMessage,
   reactFlowInstance: (ReactFlowInstance | null),
+  factory: Factory
 ) {
   if (dropTarget && reactFlowInstance) {
     let messages: Request[] | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      messages = CombineHandlers.combineMachines([draggedNode], dropTarget);
+      messages = CombineHandlers.combineMachines([draggedNode], dropTarget, factory.machines);
     } else if (draggedNode.type === "slot-group" && dropTarget.type === "slot-group") {
-      messages = CombineHandlers.combineGroups([draggedNode], dropTarget);
+      messages = CombineHandlers.combineGroups([draggedNode], dropTarget, factory.groups);
     }
 
     if (messages) {
@@ -150,7 +150,6 @@ function onDrop(
   event: DragEvent,
   reactFlowInstance: (ReactFlowInstance | null),
   sendMessage: SendMessage,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
 ) {
   event.preventDefault();
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");

@@ -1,4 +1,4 @@
-import { GroupId, Slot } from "@server/types/core-types";
+import { Factory, GroupId, GroupMap, MachineMap, Slot } from "@server/types/core-types";
 import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Request } from "@server/types/messages";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
@@ -16,13 +16,13 @@ import { v4 as uuidv4 } from "uuid";
  * @param targetMachineNode Machine that will be combined into
  * @returns Messages needed to combine and final node state after combination
  */
-function combineMachines(sourceMachineNodes: Node[], targetMachineNode: Node) {
+function combineMachines(sourceMachineNodes: Node[], targetMachineNode: Node, machines: MachineMap) {
   const messages: Request[] = [];
 
   // get the machine's groups and tell cc to add them to the drop target's group list
   const combinedGroupList: GroupId[] = sourceMachineNodes.reduce(
-    (combinedList, sourceMachineNode) => [...combinedList, ...sourceMachineNode.data.machine.groups],
-    [...targetMachineNode.data.machine.groups]
+    (combinedList, sourceMachineNode) => [...combinedList, ...machines[sourceMachineNode.id].groups],
+    [...machines[targetMachineNode.id].groups]
   );
   
   messages.push({
@@ -54,13 +54,13 @@ function combineMachines(sourceMachineNodes: Node[], targetMachineNode: Node) {
  * @param targetGroupNode Group to combine into
  * @returns Messages needed to combine
  */
-function combineGroups(sourceGroupNodes: Node[], targetGroupNode: Node) {
+function combineGroups(sourceGroupNodes: Node[], targetGroupNode: Node, groups: GroupMap) {
   const messages: Request[] = [];
 
   // get the group's slots and tell cc to add them to the target group's slot list
   const combinedSlotList: Slot[] = sourceGroupNodes.reduce(
-    (combinedList, sourceGroupNodes) => [...combinedList, ...sourceGroupNodes.data.group.slots],
-    [...targetGroupNode.data.group.slots]
+    (combinedList, sourceGroupNodes) => [...combinedList, ...groups[sourceGroupNodes.id].slots],
+    [...groups[targetGroupNode.id].slots]
   );
 
   messages.push({
