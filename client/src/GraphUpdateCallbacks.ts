@@ -1,5 +1,5 @@
-import { Factory, Group, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
+import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
+import { BatchRequest, GroupAddReq, GroupEditReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "reactflow";
@@ -56,8 +56,28 @@ function onPipeUpdate(pipeId: PipeId, edits: Partial<Pipe>, sendMessage: SendMes
     reqId: uuidv4(),
     pipeId: pipeId,
     edits: edits,
-  }
+  };
   sendMessage(JSON.stringify(pipeEditReq));
+}
+
+function onGroupUpdate(groupId: GroupId, edits: Partial<Group>, sendMessage: SendMessage) {
+  const groupEditReq: GroupEditReq = {
+    type: "GroupEdit",
+    reqId: uuidv4(),
+    groupId: groupId,
+    edits: edits,
+  };
+  sendMessage(JSON.stringify(groupEditReq));
+}
+
+function onMachineUpdate(machineId: MachineId, edits: Partial<Machine>, sendMessage: SendMessage) {
+  const machineEditReq: MachineEditReq = {
+    type: "MachineEdit",
+    reqId: uuidv4(),
+    machineId: machineId,
+    edits: edits,
+  };
+  sendMessage(JSON.stringify(machineEditReq));
 }
 
 function nodeIsCompatibleDropTarget(draggedNode: Node, targetNode: Node) {
@@ -219,6 +239,8 @@ export const GraphUpdateCallbacks = {
   onEdgeUpdate: onEdgeUpdate,
   onConnect: onConnect,
   onPipeUpdate: onPipeUpdate,
+  onGroupUpdate: onGroupUpdate,
+  onMachineUpdate: onMachineUpdate,
   onNodeDrag: onNodeDrag,
   onNodeDragStop: onNodeDragStop,
   onDragOver: onDragOver,
