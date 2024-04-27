@@ -23,11 +23,14 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   })));
   const parentMachineId = useFactoryStore(state => state.groupParents[id]);
 
-  // HACK: for some reason it's possible for a deleted group to still be rendered
-  // as a node by React Flow, in which case group[id] will be undefined.
-  // The node IS being deleted from React Flow at *some point* after updating,
-  // so this doesn't affect the interface as long as the following is here.
-  // This is just a workaround; I want to know what's making this happen.
+  // HACK: right now React Flow is not notified of deleted groups until the
+  // useEffect that listens for addsAndDeletes in App.tsx runs.
+  // Basically:
+  // Factory updates come via WS from CC -> Factory store is updated ->
+  // App.tsx gets rerendered and useEffect runs -> React Flow nodes get updated ->
+  // React Flow removes stale Node components
+  // Ideally we want the factory store and the nodes to get updated simultaneously,
+  // but for now we just detect if this Node is stale and render a placeholder
   if (slots === undefined) {
     return (
       <div className="react-flow__node-default"></div>
