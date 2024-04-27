@@ -34,7 +34,7 @@ export function getNodesForFactory(factory: Factory): Node[] {
   return nodes;
 }
 
-export function createAddedNodes(factory: Factory, addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {
+export function createAddedNodes(addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {
   const newMachines = addsAndDeletes.machines.adds;
   const newGroups = addsAndDeletes.groups.adds;
 
@@ -66,7 +66,7 @@ export function createAddedNodes(factory: Factory, addsAndDeletes: FactoryAddsAn
   return newNodes;
 }
 
-export function updateNodesForFactory(oldNodes: Node[], factory: Factory, addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {  
+export function updateNodesForFactory(oldNodes: Node[], addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {  
   const newNodes = oldNodes
     .filter(node => !addsAndDeletes.groups.deletes.has(node.id) && !addsAndDeletes.machines.deletes.has(node.id))
     .map(node => {
@@ -76,7 +76,7 @@ export function updateNodesForFactory(oldNodes: Node[], factory: Factory, addsAn
       return {...node};
     }
   );
-  return newNodes.concat(createAddedNodes(factory, addsAndDeletes, groupParents));
+  return newNodes.concat(createAddedNodes(addsAndDeletes, groupParents));
 }
 
 export const nodeTypes = {

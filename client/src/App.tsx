@@ -99,7 +99,7 @@ export default function App() {
       addsAndDeletes.machines.adds.size > 0 ||
       addsAndDeletes.machines.deletes.size > 0
     ) {
-      setNodes(nodes => updateNodesForFactory(nodes, factory, addsAndDeletes, groupParents));
+      setNodes(nodes => updateNodesForFactory(nodes, addsAndDeletes, groupParents));
     }
 
     if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
