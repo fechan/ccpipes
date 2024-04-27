@@ -9,14 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "jsondiffpatch": "^0.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-use-websocket": "^4.8.1",
     "reactflow": "^11.11.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zustand": "^4.5.2"
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.12.7",
     "@types/react": "^18.2.53",
     "@types/react-dom": "^18.2.18",
     "@types/uuid": "^9.0.8",

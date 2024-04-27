@@ -1,8 +1,9 @@
-import { Group, MachineId, Slot } from "@server/types/core-types";
-import { useContext, useEffect } from "react";
-import { Handle, NodeProps, Position, useUpdateNodeInternals } from "reactflow";
-import { DropTargetContext } from "../contexts/DropTargetContext";
+import { Group, MachineId } from "@server/types/core-types";
+import { Handle, NodeProps, Position } from "reactflow";
 import { ItemSlot } from "../components/ItemSlot";
+import { useDropTargetStore } from "../stores/dropTarget";
+import { useFactoryStore } from "../stores/factory";
+import { useShallow } from "zustand/react/shallow";
 
 export const SIZES = {
   slot: 30,
@@ -14,9 +15,27 @@ export type GroupNodeData = {
   machineId: MachineId,
 };
 
-export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
-  const { group, machineId } = data;
-  const { dropTarget } = useContext(DropTargetContext);
+export function GroupNode({ id }: NodeProps<GroupNodeData>) {
+  const dropTarget = useDropTargetStore(state => state.dropTarget);
+  const { nickname, numSlots, slots } = useFactoryStore(useShallow(state => ({
+    ...state.factory.groups[id],
+    numSlots: state.factory.groups[id]?.slots.length,
+  })));
+  const parentMachineId = useFactoryStore(state => state.groupParents[id]);
+
+  // HACK: right now React Flow is not notified of deleted groups until the
+  // useEffect that listens for addsAndDeletes in App.tsx runs.
+  // Basically:
+  // Factory updates come via WS from CC -> Factory store is updated ->
+  // App.tsx gets rerendered and useEffect runs -> React Flow nodes get updated ->
+  // React Flow removes stale Node components
+  // Ideally we want the factory store and the nodes to get updated simultaneously,
+  // but for now we just detect if this Node is stale and render a placeholder
+  if (slots === undefined) {
+    return (
+      <div className="react-flow__node-default"></div>
+    );
+  }
   
   return (
     <div
@@ -25,22 +44,22 @@ export function GroupNode({ id, data }: NodeProps<GroupNodeData>) {
         (dropTarget?.id === id ? " bg-green-200" : "")
       }
       style={{
-        width: Math.min(9, data.group.slots.length) * SIZES.slot + SIZES.slotContainerPadding*2,
-        height: Math.ceil(data.group.slots.length / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
+        width: Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2,
+        height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2,
       }}
     >
       <div className="absolute -top-5 left-0 text-xs">
-        { group.nickname || group.id }
+        { nickname || id }
       </div>
 
       <div>
         {
-          data.group.slots.map((slot, i) =>
+          slots.map((slot, i) =>
             <ItemSlot
               key={slot.periphId + slot.slot}
               slotIdx={ i }
               slot={ slot }
-              machineId={ machineId }
+              machineId={ parentMachineId }
               oldGroupId={ id }
             />
           )

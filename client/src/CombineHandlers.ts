@@ -1,4 +1,4 @@
-import { GroupId, Slot } from "@server/types/core-types";
+import { Factory, GroupId, GroupMap, MachineMap, Slot } from "@server/types/core-types";
 import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Request } from "@server/types/messages";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
@@ -7,10 +7,6 @@ import { v4 as uuidv4 } from "uuid";
  * The CCPipes messages that need to be sent to ComputerCraft to enact a
  * combining operation, and the final React Flow node state after combining.
  */
-export interface CombineResult {
-  messages: Request[],
-  finalNodeState: Node[],
-};
 
 /**
  * Combine 1 or more source machines into a target Machine.
@@ -18,21 +14,15 @@ export interface CombineResult {
  * - The source machines will then de deleted
  * @param sourceMachineNodes Machines that will be combined into the target
  * @param targetMachineNode Machine that will be combined into
- * @param allNodes All Nodes in the React Flow
- * @param sendMessage WebSocket sendMessage handle
  * @returns Messages needed to combine and final node state after combination
  */
-function combineMachines(
-  sourceMachineNodes: Node[],
-  targetMachineNode: Node,
-  allNodes: Node[],
-): CombineResult {
+function combineMachines(sourceMachineNodes: Node[], targetMachineNode: Node, machines: MachineMap) {
   const messages: Request[] = [];
 
   // get the machine's groups and tell cc to add them to the drop target's group list
   const combinedGroupList: GroupId[] = sourceMachineNodes.reduce(
-    (combinedList, sourceMachineNode) => [...combinedList, ...sourceMachineNode.data.machine.groups],
-    [...targetMachineNode.data.machine.groups]
+    (combinedList, sourceMachineNode) => [...combinedList, ...machines[sourceMachineNode.id].groups],
+    [...machines[targetMachineNode.id].groups]
   );
   
   messages.push({
@@ -53,24 +43,7 @@ function combineMachines(
     } as MachineDelReq);
   }
 
-  // set the parent of the dragged machine's group nodes to the target machine
-  // and delete the dragged machine's node
-  const sourceMachineNodeIds = sourceMachineNodes.map(node => node.id);
-  const finalNodeState = allNodes
-    .filter(node => !sourceMachineNodeIds.includes(node.id))
-    .map(node => {
-      if ( sourceMachineNodeIds.includes(node.parentId as string) ) {
-        return {...node, parentId: targetMachineNode.id}
-      }
-      if ( node.id === targetMachineNode.id ) {
-        const newTargetNodeState = {...node };
-        newTargetNodeState.data.machine.groups = combinedGroupList;
-        return newTargetNodeState;
-      }
-      return node
-    });
-
-  return { messages, finalNodeState }
+  return messages;
 }
 
 /**
@@ -79,21 +52,15 @@ function combineMachines(
  * - The source groups will then be deleted
  * @param sourceGroupNodes Groups that will be combined into the target
  * @param targetGroupNode Group to combine into
- * @param setNodes React Flow node setter
- * @param sendMessage WebSocket sendMessage handle
- * @returns Messages needed to combine and final node state after combination
+ * @returns Messages needed to combine
  */
-function combineGroups(
-  sourceGroupNodes: Node[],
-  targetGroupNode: Node,
-  allNodes: Node[],
-): CombineResult {
+function combineGroups(sourceGroupNodes: Node[], targetGroupNode: Node, groups: GroupMap) {
   const messages: Request[] = [];
 
   // get the group's slots and tell cc to add them to the target group's slot list
   const combinedSlotList: Slot[] = sourceGroupNodes.reduce(
-    (combinedList, sourceGroupNodes) => [...combinedList, ...sourceGroupNodes.data.group.slots],
-    [...targetGroupNode.data.group.slots]
+    (combinedList, sourceGroupNodes) => [...combinedList, ...groups[sourceGroupNodes.id].slots],
+    [...groups[targetGroupNode.id].slots]
   );
 
   messages.push({
@@ -114,24 +81,7 @@ function combineGroups(
     } as GroupDelReq);
   }
 
-  // set the parent of the group's slot nodes to the target group
-  // and delete the source group's node
-  const sourceGroupNodeIds = sourceGroupNodes.map(node => node.id);
-  const finalNodeState = allNodes
-    .filter(node => !sourceGroupNodeIds.includes(node.id))
-    .map(node => {
-      if ( sourceGroupNodeIds.includes(node.parentId as string) ) {
-        return { ...node, parentId: targetGroupNode.id };
-      }
-      if ( node.id === targetGroupNode.id ) {
-        const newTargetNodeState = { ...node };
-        newTargetNodeState.data.group.slots = combinedSlotList;
-        return newTargetNodeState;
-      }
-      return node
-    });
-
-  return { messages, finalNodeState };
+  return messages;
 }
 
 export const CombineHandlers = {

@@ -1,33 +1,31 @@
+import { ConfirmationResponse, FACTORY_UPDATE_REQUEST_TYPES, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FailResponse, Message, PipeAddReq, SuccessResponse } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, OnInit, ReactFlowInstance } from "reactflow";
+import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
 
 import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
   Controls,
   MiniMap,
-  ReactFlow,
-  addEdge,
-  useNodesState,
-  useEdgesState,
   Panel,
-  useReactFlow,
-  useStore,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
+  useReactFlow
 } from "reactflow";
 
 import "reactflow/dist/style.css";
 
-import { Factory } from "@server/types/core-types";
-import { nodeTypes, getNodesForFactory } from "./nodes";
-import { edgeTypes, getEdgesForFactory } from "./edges";
+import { edgeTypes, getEdgesForFactory, updateEdgesForFactory } from "./edges";
+import { getNodesForFactory, nodeTypes, updateNodesForFactory } from "./nodes";
 
+import { EdgeOptions } from "./components/EdgeOptions";
 import { NewSessionModal } from "./components/NewSessionModal";
 import { GraphUpdateCallbacks } from "./GraphUpdateCallbacks";
-import { EdgeOptions } from "./components/EdgeOptions";
-import { DropTargetContext } from "./contexts/DropTargetContext";
+import { useDropTargetStore } from "./stores/dropTarget";
+import { useFactoryStore } from "./stores/factory";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -38,12 +36,14 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
+  const { factory, addsAndDeletes, groupParents, setFactory, patchFactory } = useFactoryStore();
+
   const { getIntersectingNodes } = useReactFlow();
-  const [ factory, setFactory ] = useState({pipes: {}, machines: {}, groups: {}} as Factory);
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
-  const [ dropTarget, setDropTarget ] = useState(null as (Node | null));
+
+  const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
 
   /**
    * Handlers for React Flow events
@@ -69,8 +69,8 @@ export default function App() {
   );
 
   const onNodeDragStop: NodeDragHandler = useCallback(
-    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, setNodes, setDropTarget, sendMessage, reactFlowInstance),
-    [setNodes, setDropTarget, dropTarget, sendMessage, reactFlowInstance]
+    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, clearDropTarget, sendMessage, reactFlowInstance, factory),
+    [setNodes, clearDropTarget, dropTarget, sendMessage, reactFlowInstance, factory]
   );
 
   const onDragOver: DragEventHandler = useCallback(
@@ -79,8 +79,8 @@ export default function App() {
   );
 
   const onDrop: DragEventHandler = useCallback(
-    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, setNodes),
-    [reactFlowInstance, sendMessage, setNodes]
+    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, factory),
+    [reactFlowInstance, sendMessage, setNodes, factory]
   );
 
   /**
@@ -91,6 +91,21 @@ export default function App() {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
   }, [factory]);
+
+  useEffect(() => {
+    if (
+      addsAndDeletes.groups.adds.size > 0 ||
+      addsAndDeletes.groups.deletes.size > 0 ||
+      addsAndDeletes.machines.adds.size > 0 ||
+      addsAndDeletes.machines.deletes.size > 0
+    ) {
+      setNodes(nodes => updateNodesForFactory(nodes, addsAndDeletes, groupParents));
+    }
+
+    if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
+      setEdges(edges => updateEdgesForFactory(edges, factory, addsAndDeletes))
+    }
+  }, [addsAndDeletes])
 
   useEffect(() => {
     if (readyState === ReadyState.CLOSED)
@@ -120,6 +135,12 @@ export default function App() {
             setFactory(factoryGetRes.factory);
             return;
           }
+
+          if ("diff" in successRes) {
+            const factoryUpdateRes = successRes as FactoryUpdateRes;
+            patchFactory(factoryUpdateRes.diff);
+            return;
+          }
         } else {
           const failRes = message as FailResponse;
 
@@ -136,35 +157,30 @@ export default function App() {
     <div className="w-full h-full">
       { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
 
-      <DropTargetContext.Provider value={{ dropTarget, setDropTarget }}>
-        <ReactFlow
-          nodes={nodes}
-          nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange}
-          edges={edges}
-          edgeTypes={edgeTypes}
-          onEdgesChange={onEdgesChange}
-          onEdgesDelete={onEdgesDelete}
-          onEdgeUpdate={onEdgeUpdate}
-          onConnect={onConnect}
-          onInit={setReactFlowInstance}
-          onNodeDrag={onNodeDrag}
-          onNodeDragStop={onNodeDragStop}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          fitView
-        >
-          <Panel position="top-right">
-            <EdgeOptions
-              sendMessage={ sendMessage }
-              setEdges={ setEdges }
-             />
-          </Panel>
-          <Background />
-          <MiniMap />
-          <Controls />
-        </ReactFlow>
-      </DropTargetContext.Provider>
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        onEdgesChange={onEdgesChange}
+        onEdgesDelete={onEdgesDelete}
+        onEdgeUpdate={onEdgeUpdate}
+        onConnect={onConnect}
+        onInit={setReactFlowInstance}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        fitView
+      >
+        <Panel position="top-right">
+          <EdgeOptions sendMessage={ sendMessage } />
+        </Panel>
+        <Background />
+        <MiniMap />
+        <Controls />
+      </ReactFlow>
     </div>
   );
 }

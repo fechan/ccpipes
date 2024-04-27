@@ -1,10 +1,10 @@
-import { Group, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq } from "@server/types/messages";
+import { Factory, Group, Pipe, PipeId, Slot } from "@server/types/core-types";
+import { BatchRequest, GroupAddReq, GroupEditReq, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { addEdge, boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance, updateEdge, useUpdateNodeInternals } from "reactflow";
+import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
-import { CombineHandlers, CombineResult } from "./CombineHandlers";
+import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
@@ -32,23 +32,6 @@ function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: D
       }
     };
     sendMessage(JSON.stringify(pipeAddReq));
-
-    const newEdge: Edge = {
-      source: connection.source,
-      target: connection.target,
-      id: pipeId,
-      type: "pipe",
-      markerEnd: {
-        type: MarkerType.Arrow,
-        width: 20,
-        height: 20,
-      },
-      style: {
-        strokeWidth: 2,
-      },
-    };
-
-    return setEdges((edges) => addEdge(newEdge, edges));
   }
 }
 
@@ -64,8 +47,6 @@ function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: Sen
       }
     };
     sendMessage(JSON.stringify(pipeEditReq));
-
-    setEdges((els) => updateEdge(oldEdge, newConnection, els, { shouldReplaceId: false }))
   }
 }
 
@@ -91,7 +72,7 @@ function onNodeDrag(
   draggedNode: Node,
   getIntersectingNodes: Instance.GetIntersectingNodes<any>,
   reactFlowInstance: (ReactFlowInstance | null),
-  setDropTarget: Dispatch<SetStateAction<Node | null>>
+  setDropTarget: (dropTarget: Node | null) => void
 ) {
   if (reactFlowInstance == null) {
     return;
@@ -134,31 +115,29 @@ function onNodeDragStop(
   mouseEvent: MouseEvent,
   draggedNode: Node,
   dropTarget: Node | null,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
-  setDropTarget: Dispatch<SetStateAction<Node | null>>,
+  clearDropTarget: () => void,
   sendMessage: SendMessage,
   reactFlowInstance: (ReactFlowInstance | null),
+  factory: Factory
 ) {
   if (dropTarget && reactFlowInstance) {
-    let combineResult: CombineResult | undefined;
+    let messages: Request[] | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      combineResult = CombineHandlers.combineMachines([draggedNode], dropTarget, reactFlowInstance.getNodes());
+      messages = CombineHandlers.combineMachines([draggedNode], dropTarget, factory.machines);
     } else if (draggedNode.type === "slot-group" && dropTarget.type === "slot-group") {
-      combineResult = CombineHandlers.combineGroups([draggedNode], dropTarget, reactFlowInstance.getNodes());
+      messages = CombineHandlers.combineGroups([draggedNode], dropTarget, factory.groups);
     }
 
-    if (combineResult) {
+    if (messages) {
       const batchReq: BatchRequest = {
         type: "BatchRequest",
         reqId: uuidv4(),
-        requests: combineResult.messages,
+        requests: messages,
       };
       sendMessage(JSON.stringify(batchReq));
-
-      setNodes(() => combineResult.finalNodeState);
     }
 
-    setDropTarget(null);
+    clearDropTarget();
   }
 }
 
@@ -171,7 +150,7 @@ function onDrop(
   event: DragEvent,
   reactFlowInstance: (ReactFlowInstance | null),
   sendMessage: SendMessage,
-  setNodes: Dispatch<SetStateAction<Node[]>>,
+  factory: Factory
 ) {
   event.preventDefault();
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
@@ -195,11 +174,15 @@ function onDrop(
     y2: mousePosition.y+.1
   })).filter(node => node.id === machineId);
 
-  // if yes we'll create a new group inside that node with just this slot in it
-  // and remove this slot from its old group
-  if (intersections.length > 0) {
-    const machineNode = intersections[0];
+  // check if taking the slot out will cause the old group to be empty
+  const oldGroup = factory.groups[oldGroupId];
+  const oldGroupSlots = oldGroup.slots;
+  const oldGroupWillBeEmpty = oldGroupSlots.length === 1;
 
+  // if machineId is the same and the old group will still have a slot,
+  // create a new group inside that node with just this slot in it
+  // and remove this slot from its old group
+  if (intersections.length > 0 && !oldGroupWillBeEmpty) {
     const newGroupId = uuidv4();
     const newGroup: Group = {
       id: newGroupId,
@@ -213,8 +196,6 @@ function onDrop(
       group: newGroup
     };
 
-    const oldGroup = reactFlowInstance.getNode(oldGroupId);
-    const oldGroupSlots = oldGroup?.data.group.slots;
     const oldGroupSlotsUpdated = oldGroupSlots.filter((oldSlot: Slot) => oldSlot.periphId !== slot.periphId || oldSlot.slot !== slot.slot);
     const groupEditReq: GroupEditReq = {
       type: "GroupEdit",
@@ -230,26 +211,6 @@ function onDrop(
     }
 
     sendMessage(JSON.stringify(batchReq));
-    setNodes(nodes => nodes
-      .map(node => {
-        if (node.id === oldGroupId) {
-          const updatedGroup = {...node};
-          updatedGroup.data.group.slots = oldGroupSlotsUpdated;
-          return updatedGroup;
-        }
-        return node;
-      })
-      .concat({
-        id: newGroupId,
-        type: "slot-group",
-        position: { x: mousePosition.x - machineNode.position.x, y: mousePosition.y - machineNode.position.y },
-        data: {
-          group: newGroup,
-          parentId: machineId,
-        },
-        parentId: machineId,
-        extent: "parent",
-      }))
   }  
 }
 

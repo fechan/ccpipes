@@ -3,14 +3,16 @@ import { Edge, useOnSelectionChange } from "reactflow";
 import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Pipe } from "@server/types/core-types";
+import { useFactoryStore } from "../stores/factory";
 
-export interface EdgeOptionsData {
+interface EdgeOptionsProps {
   sendMessage: SendMessage,
-  setEdges: React.Dispatch<React.SetStateAction<Edge<any>[]>>,
 };
 
-export function EdgeOptions({ sendMessage, setEdges }: EdgeOptionsData) {
+export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
   const [ selectedEdges, setSelectedEdges ] = useState([] as Edge[]);
+
+  const pipes = useFactoryStore(state => state.factory.pipes);
 
   const [ nickname, setNickname ] = useState("");
   const [ filter, setFilter ] = useState("");
@@ -23,26 +25,12 @@ export function EdgeOptions({ sendMessage, setEdges }: EdgeOptionsData) {
   useOnSelectionChange({
     onChange: ({ edges }) => {
       setSelectedEdges(edges);
-      setFilter(edges.length === 1 ? (edges[0]?.data?.filter || "") : "...");
-      setNickname(edges.length === 1 ? (edges[0]?.data?.nickname || "") : "...");
+      setFilter(edges.length === 1 ? (pipes[edges[0].id].filter || "") : "...");
+      setNickname(edges.length === 1 ? (pipes[edges[0].id].nickname || "") : "...");
     }
   });
 
   function onPipeOptionChanged(option: keyof Pipe, value: string) {
-    const selectedEdgeIds = selectedEdges.map(edge => edge.id);
-    setEdges((edges) =>
-      edges.map((edge) => {
-        if (selectedEdgeIds.includes(edge.id)) {
-          edge.data = {
-            ...edge.data,
-            [option]: value,
-          };
-        }
-
-        return edge;
-      })
-    );
-
     for (let edge of selectedEdges) {
       GraphUpdateCallbacks.onPipeUpdate(edge.id, { [option]: value }, sendMessage)
     }
