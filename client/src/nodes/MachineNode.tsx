@@ -4,7 +4,7 @@ import { useFactoryStore } from "../stores/factory";
 import { useShallow } from "zustand/react/shallow";
 import { stringToColor } from "../StringToColor";
 
-export function MachineNode({ id }: NodeProps) {
+export function MachineNode({ id, selected }: NodeProps) {
   const { nickname, exists, machineGroups, allGroups } = useFactoryStore(useShallow(state => ({
     exists: id in state.factory.machines,
     nickname: state.factory.machines[id]?.nickname,
@@ -37,14 +37,16 @@ export function MachineNode({ id }: NodeProps) {
   return (
     <div 
       className={ 
-        "react-flow__node-default mcui-window w-full h-full py-0.5 px-2 z-10 " +
-        (dropTarget?.id === id ? "bg-green-200 " : "")
+        "react-flow__node-default mcui-window w-full h-full py-0.5 px-2 " +
+        (dropTarget?.id === id ? "bg-green-200 " : "") +
+        (selected ? " !bg-blue-200" : "")
       }
     >
       <div
         className={
-          "w-full h-12 p-1 px-2 text-start absolute left-0 -top-11 mcui-window border-b-0 rounded-t z-10 " +
-          (dropTarget?.id === id ? "bg-green-200 " : "")
+          "w-full h-12 p-1 px-2 text-start absolute left-0 -top-11 mcui-window border-b-0 rounded-t " +
+          (dropTarget?.id === id ? "bg-green-200 " : "") +
+          (selected ? " !bg-blue-200" : "")
         }
       >
         <div>{ nickname || id }</div>

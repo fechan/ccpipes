@@ -65,6 +65,10 @@ body,
   margin: 0;
 }
 
-.react-flow__node {
-  z-index: -1 !important;
+react-flow__node-machine {
+  @apply z-10;
+}
+
+react-flow__node-slot-group {
+  @apply z-20;
 }
