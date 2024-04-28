@@ -41,18 +41,18 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
 
   return (
     <>
-      {selectedGroups.length > 0 && <div className="border rounded-lg bg-white shadow p-3">
+      {selectedGroups.length > 0 && <div className="border p-3 border-2 rounded mcui-window">
         <div className="mb-3">
           Editing { selectedGroups?.length || 'no' } groups
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="nickName">Nickname</label>
+        <div className="mb-3 flex flex-col">
+          <label htmlFor="nickName" className="mb-1">Nickname</label>
           <input
             type="text"
             name="nickName"
             id="nickName"
-            className="border rounded-lg p-1 ms-3"
+            className="mcui-input p-1 ps-2"
             value={ nickname }
             onInput={ e => onGroupOptionChanged("nickname", (e.target as HTMLInputElement).value) }
           />

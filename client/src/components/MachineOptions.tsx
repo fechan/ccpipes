@@ -41,18 +41,18 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
 
   return (
     <>
-      {selectedMachines.length > 0 && <div className="border rounded-lg bg-white shadow p-3">
+      {selectedMachines.length > 0 && <div className="border p-3 border-2 rounded mcui-window">
         <div className="mb-3">
           Editing { selectedMachines?.length || 'no' } machines
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="nickName">Nickname</label>
+        <div className="flex flex-col mb-3">
+          <label htmlFor="nickName" className="mb-1">Nickname</label>
           <input
             type="text"
             name="nickName"
             id="nickName"
-            className="border rounded-lg p-1 ms-3"
+            className="mcui-input p-1 ps-2"
             value={ nickname }
             onInput={ e => onMachineOptionChanged("nickname", (e.target as HTMLInputElement).value) }
           />

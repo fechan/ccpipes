@@ -39,30 +39,30 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
 
   return (
     <>
-      {selectedEdges.length > 0 && <div className="border rounded-lg bg-white shadow p-3">
+      {selectedEdges.length > 0 && <div className="border rounded p-3 border-2 mcui-window">
         <div className="mb-3">
           Editing { selectedEdges?.length || 'no' } pipes
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="nickName">Nickname</label>
+        <div className="flex flex-col mb-3">
+          <label htmlFor="nickName" className="mb-1">Nickname</label>
           <input
             type="text"
             name="nickName"
             id="nickName"
-            className="border rounded-lg p-1 ms-3"
+            className="mcui-input p-1 ps-2"
             value={ nickname }
             onInput={ e => onPipeOptionChanged("nickname", (e.target as HTMLInputElement).value) }
           />
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="pipeFilter">Item filter</label>
+        <div className="flex flex-col mb-3">
+          <label htmlFor="pipeFilter" className="mb-1">Item filter</label>
           <input
             type="text"
             name="pipeFilter"
             id="pipeFilter"
-            className="border rounded-lg p-1 ms-3"
+            className="mcui-input p-1 ps-2"
             value={ filter }
             onInput={ e => onPipeOptionChanged("filter", (e.target as HTMLInputElement).value) }
           />
