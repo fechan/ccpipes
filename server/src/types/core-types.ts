@@ -53,7 +53,6 @@ export type GroupMap = { [key: GroupId]: Group };
 export interface Group {
     id: GroupId,
     slots: Slot[],
-    distribution: string,
     nickname?: string,
 };
 

@@ -31,7 +31,6 @@ return {
         periphId = "minecraft:dropper_1",
         slot = 9
       } },
-      distribution = "roundRobin"
     },
     ["minecraft:dispenser_1:g1"] = {
       id = "minecraft:dispenser_1:g1",
@@ -64,7 +63,6 @@ return {
         periphId = "minecraft:dispenser_1",
         slot = 9
       } },
-      distribution = "roundRobin"
     }
   },
   machines = {
