@@ -37,13 +37,13 @@ export function MachineNode({ id }: NodeProps) {
   return (
     <div 
       className={ 
-        "react-flow__node-default mcui-window w-full h-full py-0.5 px-2 " +
+        "react-flow__node-default mcui-window w-full h-full py-0.5 px-2 z-10 " +
         (dropTarget?.id === id ? "bg-green-200 " : "")
       }
     >
       <div
         className={
-          "w-full h-12 p-1 px-2 text-start absolute left-0 -top-11 mcui-window border-b-0 rounded-t " +
+          "w-full h-12 p-1 px-2 text-start absolute left-0 -top-11 mcui-window border-b-0 rounded-t z-10 " +
           (dropTarget?.id === id ? "bg-green-200 " : "")
         }
       >

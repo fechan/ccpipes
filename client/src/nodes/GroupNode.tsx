@@ -41,7 +41,7 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
   return (
     <div
       className={
-        "react-flow__node-default w-full h-full bg-mcgui-bg p-0 rounded-sm " + 
+        "react-flow__node-default w-full h-full bg-mcgui-bg p-0 rounded-sm z-20 " + 
         "border border-mcgui-group-border " +
         (dropTarget?.id === id ? " !bg-green-200" : "")
       }
@@ -52,7 +52,7 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
     >
       <div
         className={
-          "h-full rounded-sm " +
+          "h-full rounded-sm z-20 " +
           "border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark "
         }
       >
