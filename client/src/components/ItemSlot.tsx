@@ -1,6 +1,7 @@
 import { GroupId, MachineId, Slot } from "@server/types/core-types";
 import { SIZES } from "../nodes/GroupNode";
 import { DragEvent } from "react";
+import { stringToColor } from "../StringToColor";
 
 export interface ItemSlotProps {
   slotIdx: number,
@@ -36,6 +37,7 @@ export function ItemSlot ({ slotIdx, slot, machineId, oldGroupId }: ItemSlotProp
       style={{
         top: Math.floor(slotIdx / 9) * SIZES.slot + SIZES.slotContainerPadding + SIZES.paddingTop,
         left: (slotIdx % 9) * SIZES.slot + SIZES.slotContainerPadding,
+        backgroundColor: stringToColor(slot.periphId)
       }}
       onDragStart={ onDragStart }
     >
