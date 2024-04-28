@@ -11,35 +11,57 @@ import { v4 as uuidv4 } from "uuid";
  * Combine 1 or more source machines into a target Machine.
  * - Groups from the source machines will be moved into the target machine
  * - The source machines will then de deleted
- * @param sourceMachineId Machines that will be combined into the target
+ * @param sourceMachineIds Machines that will be combined into the target
  * @param targetMachineId Machine that will be combined into
- * @param machines Map from Machine IDs to machine objects
+ * @param machines Map from Machine IDs to Machine objects
+ * @param groups Map from Group IDs to Group objects
  * @returns Messages needed to combine and final node state after combination
  */
-function combineMachines(sourceMachineId: MachineId[], targetMachineId: MachineId, machines: MachineMap) {
+function combineMachines(sourceMachineIds: MachineId[], targetMachineId: MachineId, machines: MachineMap, groups: GroupMap) {
   const messages: Request[] = [];
 
-  // get the machine's groups and tell cc to add them to the drop target's group list
-  const combinedGroupList: GroupId[] = sourceMachineId.reduce(
-    (combinedList, sourceMachineId) => [...combinedList, ...machines[sourceMachineId].groups],
-    [...machines[targetMachineId].groups]
-  );
+  const namedGroups: {[nick: string]: GroupId[]} = {}; // named groups with the same nickname will be combined into the first group of that name encountered
+  const unnamedGroups: GroupId[] = []; // unnamed groups will just be added to the target without changing its slots
+  for (let machineId of [targetMachineId].concat(sourceMachineIds)) {
+    for (let groupId of machines[machineId].groups) {
+      const group = groups[groupId];
+
+      if (!group.nickname) {
+        unnamedGroups.push(groupId);
+        continue;
+      }
+
+      if (!(group.nickname in namedGroups)) {
+        namedGroups[group.nickname] = [];
+      }
+
+      namedGroups[group.nickname].push(groupId);
+    }
+  }
+
+  const finalNamedGroups: GroupId[] = []; // named groups that have been combined
+  for (const groupIds of Object.values(namedGroups)) {
+    if (groupIds.length > 1) {
+      messages.push(...combineGroups(groupIds.slice(1), groupIds[0], groups))
+    }
+    finalNamedGroups.push(groupIds[0]);
+  }
   
   messages.push({
     type: "MachineEdit",
     reqId: uuidv4(),
     machineId: targetMachineId,
     edits: {
-      groups: combinedGroupList,
+      groups: [...finalNamedGroups, ...unnamedGroups],
     }
   } as MachineEditReq);
 
-  // tell cc to delete the dragged machine
-  for (let machineNode of sourceMachineId) {
+  // tell cc to delete the source machines
+  for (let machineId of sourceMachineIds) {
     messages.push({
       type: "MachineDel",
       reqId: uuidv4(),
-      machineId: machineNode,
+      machineId: machineId,
     } as MachineDelReq);
   }
 

@@ -195,7 +195,7 @@ local function machineDel (factory, machineId)
   local diff = {
     machines = {
       [machineId] = {
-        oldMachine, 0, 0
+        textutils.unserialize(textutils.serialize(oldMachine)), 0, 0
       }
     }
   }
