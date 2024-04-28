@@ -5,15 +5,10 @@
 ---@class Pipe
 
 local TransferCalculator = require('transfer-calculator')
-
-local function matchNameFilter (query)
-  return function (itemDetail)
-    return string.match(itemDetail.name, query or '') ~= nil
-  end
-end
+local Filter = require('filter')
 
 local function processPipe (pipe, groupMap)
-  local filter = matchNameFilter(pipe.filter)
+  local filter = Filter.getFilterFn(pipe.filter)
   local ok, transferOrders = pcall(
     function ()
       return TransferCalculator.getTransferOrders(groupMap[pipe.from], groupMap[pipe.to], filter)

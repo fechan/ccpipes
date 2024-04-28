@@ -103,6 +103,10 @@ end
 ---@param jeiFilter string JEI-like item filter string
 ---@return function filterFn A function that accepts a CC itemDetail and returns true if the filter matches, false otherwise
 local function getFilterFn (jeiFilter)
+  if jeiFilter == nil or string.gsub(jeiFilter, '%s', '') == '' then -- if the filter is blank
+    return function () return true end     -- the filter should always return true
+  end
+
   local matchAny = {}
   for orOperand in string.gmatch(jeiFilter, '[^|]+') do
     table.insert(matchAny, getUnionFilterFn(orOperand))
