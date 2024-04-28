@@ -143,9 +143,9 @@ function onNodeDragStop(
   if (dropTarget && reactFlowInstance) {
     let messages: Request[] | undefined;
     if (draggedNode.type === "machine" && dropTarget.type === "machine") {
-      messages = CombineHandlers.combineMachines([draggedNode], dropTarget, factory.machines);
+      messages = CombineHandlers.combineMachines([draggedNode.id], dropTarget.id, factory.machines);
     } else if (draggedNode.type === "slot-group" && dropTarget.type === "slot-group") {
-      messages = CombineHandlers.combineGroups([draggedNode], dropTarget, factory.groups);
+      messages = CombineHandlers.combineGroups([draggedNode.id], dropTarget.id, factory.groups);
     }
 
     if (messages) {
