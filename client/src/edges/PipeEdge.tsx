@@ -22,16 +22,17 @@ export const PipeEdge: FC<EdgeProps> = ({
   });
 
   const nickname = useFactoryStore(state => state.factory.pipes[id]?.nickname);
+  const filter = useFactoryStore(state => state.factory.pipes[id]?.filter);
 
   const style = {
     strokeWidth: 1,
-    stroke: "black",
+    stroke: "blue",
   }
 
   return (
     <>
       <BaseEdge id={id} path={edgePath} style={style} markerEnd={markerEnd} />
-      { ( nickname ) && <EdgeLabelRenderer>
+      { ( nickname || filter ) && <EdgeLabelRenderer>
         <div
           style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
@@ -39,6 +40,7 @@ export const PipeEdge: FC<EdgeProps> = ({
           className="absolute text-gray-600 text-xs"
         >
           { nickname }
+          ({ filter })
         </div>
       </EdgeLabelRenderer>}
     </>
