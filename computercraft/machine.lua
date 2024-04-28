@@ -71,7 +71,6 @@ function Machine.fromPeriphId (periphId)
     local group = {
       id = groupId,
       slots = {slot},
-      distribution = 'roundRobin',
       nickname = nicknames[slotNbr] or ('Slot ' .. slotNbr),
     }
 
@@ -93,7 +92,6 @@ function Machine.fromChestPeriphId (periphId)
   local group = {
     id = groupId,
     slots = {},
-    distribution = 'roundRobin',
     nickname = 'Inventory',
   }
 

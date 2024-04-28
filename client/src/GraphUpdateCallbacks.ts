@@ -207,7 +207,6 @@ function onDrop(
     const newGroup: Group = {
       id: newGroupId,
       slots: [slot],
-      distribution: "roundrobin",
     };
     const groupAddReq: GroupAddReq = {
       type: "GroupAdd",
