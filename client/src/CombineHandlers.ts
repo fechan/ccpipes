@@ -1,6 +1,5 @@
-import { Factory, GroupId, GroupMap, MachineId, MachineMap, Slot } from "@server/types/core-types";
+import { GroupId, GroupMap, MachineId, MachineMap, Slot } from "@server/types/core-types";
 import { GroupDelReq, GroupEditReq, MachineDelReq, MachineEditReq, Request } from "@server/types/messages";
-import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 
 /**
