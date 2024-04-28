@@ -181,7 +181,7 @@ export default function App() {
           <GroupOptions sendMessage={ sendMessage } />
           <MachineOptions sendMessage={ sendMessage } />
         </Panel>
-        <Background />
+        <Background className="bg-neutral-700" />
         <MiniMap />
         <Controls />
       </ReactFlow>

@@ -13,7 +13,7 @@ export function getEdgesForFactory(factory: Factory): Edge[] {
       type: MarkerType.ArrowClosed,
       width: 15,
       height: 15,
-      color: "blue",
+      color: "magenta",
     }
   }));
 }
@@ -33,7 +33,7 @@ function createAddedEdges(factory: Factory, addsAndDeletes: FactoryAddsAndDelete
         type: MarkerType.Arrow,
         width: 15,
         height: 15,
-        color: "blue"
+        color: "magenta"
       }
     };
     newEdges.push(pipeEdge);

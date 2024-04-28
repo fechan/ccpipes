@@ -26,7 +26,7 @@ export const PipeEdge: FC<EdgeProps> = ({
 
   const style = {
     strokeWidth: 1,
-    stroke: "blue",
+    stroke: "magenta",
   }
 
   return (
@@ -34,11 +34,11 @@ export const PipeEdge: FC<EdgeProps> = ({
       <BaseEdge id={id} path={edgePath} style={style} markerEnd={markerEnd} />
       { ( nickname || filter ) && <EdgeLabelRenderer>
         <div
+          className="absolute text-black text-xs"
           style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white",
+            textShadow: "-1px -1px 2px white, 1px -1px 2px white, -1px 1px 2px white, 1px 1px 2px white",
           }}
-          className="absolute text-gray-600 text-xs"
         >
           { nickname }
           { filter && <> ({filter})</>}
