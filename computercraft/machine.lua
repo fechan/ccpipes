@@ -35,6 +35,8 @@ end
 function Machine.fromPeriphId (periphId)
   local o = Machine.new(periphId)
 
+  local peripheral = peripheral.wrap(periphId)
+
   if (
     string.find(periphId, 'minecraft:chest_') or
     string.find(periphId, 'minecraft:trapped_chest_') or
@@ -42,12 +44,12 @@ function Machine.fromPeriphId (periphId)
     string.find(periphId, 'minecraft:dispenser_') or
     string.find(periphId, 'minecraft:dropper_') or
     string.find(periphId, 'minecraft:hopper_') or
-    (string.find(periphId, 'minecraft:') and string.find(periphId, '_shulker_box_'))
+    (string.find(periphId, 'minecraft:') and string.find(periphId, '_shulker_box_')) or
+    peripheral.size() > 16
   ) then
     return Machine.fromChestPeriphId(periphId)
   end
 
-  local peripheral = peripheral.wrap(periphId)
   local groups = {}
 
   -- create 1 group for each slot
