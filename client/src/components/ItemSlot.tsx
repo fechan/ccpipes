@@ -30,7 +30,7 @@ export function ItemSlot ({ slotIdx, slot, machineId, oldGroupId }: ItemSlotProp
     <div
       draggable
       className={
-        "nodrag absolute border w-[30px] h-[30px] flex items-center justify-center bg-mcgui-slot-bg hover:bg-blue-100 text-white hover:text-black" +
+        "nodrag absolute border w-[30px] h-[30px] flex items-center justify-center bg-mcgui-slot-bg hover:bg-blue-400 text-white hover:text-black" +
         "border-2 border-b-mcgui-slot-border-light border-e-mcgui-slot-border-light border-t-mcgui-slot-border-dark border-s-mcgui-slot-border-dark "
       }
       style={{

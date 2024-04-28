@@ -43,7 +43,7 @@ export function GroupNode({ id }: NodeProps<GroupNodeData>) {
       className={
         "react-flow__node-default w-full h-full bg-mcgui-bg p-0 rounded-sm " + 
         "border border-mcgui-group-border " +
-        (dropTarget?.id === id ? " bg-green-200" : "")
+        (dropTarget?.id === id ? " !bg-green-200" : "")
       }
       style={{
         width: Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2,
