@@ -36,11 +36,12 @@ export const PipeEdge: FC<EdgeProps> = ({
         <div
           style={{
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white",
           }}
           className="absolute text-gray-600 text-xs"
         >
           { nickname }
-          ({ filter })
+          { filter && <> ({filter})</>}
         </div>
       </EdgeLabelRenderer>}
     </>
