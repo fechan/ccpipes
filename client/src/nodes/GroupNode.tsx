@@ -11,12 +11,7 @@ export const SIZES = {
   paddingTop: 10,
 };
 
-export type GroupNodeData = {
-  group: Group,
-  machineId: MachineId,
-};
-
-export function GroupNode({ id }: NodeProps<GroupNodeData>) {
+export function GroupNode({ id }: NodeProps) {
   const dropTarget = useDropTargetStore(state => state.dropTarget);
   const { nickname, numSlots, slots } = useFactoryStore(useShallow(state => ({
     ...state.factory.groups[id],
