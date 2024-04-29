@@ -58,7 +58,10 @@ export function MachineNode({ id, selected }: NodeProps) {
         }
       >
         <div>{ nickname || id }</div>
-        <div className="h-7 overflow-x-scroll whitespace-nowrap">
+        <div
+          className="h-7 overflow-x-auto whitespace-nowrap"
+          style={{scrollbarWidth: "thin"}}
+        >
           {
             Array.from(machinePeriphs).map(periphId => (
               <PeripheralBadge

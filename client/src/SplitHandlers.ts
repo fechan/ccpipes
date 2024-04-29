@@ -1,5 +1,5 @@
 import { Factory, Group, Machine, Slot } from "@server/types/core-types";
-import { GroupAddReq, GroupEditReq, MachineAddReq, Request } from "@server/types/messages";
+import { GroupAddReq, GroupDelReq, GroupEditReq, MachineAddReq, Request } from "@server/types/messages";
 import { Node } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { ItemSlotDragData } from "./components/ItemSlot";
@@ -89,15 +89,25 @@ export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragDa
       messages.push(groupAddReq);
 
       // remove slots from this peripheral from the old group
-      const groupEditReq: GroupEditReq = {
-        type: "GroupEdit",
-        reqId: uuidv4(),
-        groupId: oldGroup.id,
-        edits: {
-          slots: oldGroup.slots.filter(slot => slot.periphId !== periphId)
+      const oldGroupUpdatedSlots = oldGroup.slots.filter(slot => slot.periphId !== periphId)
+      if (oldGroupUpdatedSlots.length > 0) {
+        const groupEditReq: GroupEditReq = {
+          type: "GroupEdit",
+          reqId: uuidv4(),
+          groupId: oldGroup.id,
+          edits: {
+            slots: oldGroupUpdatedSlots
+          }
+        };
+        messages.push(groupEditReq);
+      } else {
+        const groupDelReq: GroupDelReq = {
+          type: "GroupDel",
+          reqId: uuidv4(),
+          groupId: oldGroup.id
         }
-      };
-      messages.push(groupEditReq);
+        messages.push(groupDelReq);
+      }
     }
 
   }
