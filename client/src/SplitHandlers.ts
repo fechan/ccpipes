@@ -1,8 +1,8 @@
-import { ItemSlotDragData } from "./components/ItemSlot";
 import { Factory, Group, Machine, Slot } from "@server/types/core-types";
 import { GroupAddReq, GroupEditReq, MachineAddReq, Request } from "@server/types/messages";
-import { v4 as uuidv4 } from "uuid";
 import { Node } from "reactflow";
+import { v4 as uuidv4 } from "uuid";
+import { ItemSlotDragData } from "./components/ItemSlot";
 import { PeripheralBadgeDragData } from "./components/PeripheralBadge";
 
 export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: Node[], factory: Factory) {
