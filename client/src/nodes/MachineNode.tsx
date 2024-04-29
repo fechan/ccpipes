@@ -2,15 +2,28 @@ import type { NodeProps } from "reactflow";
 import { useDropTargetStore } from "../stores/dropTarget";
 import { useFactoryStore } from "../stores/factory";
 import { useShallow } from "zustand/react/shallow";
-import { stringToColor } from "../StringToColor";
 import { PeripheralBadge } from "../components/PeripheralBadge";
+import { GroupId, GroupMap } from "@server/types/core-types";
+
+function getPeripheralsInMachine(machineGroups: GroupId[], allGroups: GroupMap) {
+  if (machineGroups && allGroups) {
+    const peripheralIds = new Set<string>();
+    for (let groupId of machineGroups) {
+      const group = allGroups[groupId];
+      for (let slot of group.slots) {
+        peripheralIds.add(slot.periphId);
+      }
+    }
+    return peripheralIds;
+  }
+  return [];
+}
 
 export function MachineNode({ id, selected }: NodeProps) {
-  const { nickname, exists, machineGroups, allGroups } = useFactoryStore(useShallow(state => ({
+  const { nickname, exists, machinePeriphs } = useFactoryStore(useShallow(state => ({
     exists: id in state.factory.machines,
     nickname: state.factory.machines[id]?.nickname,
-    machineGroups: state.factory.machines[id]?.groups,
-    allGroups: state.factory.groups,
+    machinePeriphs: getPeripheralsInMachine(state.factory.machines[id]?.groups, state.factory.groups)
   })));
 
   const dropTarget = useDropTargetStore(state => state.dropTarget);
@@ -27,13 +40,7 @@ export function MachineNode({ id, selected }: NodeProps) {
     return <div className="react-flow__node-default"></div>
   }
 
-  const peripheralIds = new Set<string>();
-  for (let groupId of machineGroups) {
-    const group = allGroups[groupId];
-    for (let slot of group.slots) {
-      peripheralIds.add(slot.periphId);
-    }
-  }
+
 
   return (
     <div 
@@ -53,7 +60,7 @@ export function MachineNode({ id, selected }: NodeProps) {
         <div>{ nickname || id }</div>
         <div className="h-7 overflow-x-scroll whitespace-nowrap">
           {
-            Array.from(peripheralIds).map(periphId => (
+            Array.from(machinePeriphs).map(periphId => (
               <PeripheralBadge
                 key={ periphId }
                 periphId={ periphId }
