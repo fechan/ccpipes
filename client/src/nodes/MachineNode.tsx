@@ -53,7 +53,13 @@ export function MachineNode({ id, selected }: NodeProps) {
         <div>{ nickname || id }</div>
         <div className="h-7 overflow-x-scroll whitespace-nowrap">
           {
-            Array.from(peripheralIds).map(periphId => <PeripheralBadge key={periphId} periphId={periphId}/>)
+            Array.from(peripheralIds).map(periphId => (
+              <PeripheralBadge
+                key={ periphId }
+                periphId={ periphId }
+                machineId={ id }
+              />
+            ))
           }
         </div>
       </div>
