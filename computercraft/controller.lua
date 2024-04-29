@@ -29,6 +29,12 @@ local function handlePipeEdit (request, factory, sendMessage)
   return diff
 end
 
+local function handleMachineAdd (request, factory, sendMessage)
+  local machine = request.machine
+  local diff = Factory.machineAdd(factory, machine)
+  return diff
+end
+
 local function handleMachineDel (request, factory, sendMessage)
   local diff = Factory.machineDel(factory, request.machineId)
   return diff
@@ -75,6 +81,7 @@ local function listenForCcpipesEvents (wsContext, factory)
         ['ccpipes-PipeAdd'] = handlePipeAdd,
         ['ccpipes-PipeDel'] = handlePipeDel,
         ['ccpipes-PipeEdit'] = handlePipeEdit,
+        ['ccpipes-MachineAdd'] = handleMachineAdd,
         ['ccpipes-MachineDel'] = handleMachineDel,
         ['ccpipes-MachineEdit'] = handleMachineEdit,
         ['ccpipes-GroupAdd'] = handleGroupAdd,

@@ -200,7 +200,6 @@ function onDrop(
       intersections,
       factory
     );
-    event.dataTransfer.clearData("application/ccpipes-slotmove");
   }
 
   const peripheralData = event.dataTransfer.getData("application/ccpipes-peripheralmove");
@@ -210,7 +209,6 @@ function onDrop(
       intersections,
       factory,
     );
-    event.dataTransfer.clearData("application/ccpipes-peripheralmove");
   }
 
   if (requests && requests.length > 0) {

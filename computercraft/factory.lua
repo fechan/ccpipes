@@ -200,6 +200,20 @@ local function machineDel (factory, machineId)
   return {diff}
 end
 
+---Add a machine to a factory
+---@param factory Factory Factory to add to
+---@param machine Machine Machine to add
+local function machineAdd (factory, machine)
+  factory.machines[machine.id] = machine
+
+  local diff = {
+    machines = {
+      [machine.id] = {machine}
+    }
+  }
+  return {diff}
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
@@ -237,6 +251,7 @@ return {
   pipeAdd = pipeAdd,
   pipeDel = pipeDel,
   pipeEdit = pipeEdit,
+  machineAdd = machineAdd,
   machineEdit = machineEdit,
   machineDel = machineDel,
   groupAdd = groupAdd,

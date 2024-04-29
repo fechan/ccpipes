@@ -60,7 +60,7 @@ export function GroupNode({ id, selected }: NodeProps) {
           {
             slots.map((slot, i) =>
               <ItemSlot
-                key={slot.periphId + slot.slot}
+                key={`${slot.periphId} ${slot.slot}`}
                 slotIdx={ i }
                 slot={ slot }
                 machineId={ parentMachineId }

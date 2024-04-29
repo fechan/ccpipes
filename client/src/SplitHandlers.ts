@@ -71,7 +71,7 @@ export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragDa
   };
   messages.push(machineAddReq);
 
-  for (let groupId in factory.machines[oldMachineId]) {
+  for (let groupId of factory.machines[oldMachineId].groups) {
     const oldGroup = factory.groups[groupId];
     const slotsFromPeripheral = oldGroup.slots.filter(slot => slot.periphId === periphId);
     if (slotsFromPeripheral.length > 0) {
