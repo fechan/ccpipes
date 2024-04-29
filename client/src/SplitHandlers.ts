@@ -54,6 +54,18 @@ export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragDa
   if (intersections.length > 0) {
     return [];
   }
+
+  // don't do anything if there's only one peripheral in the machine
+  const peripheralIds = new Set<string>();
+  for (let groupId of factory.machines[oldMachineId].groups) {
+    const group = factory.groups[groupId];
+    for (let slot of group.slots) {
+      peripheralIds.add(slot.periphId);
+    }
+  }
+  if (peripheralIds.size === 1) {
+    return [];
+  }
   
   const messages: Request[] = [];
 
