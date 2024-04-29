@@ -6,6 +6,7 @@ import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
+import { splitSlotFromGroup } from "./SplitHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -179,58 +180,33 @@ function onDrop(
     return;
   }
 
-  const { slot, machineId, oldGroupId }: ItemSlotDragData = JSON.parse(slotData);
-
   const mousePosition = reactFlowInstance.screenToFlowPosition({
     x: event.clientX,
     y: event.clientY,
   });
 
-  // check if we're over a machine node of the same ID as machineId
   const intersections = reactFlowInstance.getIntersectingNodes(boxToRect({
     x: mousePosition.x,
     x2: mousePosition.x+.1,
     y: mousePosition.y,
     y2: mousePosition.y+.1
-  })).filter(node => node.id === machineId);
+  }))
 
-  // check if taking the slot out will cause the old group to be empty
-  const oldGroup = factory.groups[oldGroupId];
-  const oldGroupSlots = oldGroup.slots;
-  const oldGroupWillBeEmpty = oldGroupSlots.length === 1;
+  const requests = splitSlotFromGroup(
+    JSON.parse(slotData),
+    intersections,
+    factory
+  );
 
-  // if machineId is the same and the old group will still have a slot,
-  // create a new group inside that node with just this slot in it
-  // and remove this slot from its old group
-  if (intersections.length > 0 && !oldGroupWillBeEmpty) {
-    const newGroupId = uuidv4();
-    const newGroup: Group = {
-      id: newGroupId,
-      slots: [slot],
-    };
-    const groupAddReq: GroupAddReq = {
-      type: "GroupAdd",
-      reqId: uuidv4(),
-      machineId: machineId,
-      group: newGroup
-    };
-
-    const oldGroupSlotsUpdated = oldGroupSlots.filter((oldSlot: Slot) => oldSlot.periphId !== slot.periphId || oldSlot.slot !== slot.slot);
-    const groupEditReq: GroupEditReq = {
-      type: "GroupEdit",
-      reqId: uuidv4(),
-      groupId: oldGroupId,
-      edits: { slots: oldGroupSlotsUpdated }
-    }
-
+  if (requests.length > 0) {
     const batchReq: BatchRequest = {
       type: "BatchRequest",
       reqId: uuidv4(),
-      requests: [groupAddReq, groupEditReq],
+      requests: requests,
     }
 
     sendMessage(JSON.stringify(batchReq));
-  }  
+  }
 }
 
 export const GraphUpdateCallbacks = {
