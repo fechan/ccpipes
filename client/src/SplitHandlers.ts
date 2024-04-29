@@ -1,8 +1,9 @@
 import { ItemSlotDragData } from "./components/ItemSlot";
-import { Factory, Group, Slot } from "@server/types/core-types";
-import { GroupAddReq, GroupEditReq } from "@server/types/messages";
+import { Factory, Group, Machine, Slot } from "@server/types/core-types";
+import { GroupAddReq, GroupEditReq, MachineAddReq, Request } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
 import { Node } from "reactflow";
+import { PeripheralBadgeDragData } from "./components/PeripheralBadge";
 
 export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: Node[], factory: Factory) {
   const { slot, machineId, oldGroupId } = slotData;
@@ -43,4 +44,63 @@ export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: No
   }
 
   return [];
+}
+
+export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragData, intersections: Node[], factory: Factory) {
+  const { periphId, oldMachineId } = peripheralData;
+
+  // don't do anything if dragging to the same machine
+  intersections = intersections.filter(node => node.id === oldMachineId);
+  if (intersections.length > 0) {
+    return [];
+  }
+  
+  const messages: Request[] = [];
+
+  // create a machine for the split peripheral
+  const newMachine: Machine = {
+    id: uuidv4(),
+    nickname: periphId,
+    groups: []
+  };
+
+  const machineAddReq: MachineAddReq = {
+    type: "MachineAdd",
+    reqId: uuidv4(),
+    machine: newMachine
+  };
+  messages.push(machineAddReq);
+
+  for (let groupId in factory.machines[oldMachineId]) {
+    const oldGroup = factory.groups[groupId];
+    const slotsFromPeripheral = oldGroup.slots.filter(slot => slot.periphId === periphId);
+    if (slotsFromPeripheral.length > 0) {
+      // make new group with all slots from this peripheral that were in the old group
+      const groupAddReq: GroupAddReq = {
+        type: "GroupAdd",
+        reqId: uuidv4(),
+        machineId: newMachine.id,
+        group: {
+          id: uuidv4(),
+          nickname: oldGroup.nickname,
+          slots: slotsFromPeripheral,
+        }
+      };
+      messages.push(groupAddReq);
+
+      // remove slots from this peripheral from the old group
+      const groupEditReq: GroupEditReq = {
+        type: "GroupEdit",
+        reqId: uuidv4(),
+        groupId: oldGroup.id,
+        edits: {
+          slots: oldGroup.slots.filter(slot => slot.periphId !== periphId)
+        }
+      };
+      messages.push(groupEditReq);
+    }
+
+  }
+
+  return messages;
 }

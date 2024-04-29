@@ -1,12 +1,12 @@
 import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, MachineEditReq, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
+import { BatchRequest, GroupAddReq, GroupEditReq, MachineEditReq, Message, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
-import { splitSlotFromGroup } from "./SplitHandlers";
+import { splitPeripheralFromMachine, splitSlotFromGroup } from "./SplitHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   for (let edge of edges) {
@@ -174,11 +174,12 @@ function onDrop(
   factory: Factory
 ) {
   event.preventDefault();
-  const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
-  
-  if (slotData === undefined || !slotData || reactFlowInstance === undefined || !reactFlowInstance) {
+
+  if (!reactFlowInstance) {
     return;
   }
+
+  let requests: Request[] | undefined;
 
   const mousePosition = reactFlowInstance.screenToFlowPosition({
     x: event.clientX,
@@ -190,15 +191,29 @@ function onDrop(
     x2: mousePosition.x+.1,
     y: mousePosition.y,
     y2: mousePosition.y+.1
-  }))
+  }));
 
-  const requests = splitSlotFromGroup(
-    JSON.parse(slotData),
-    intersections,
-    factory
-  );
+  const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
+  if (slotData) {
+    requests = splitSlotFromGroup(
+      JSON.parse(slotData),
+      intersections,
+      factory
+    );
+    event.dataTransfer.clearData("application/ccpipes-slotmove");
+  }
 
-  if (requests.length > 0) {
+  const peripheralData = event.dataTransfer.getData("application/ccpipes-peripheralmove");
+  if (peripheralData) {
+    requests = splitPeripheralFromMachine(
+      JSON.parse(peripheralData),
+      intersections,
+      factory,
+    );
+    event.dataTransfer.clearData("application/ccpipes-peripheralmove");
+  }
+
+  if (requests && requests.length > 0) {
     const batchReq: BatchRequest = {
       type: "BatchRequest",
       reqId: uuidv4(),
