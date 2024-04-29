@@ -39,7 +39,7 @@ local function shallowCopy (tbl)
   return t2
 end
 
-function concatArrays(...)
+function concatArrays (...)
   local t = {}
 
   for i = 1, arg.n do
@@ -56,11 +56,15 @@ function concatArrays(...)
   return t
 end
 
+function freezeTable (tbl)
+  return textutils.unserialize(textutils.serialize(tbl))
+end
+
 return {
   randomString = randomString,
 	absolutePathTo = absolutePathTo,
 	reverse = reverse,
   shallowCopy = shallowCopy,
   concatArrays = concatArrays,
-  arrayFilter = arrayFilter,
+  freezeTable = freezeTable,
 }

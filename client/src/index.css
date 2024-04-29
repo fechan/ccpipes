@@ -65,14 +65,18 @@ body,
   margin: 0;
 }
 
-.react-flow__node {
+/* .react-flow__node {
   z-index: -1 !important;
-}
+} */
 
 .react-flow__node.react-flow__node-machine {
-  z-index: -30 !important;
+  z-index: -30;
 }
 
 .react-flow__node.react-flow__node-slot-group {
-  z-index: -20 !important;
+  z-index: -20;
 }
+
+/* .react-flow__node.react-flow__node-machine.dragging {
+  z-index: -29 !important;
+} */

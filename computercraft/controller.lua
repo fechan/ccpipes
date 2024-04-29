@@ -87,7 +87,7 @@ local function listenForCcpipesEvents (wsContext, factory)
         for i, request in pairs(message.requests) do
           local handlerName = 'ccpipes-' .. request.type
           if handlers[handlerName] then
-            local diff = handlers[handlerName](request, factory, sendMessage)
+            local diff = Utils.freezeTable(handlers[handlerName](request, factory, sendMessage))
             if (diff ~= nil) then
               table.insert(diffs, diff)
             end
