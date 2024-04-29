@@ -3,6 +3,7 @@ import { useDropTargetStore } from "../stores/dropTarget";
 import { useFactoryStore } from "../stores/factory";
 import { useShallow } from "zustand/react/shallow";
 import { stringToColor } from "../StringToColor";
+import { PeripheralBadge } from "../components/PeripheralBadge";
 
 export function MachineNode({ id, selected }: NodeProps) {
   const { nickname, exists, machineGroups, allGroups } = useFactoryStore(useShallow(state => ({
@@ -52,17 +53,7 @@ export function MachineNode({ id, selected }: NodeProps) {
         <div>{ nickname || id }</div>
         <div className="h-7 overflow-x-scroll whitespace-nowrap">
           {
-            Array.from(peripheralIds).map(periphId => (
-              <span
-                key={periphId}
-                className="rounded py-0.5 px-2 text-xs me-1 bg-blue-500 text-white"
-                style={{
-                  backgroundColor: stringToColor(periphId)
-                }}
-              >
-                { periphId.split(":")[1] }
-              </span>
-            ))
+            Array.from(peripheralIds).map(periphId => <PeripheralBadge key={periphId} periphId={periphId}/>)
           }
         </div>
       </div>
