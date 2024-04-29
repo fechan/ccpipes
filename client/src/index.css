@@ -70,13 +70,13 @@ body,
 } */
 
 .react-flow__node.react-flow__node-machine {
-  z-index: -30;
+  z-index: -30 !important;
 }
 
 .react-flow__node.react-flow__node-slot-group {
-  z-index: -20;
+  z-index: -20 !important;
 }
 
-/* .react-flow__node.react-flow__node-machine.dragging {
+.react-flow__node.react-flow__node-machine.dragging {
   z-index: -29 !important;
-} */
+}
