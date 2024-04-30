@@ -180,6 +180,9 @@ local function getTransferOrders (origin, destination, filter)
       -- can I transfer all of the origin stack?
       if originStackSize <= transferLimit then -- if yes, transfer the whole stack and move on
         table.insert(orders, {from=originSlot, to=possibleDestSlot, limit=originStackSize})
+        if originStackSize + numExistingItemsAtDest < destSlotStackLimit then -- if the destination slot can still hold items, put it back in the queue
+          table.insert(possibleSlotsFull, 1, possibleDestSlot)
+        end
       else -- if no, transfer the transferLimit and add the remainder of the stack to shouldTransfer
         table.insert(orders, {from=originSlot, to=possibleDestSlot, limit=transferLimit})
         table.insert(shouldTransfer, {
