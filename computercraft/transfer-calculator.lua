@@ -1,4 +1,5 @@
 local CacheMap = require('CacheMap')
+local Concurrent = require('concurrent')
 local Utils = require('utils')
 
 ---A request to transfer `limit` items from the `from` slot to the `to` slot
@@ -75,19 +76,37 @@ end
 
 local function getManyDetailedInvLists (periphs)
   local invLists = {} -- maps periphId -> detailed inventory list
+  local runner = Concurrent.create_runner(64)
 
-  local listCoros = {}
   for i,periphId in ipairs(periphs) do
-    table.insert(listCoros,
+    runner.spawn(
       function ()
         invLists[periphId] = getDetailedInvList(periphId)
       end
     )
   end
 
-  parallel.waitForAll(unpack(listCoros))
-
+  runner.run_until_done()
   return invLists
+end
+
+local function getManyItemLimits (groups)
+  local itemLimits = {} -- maps 'periphId/slotNbr' -> itemLimit
+  local runner = Concurrent.create_runner(64)
+
+  for i, group in ipairs(groups) do
+    for j, slot in ipairs(group.slots) do
+      runner.spawn(
+        function ()
+          local periph = peripheral.wrap(slot.periphId)
+          itemLimits[slot.periphId .. "/" .. slot.slot] = periph.getItemLimit(slot.slot)
+        end
+      )
+    end
+  end
+
+  runner.run_until_done()
+  return itemLimits
 end
 
 local function getAllPeripheralIds (groups)
@@ -115,6 +134,7 @@ end
 local function getTransferOrders (origin, destination, filter)
   local orders = {}
 
+  local itemLimits = getManyItemLimits({destination})
   local itemLimitCache = CacheMap.new()
   local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
 
@@ -152,10 +172,7 @@ local function getTransferOrders (origin, destination, filter)
     local possibleDestSlot = popBestPossibleSlot(possibleSlotsEmpty, possibleSlotsFull)
 
     if possibleDestSlot ~= nil then
-      local destSlotStackLimit = itemLimitCache:Get(possibleDestSlot.periphId .. "/" .. possibleDestSlot.slot, function ()
-        local periph = peripheral.wrap(possibleDestSlot.periphId)
-        return periph.getItemLimit(possibleDestSlot.slot)
-      end)
+      local destSlotStackLimit = itemLimits[possibleDestSlot.periphId .. "/" .. possibleDestSlot.slot]
       local numExistingItemsAtDest = getNumExistingItemsAt(possibleDestSlot, inventoryLists)
 
       local transferLimit = destSlotStackLimit - numExistingItemsAtDest
