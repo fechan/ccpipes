@@ -20,7 +20,7 @@ local function waitForQuitKey (wsContext)
 end
 
 local function init ()
-  print("Welcome to CCPipes! Press Q to quit.\n")
+  print("Welcome to CCPipes! Press Q to stop all pipes and quit.\n")
 
   local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
@@ -45,7 +45,7 @@ local function init ()
   }
 
   parallel.waitForAll(
-    function () WebSocket.attachSession(wsContext) end,
+    function () WebSocket.doWebSocket(wsContext) end,
     function () Controller.listenForCcpipesEvents(wsContext, factory) end,
     function () Pipe.processAllPipesForever(factory) end,
     function () waitForQuitKey(wsContext) end,
