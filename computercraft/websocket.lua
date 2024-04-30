@@ -143,6 +143,8 @@ local function doWebSocket (wsContext)
             'Editor session closed. Press E to create a new editing session ' ..
             'or press Q to stop all pipes and quit.'
           )
+          wsContext.ws.close()
+          wsContext.ws = nil
           state = 'WAIT-FOR-USER'
         end
       end)
