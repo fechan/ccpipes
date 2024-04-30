@@ -57,20 +57,20 @@ end
 ---50 ms more or less for all of them, even if the inventory is really big.
 ---@param periphId string Peripheral ID of inventory
 ---@return table detailedInvList Detailed item list
-local function getDetailedInvList (periphId)
+local function getDetailedInvList (periphId, runner)
+  runner = runner or Concurrent.create_runner(64)
   local detailedInvList = {} -- maps slot -> itemDetails
   local periph = peripheral.wrap(periphId)
 
-  local itemDetailCoros = {}
   for slot, slotInfo in pairs(periph.list()) do
-    table.insert(itemDetailCoros,
+    runner.spawn(
       function ()
         detailedInvList[slot] = periph.getItemDetail(slot)
       end
     )
   end
 
-  parallel.waitForAll(unpack(itemDetailCoros))
+  runner.run_until_done()
   return detailedInvList
 end
 
