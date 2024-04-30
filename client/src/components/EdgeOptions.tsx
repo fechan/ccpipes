@@ -4,6 +4,7 @@ import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Pipe } from "@server/types/core-types";
 import { useFactoryStore } from "../stores/factory";
+import { useStoreApi } from 'reactflow';
 
 interface EdgeOptionsProps {
   sendMessage: SendMessage,
@@ -31,10 +32,29 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
   });
 
   function onPipeOptionChanged(option: keyof Pipe, value: string) {
-    for (let edge of selectedEdges) {
-      GraphUpdateCallbacks.onPipeUpdate(edge.id, { [option]: value }, sendMessage)
-    }
     setters[option](value);
+  }
+
+  function onCommit() {
+    const edits: Partial<Pipe> = {};
+
+    if (!["...", ""].includes(nickname)) {
+      edits.nickname = nickname;
+    }
+    
+    if (filter !== "...") {
+      edits.filter = filter;
+    }
+
+    for (let edge of selectedEdges) {
+      GraphUpdateCallbacks.onPipeUpdate(edge.id, edits, sendMessage)
+    }
+  }
+  
+  const store = useStoreApi();
+  const { addSelectedEdges } = store.getState();
+  function onCancel() {
+    addSelectedEdges([]);
   }
 
   return (
@@ -56,7 +76,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
           />
         </div>
 
-        <div className="flex flex-col mb-3">
+        <div className="flex flex-col mb-5">
           <label htmlFor="pipeFilter" className="mb-1">Item filter</label>
           <input
             type="text"
@@ -66,6 +86,21 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             value={ filter }
             onInput={ e => onPipeOptionChanged("filter", (e.target as HTMLInputElement).value) }
           />
+        </div>
+
+        <div className="text-right box-border">
+          <button
+            className="mcui-button bg-red-700 w-32 h-10 me-3"
+            onClick={ onCancel }
+          >
+            Cancel
+          </button>
+          <button
+            className="mcui-button bg-green-800 w-20 h-10"
+            onClick={ onCommit }
+          >
+            OK
+          </button>
         </div>
       </div>}
     </>

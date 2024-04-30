@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath, MarkerType } from "reactflow";
+import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath } from "reactflow";
 import { useFactoryStore } from "../stores/factory";
 
 export const PipeEdge: FC<EdgeProps> = ({
@@ -10,7 +10,8 @@ export const PipeEdge: FC<EdgeProps> = ({
   targetY,
   sourcePosition,
   targetPosition,
-  markerEnd
+  markerEnd,
+  selected,
 }) => {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -25,7 +26,7 @@ export const PipeEdge: FC<EdgeProps> = ({
   const filter = useFactoryStore(state => state.factory.pipes[id]?.filter);
 
   const style = {
-    strokeWidth: 1,
+    strokeWidth: selected ? 3 : 1,
     stroke: "magenta",
   }
 
