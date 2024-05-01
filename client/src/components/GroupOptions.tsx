@@ -52,8 +52,14 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
   return (
     <>
       {selectedGroups.length > 0 && <div className="border p-3 border-2 rounded mcui-window">
-        <div className="mb-3">
+        <div className="mb-3 flex justify-between items-center">
           Editing { selectedGroups?.length || 'no' } groups
+          <button
+            className="mcui-button w-8 h-8"
+            onClick={ onCancel }
+          >
+            ×
+          </button>
         </div>
 
         <div className="mb-3 flex flex-col">
@@ -69,12 +75,6 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
         </div>
 
         <div className="text-right box-border">
-          <button
-            className="mcui-button bg-red-700 w-40 h-10 me-3"
-            onClick={ onCancel }
-          >
-            Cancel
-          </button>
           <button
             className="mcui-button bg-green-800 w-40 h-10"
             onClick={ onCommit }

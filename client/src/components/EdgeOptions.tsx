@@ -55,8 +55,14 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
   return (
     <>
       {selectedEdges.length > 0 && <div className="border rounded p-3 border-2 mcui-window">
-        <div className="mb-3">
+        <div className="mb-3 flex justify-between items-center">
           Editing { selectedEdges?.length || 'no' } pipes
+          <button
+            className="mcui-button w-8 h-8"
+            onClick={ onCancel }
+          >
+            ×
+          </button>
         </div>
 
         <div className="flex flex-col mb-3">
@@ -85,13 +91,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
 
         <div className="text-right box-border">
           <button
-            className="mcui-button bg-red-700 w-32 h-10 me-3"
-            onClick={ onCancel }
-          >
-            Cancel
-          </button>
-          <button
-            className="mcui-button bg-green-800 w-32 h-10"
+            className="mcui-button bg-green-800 w-36 h-10"
             onClick={ onCommit }
           >
             Update pipe

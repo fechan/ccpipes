@@ -64,8 +64,14 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
   return (
     <>
       {selectedMachines.length > 0 && <div className="border p-3 border-2 rounded mcui-window">
-        <div className="mb-3">
+        <div className="mb-3 flex justify-between items-center">
           Editing { selectedMachines?.length || 'no' } machines
+          <button
+            className="mcui-button w-8 h-8"
+            onClick={ onCancel }
+          >
+            ×
+          </button>
         </div>
 
         <div className="flex flex-col mb-3">
@@ -82,13 +88,7 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
 
         <div className="text-right box-border">
           <button
-            className="mcui-button bg-red-700 w-40 h-10 me-3"
-            onClick={ onCancel }
-          >
-            Cancel
-          </button>
-          <button
-            className="mcui-button bg-green-800 w-40 h-10"
+            className="mcui-button bg-green-800 w-44 h-10"
             onClick={ onCommit }
           >
             Update machine
