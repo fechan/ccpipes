@@ -30,13 +30,16 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
 
   function onCommit() {
     const edits: Partial<Group> = {};
+    let changes = false;
 
     if (!["...", ""].includes(nickname)) {
       edits.nickname = nickname;
+      changes = true;
     }
-
-    for (let group of selectedGroups) {
-      GraphUpdateCallbacks.onGroupUpdate(group.id, edits, sendMessage)
+    if (changes) {
+      for (let group of selectedGroups) {
+        GraphUpdateCallbacks.onGroupUpdate(group.id, edits, sendMessage)
+      }
     }
   }
   

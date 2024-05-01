@@ -34,13 +34,17 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
 
   function onCommit() {
     const edits: Partial<Machine> = {};
+    let changes = false;
 
     if (!["...", ""].includes(nickname)) {
       edits.nickname = nickname;
+      changes = true;
     }
 
-    for (let machine of selectedMachines) {
-      GraphUpdateCallbacks.onMachineUpdate(machine.id, edits, sendMessage)
+    if (changes) {
+      for (let machine of selectedMachines) {
+        GraphUpdateCallbacks.onMachineUpdate(machine.id, edits, sendMessage)
+      }
     }
   }
   

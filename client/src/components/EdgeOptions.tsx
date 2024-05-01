@@ -27,17 +27,22 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
 
   function onCommit() {
     const edits: Partial<Pipe> = {};
+    let changes = false;
 
     if (!["...", ""].includes(nickname)) {
       edits.nickname = nickname;
+      changes = true;
     }
     
     if (filter !== "...") {
       edits.filter = filter;
+      changes = true;
     }
 
-    for (let edge of selectedEdges) {
-      GraphUpdateCallbacks.onPipeUpdate(edge.id, edits, sendMessage)
+    if (changes) {
+      for (let edge of selectedEdges) {
+        GraphUpdateCallbacks.onPipeUpdate(edge.id, edits, sendMessage)
+      }
     }
   }
   
