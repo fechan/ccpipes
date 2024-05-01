@@ -41,9 +41,9 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
   }
   
   const store = useStoreApi();
-  const { addSelectedEdges } = store.getState();
+  const { addSelectedNodes } = store.getState();
   function onCancel() {
-    addSelectedEdges([]);
+    addSelectedNodes([]);
   }
 
   return (
