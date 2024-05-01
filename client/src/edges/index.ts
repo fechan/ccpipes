@@ -2,6 +2,7 @@ import { MarkerType, type Edge, type EdgeTypes } from "reactflow";
 import { Factory } from "@server/types/core-types";
 import { PipeEdge } from "./PipeEdge";
 import { FactoryAddsAndDeletes } from "../stores/factory";
+import { TempEdge } from "./TempEdge";
 
 export function getEdgesForFactory(factory: Factory): Edge[] {
   return Object.values(factory.pipes).map(pipe => ({
@@ -43,10 +44,11 @@ function createAddedEdges(factory: Factory, addsAndDeletes: FactoryAddsAndDelete
 }
 
 export function updateEdgesForFactory(oldEdges: Edge[], factory: Factory, addsAndDeletes: FactoryAddsAndDeletes) {
-  const newEdges = oldEdges.filter(edge => !addsAndDeletes.pipes.deletes.has(edge.id));
+  const newEdges = oldEdges.filter(edge => !addsAndDeletes.pipes.deletes.has(edge.id) && edge.type !== "temp");
   return newEdges.concat(createAddedEdges(factory, addsAndDeletes));
 }
 
 export const edgeTypes = {
   "pipe": PipeEdge,
+  "temp": TempEdge,
 } satisfies EdgeTypes;

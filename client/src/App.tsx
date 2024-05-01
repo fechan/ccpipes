@@ -2,18 +2,20 @@ import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, F
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
+import type { Edge, Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
 
 import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
   Controls,
+  MarkerType,
   MiniMap,
   Panel,
   ReactFlow,
   useEdgesState,
   useNodesState,
-  useReactFlow
+  useReactFlow,
+  useStoreApi
 } from "reactflow";
 
 import "reactflow/dist/style.css";
@@ -28,6 +30,7 @@ import { useDropTargetStore } from "./stores/dropTarget";
 import { useFactoryStore } from "./stores/factory";
 import { GroupOptions } from "./components/GroupOptions";
 import { MachineOptions } from "./components/MachineOptions";
+import { TempEdgeOptions } from "./components/TempEdgeOptions";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -45,14 +48,16 @@ export default function App() {
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
 
+  const [ tempEdge, setTempEdge ] = useState(null as (Edge | null));
+
   const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
 
   /**
    * Handlers for React Flow events
    */
   const onConnect: OnConnect = useCallback(
-    (connection) => GraphUpdateCallbacks.onConnect(connection, sendMessage, setEdges),
-    [setEdges]
+    (connection) => GraphUpdateCallbacks.onConnect(connection, setTempEdge, setEdges),
+    [setEdges, setTempEdge]
   );
 
   const onEdgesDelete: OnEdgesDelete = useCallback(
@@ -158,6 +163,16 @@ export default function App() {
   return (
     <div className="w-full h-full">
       { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
+      { tempEdge && <TempEdgeOptions
+          sendMessage={ sendMessage }
+          tempEdge={ tempEdge }
+          setTempEdge={ setTempEdge }
+          onCancel={ () => {
+            setTempEdge(null);
+            setEdges(edges.filter(edge => edge.type !== "temp"));
+          } }
+        />
+      }
 
       <ReactFlow
         nodes={nodes}

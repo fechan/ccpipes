@@ -2,7 +2,7 @@ import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId, Slot } from 
 import { BatchRequest, GroupAddReq, GroupEditReq, MachineEditReq, Message, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
-import { boxToRect, Connection, Edge, Instance, Node, ReactFlowInstance } from "reactflow";
+import { boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { ItemSlotDragData } from "./components/ItemSlot";
@@ -19,21 +19,23 @@ function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
   }
 }
 
-function onConnect(connection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {
-  if (connection.source !== null && connection.target !== null) {
-    const pipeId = uuidv4();
-
-    const pipeAddReq: PipeAddReq = {
-      type: "PipeAdd",
-      reqId: uuidv4(),
-      pipe: {
-        id: pipeId,
-        from: connection.source,
-        to: connection.target,
-      }
-    };
-    sendMessage(JSON.stringify(pipeAddReq));
-  }
+function onConnect(connection: Connection, setTempEdge: Dispatch<SetStateAction<Edge|null>>, setEdges: Dispatch<SetStateAction<Edge[]>>) {
+  if (!connection.source || !connection.target) return;
+  
+  const tempEdge: Edge = {
+    id: uuidv4(),
+    type: "temp",
+    source: connection.source,
+    target: connection.target,
+    markerEnd: {
+      type: MarkerType.Arrow,
+      width: 15,
+      height: 15,
+      color: "magenta"
+    }
+  };
+  setEdges(edges => edges.concat([tempEdge]));
+  setTempEdge(tempEdge);
 }
 
 function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {

@@ -18,11 +18,6 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
   const [ nickname, setNickname ] = useState("");
   const [ filter, setFilter ] = useState("");
 
-  const setters: { [key: string]: Dispatch<SetStateAction<string>> } = {
-    "nickname": setNickname,
-    "filter": setFilter,
-  };
-
   useOnSelectionChange({
     onChange: ({ edges }) => {
       setSelectedEdges(edges);
@@ -30,10 +25,6 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
       setNickname(edges.length === 1 ? (pipes[edges[0].id].nickname || "") : "...");
     }
   });
-
-  function onPipeOptionChanged(option: keyof Pipe, value: string) {
-    setters[option](value);
-  }
 
   function onCommit() {
     const edits: Partial<Pipe> = {};
@@ -72,7 +63,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             id="nickName"
             className="mcui-input p-1 ps-2"
             value={ nickname }
-            onInput={ e => onPipeOptionChanged("nickname", (e.target as HTMLInputElement).value) }
+            onInput={ e => setNickname((e.target as HTMLInputElement).value) }
           />
         </div>
 
@@ -84,7 +75,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             id="pipeFilter"
             className="mcui-input p-1 ps-2"
             value={ filter }
-            onInput={ e => onPipeOptionChanged("filter", (e.target as HTMLInputElement).value) }
+            onInput={ e => setFilter((e.target as HTMLInputElement).value) }
           />
         </div>
 
@@ -96,10 +87,10 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             Cancel
           </button>
           <button
-            className="mcui-button bg-green-800 w-20 h-10"
+            className="mcui-button bg-green-800 w-32 h-10"
             onClick={ onCommit }
           >
-            OK
+            Update pipe
           </button>
         </div>
       </div>}
