@@ -1,10 +1,9 @@
-import { SendMessage } from "react-use-websocket";
-import { Edge, useOnSelectionChange } from "reactflow";
-import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
-import { Dispatch, SetStateAction, useState } from "react";
 import { Pipe } from "@server/types/core-types";
+import { useState } from "react";
+import { SendMessage } from "react-use-websocket";
+import { Edge, useOnSelectionChange, useStoreApi } from "reactflow";
+import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { useFactoryStore } from "../stores/factory";
-import { useStoreApi } from 'reactflow';
 
 interface EdgeOptionsProps {
   sendMessage: SendMessage,
