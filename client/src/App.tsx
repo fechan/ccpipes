@@ -2,7 +2,7 @@ import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, F
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
-import type { Edge, Node, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
+import type { Edge, Node, NodeChange, NodeDragHandler, OnConnect, OnEdgesDelete, OnEdgeUpdateFunc, ReactFlowInstance } from "reactflow";
 
 import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
@@ -43,7 +43,7 @@ export default function App() {
 
   const { factory, addsAndDeletes, groupParents, setFactory, patchFactory } = useFactoryStore();
 
-  const { getIntersectingNodes } = useReactFlow();
+  const { getIntersectingNodes, getNode } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
@@ -88,6 +88,14 @@ export default function App() {
   const onDrop: DragEventHandler = useCallback(
     (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, factory),
     [reactFlowInstance, sendMessage, setNodes, factory]
+  );
+
+  const beforeNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      changes = changes.filter(change => change.type !== "remove" || !["slot-group", "machine"].includes(getNode(change.id)!.type!))
+      onNodesChange(changes);
+    },
+    [onNodesChange]
   );
 
   /**
@@ -177,7 +185,7 @@ export default function App() {
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
+        onNodesChange={beforeNodesChange}
         edges={edges}
         edgeTypes={edgeTypes}
         onEdgesChange={onEdgesChange}
