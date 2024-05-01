@@ -1,5 +1,5 @@
 import { SendMessage } from "react-use-websocket";
-import { Node, useOnSelectionChange } from "reactflow";
+import { Node, useOnSelectionChange, useStoreApi } from "reactflow";
 import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Group } from "@server/types/core-types";
@@ -16,10 +16,6 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
 
   const [ nickname, setNickname ] = useState("");
 
-  const setters: { [key: string]: Dispatch<SetStateAction<string>> } = {
-    "nickname": setNickname,
-  };
-
   useOnSelectionChange({
     onChange: ({ nodes }) => {
       const selectedNodeTypes = new Set(nodes.map(node => node.type));
@@ -32,11 +28,22 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
     }
   });
 
-  function onGroupOptionChanged(option: keyof Group, value: string) {
-    for (let group of selectedGroups) {
-      GraphUpdateCallbacks.onGroupUpdate(group.id, { [option]: value }, sendMessage)
+  function onCommit() {
+    const edits: Partial<Group> = {};
+
+    if (!["...", ""].includes(nickname)) {
+      edits.nickname = nickname;
     }
-    setters[option](value);
+
+    for (let group of selectedGroups) {
+      GraphUpdateCallbacks.onGroupUpdate(group.id, edits, sendMessage)
+    }
+  }
+  
+  const store = useStoreApi();
+  const { addSelectedEdges } = store.getState();
+  function onCancel() {
+    addSelectedEdges([]);
   }
 
   return (
@@ -54,8 +61,23 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
             id="nickName"
             className="mcui-input p-1 ps-2"
             value={ nickname }
-            onInput={ e => onGroupOptionChanged("nickname", (e.target as HTMLInputElement).value) }
+            onInput={ e => setNickname((e.target as HTMLInputElement).value) }
           />
+        </div>
+
+        <div className="text-right box-border">
+          <button
+            className="mcui-button bg-red-700 w-40 h-10 me-3"
+            onClick={ onCancel }
+          >
+            Cancel
+          </button>
+          <button
+            className="mcui-button bg-green-800 w-40 h-10"
+            onClick={ onCommit }
+          >
+            Update group
+          </button>
         </div>
       </div>}
     </>
