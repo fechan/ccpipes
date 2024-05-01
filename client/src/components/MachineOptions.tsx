@@ -88,10 +88,10 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
 
         <div className="text-right box-border">
           <button
-            className="mcui-button bg-green-800 w-44 h-10"
+            className="mcui-button bg-green-800 w-32 h-10"
             onClick={ onCommit }
           >
-            Update machine
+            Update
           </button>
         </div>
       </div>}

@@ -45,7 +45,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
       }
     }
   }
-  
+
   const store = useStoreApi();
   const { addSelectedEdges } = store.getState();
   function onCancel() {
@@ -91,10 +91,16 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
 
         <div className="text-right box-border">
           <button
-            className="mcui-button bg-green-800 w-36 h-10"
+            className="mcui-button bg-red-700 w-32 h-10 me-3"
+            onClick={ () => GraphUpdateCallbacks.onEdgesDelete(selectedEdges, sendMessage) }
+          >
+            Delete
+          </button>
+          <button
+            className="mcui-button bg-green-800 w-32 h-10"
             onClick={ onCommit }
           >
-            Update pipe
+            Update
           </button>
         </div>
       </div>}

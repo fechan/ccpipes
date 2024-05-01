@@ -76,10 +76,10 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
 
         <div className="text-right box-border">
           <button
-            className="mcui-button bg-green-800 w-40 h-10"
+            className="mcui-button bg-green-800 w-32 h-10"
             onClick={ onCommit }
           >
-            Update group
+            Update
           </button>
         </div>
       </div>}

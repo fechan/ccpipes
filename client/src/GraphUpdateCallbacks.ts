@@ -1,11 +1,10 @@
-import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId, Slot } from "@server/types/core-types";
-import { BatchRequest, GroupAddReq, GroupEditReq, MachineEditReq, Message, PipeAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
+import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "@server/types/core-types";
+import { BatchRequest, GroupEditReq, MachineEditReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
-import { ItemSlotDragData } from "./components/ItemSlot";
 import { splitPeripheralFromMachine, splitSlotFromGroup } from "./SplitHandlers";
 
 function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
