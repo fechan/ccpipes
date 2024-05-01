@@ -1,5 +1,5 @@
 import { SendMessage } from "react-use-websocket";
-import { Node, useOnSelectionChange } from "reactflow";
+import { Node, useOnSelectionChange, useStoreApi } from "reactflow";
 import { GraphUpdateCallbacks } from "../GraphUpdateCallbacks";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Machine } from "@server/types/core-types";
@@ -32,6 +32,24 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
     }
   });
 
+  function onCommit() {
+    const edits: Partial<Machine> = {};
+
+    if (!["...", ""].includes(nickname)) {
+      edits.nickname = nickname;
+    }
+
+    for (let machine of selectedMachines) {
+      GraphUpdateCallbacks.onMachineUpdate(machine.id, edits, sendMessage)
+    }
+  }
+  
+  const store = useStoreApi();
+  const { addSelectedNodes } = store.getState();
+  function onCancel() {
+    addSelectedNodes([]);
+  }
+
   function onMachineOptionChanged(option: keyof Machine, value: string) {
     for (let machine of selectedMachines) {
       GraphUpdateCallbacks.onMachineUpdate(machine.id, { [option]: value }, sendMessage)
@@ -56,6 +74,21 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
             value={ nickname }
             onInput={ e => onMachineOptionChanged("nickname", (e.target as HTMLInputElement).value) }
           />
+        </div>
+
+        <div className="text-right box-border">
+          <button
+            className="mcui-button bg-red-700 w-40 h-10 me-3"
+            onClick={ onCancel }
+          >
+            Cancel
+          </button>
+          <button
+            className="mcui-button bg-green-800 w-40 h-10"
+            onClick={ onCommit }
+          >
+            Update machine
+          </button>
         </div>
       </div>}
     </>
