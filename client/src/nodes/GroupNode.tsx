@@ -1,4 +1,3 @@
-import { Group, MachineId } from "@server/types/core-types";
 import { Handle, NodeProps, Position } from "reactflow";
 import { ItemSlot } from "../components/ItemSlot";
 import { useDropTargetStore } from "../stores/dropTarget";

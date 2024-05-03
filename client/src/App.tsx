@@ -7,15 +7,12 @@ import type { Edge, Node, NodeChange, NodeDragHandler, OnConnect, OnEdgesDelete,
 import { DragEvent, DragEventHandler, MouseEvent, useCallback, useEffect, useState } from "react";
 import {
   Background,
-  Controls,
-  MarkerType,
-  MiniMap,
+  Controls, MiniMap,
   Panel,
   ReactFlow,
   useEdgesState,
   useNodesState,
-  useReactFlow,
-  useStoreApi
+  useReactFlow
 } from "reactflow";
 
 import "reactflow/dist/style.css";
@@ -31,6 +28,7 @@ import { useFactoryStore } from "./stores/factory";
 import { GroupOptions } from "./components/GroupOptions";
 import { MachineOptions } from "./components/MachineOptions";
 import { TempEdgeOptions } from "./components/TempEdgeOptions";
+import { getLayoutedElements } from "./Layouting";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -48,6 +46,7 @@ export default function App() {
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
 
+  const [ needLayout, setNeedLayout ] = useState(false);
   const [ tempEdge, setTempEdge ] = useState(null as (Edge | null));
 
   const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
@@ -105,9 +104,23 @@ export default function App() {
   useEffect(() => {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
+    setNeedLayout(true);
   }, [factory]);
 
   useEffect(() => {
+    (async () => {
+      if (needLayout) {
+        console.log("triggered layout")
+        const layouted = await getLayoutedElements(nodes, edges, factory);
+        setNodes(layouted);
+        setNeedLayout(false);
+      }
+    })();
+  }, [needLayout]);
+
+  useEffect(() => {
+    setNeedLayout(true);
+
     if (
       addsAndDeletes.groups.adds.size > 0 ||
       addsAndDeletes.groups.deletes.size > 0 ||
