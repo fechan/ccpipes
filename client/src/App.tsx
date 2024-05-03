@@ -110,7 +110,6 @@ export default function App() {
   useEffect(() => {
     (async () => {
       if (needLayout) {
-        console.log("triggered layout")
         const layouted = await getLayoutedElements(nodes, edges, factory);
         setNodes(layouted);
         setNeedLayout(false);
