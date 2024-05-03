@@ -45,7 +45,7 @@ function Machine.fromPeriphId (periphId)
     string.find(periphId, 'minecraft:dropper_') or
     string.find(periphId, 'minecraft:hopper_') or
     (string.find(periphId, 'minecraft:') and string.find(periphId, '_shulker_box_')) or
-    peripheral.size() > 16
+    peripheral.size() >= 16
   ) then
     return Machine.fromChestPeriphId(periphId)
   end

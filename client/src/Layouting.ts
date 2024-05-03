@@ -10,7 +10,7 @@ const elkOptions: LayoutOptions = {
   "elk.direction": "RIGHT",
   "elk.algorithm": "layered",
   "elk.layered.spacing.nodeNodeBetweenLayers": "100",
-  "elk.spacing.nodeNode": "80",
+  "elk.layered.spacing.baseValue": "60",
 };
 
 export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory: Factory) {
@@ -30,6 +30,9 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
     const machineNodeFlow = nodeMap[machineId];
     const machineNodeElk: ElkNode = {
       ...machineNodeFlow,
+      layoutOptions: {
+        "elk.padding": "[top=30,right=30,bottom=30,left=30]",
+      },
       width: 1,
       height: 1,
       children: [],
