@@ -112,8 +112,6 @@ export default function App() {
   }, [factory]);
 
   useEffect(() => {
-    setNeedLayout(true);
-
     if (
       addsAndDeletes.groups.adds.size > 0 ||
       addsAndDeletes.groups.deletes.size > 0 ||
@@ -121,6 +119,7 @@ export default function App() {
       addsAndDeletes.machines.deletes.size > 0
     ) {
       setNodes(nodes => updateNodesForFactory(nodes, addsAndDeletes, groupParents));
+      setNeedLayout(true);
     }
 
     if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
