@@ -44,6 +44,7 @@ wss.on("connection", function connection(ws) {
       }
     } catch (error) {
       console.error(`Caught error ${error.name}: ${error.message}`);
+      ws.close()
     }
   });
 
