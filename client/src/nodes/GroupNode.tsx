@@ -11,6 +11,14 @@ export const SIZES = {
   paddingTop: 10,
 };
 
+export function getWidth(numSlots: number) {
+  return Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2;
+}
+
+export function getHeight(numSlots: number) {
+  return Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2 + SIZES.paddingTop;
+}
+
 export function GroupNode({ id, selected }: NodeProps) {
   const dropTarget = useDropTargetStore(state => state.dropTarget);
   const { nickname, numSlots, slots } = useFactoryStore(useShallow(state => ({
@@ -42,8 +50,8 @@ export function GroupNode({ id, selected }: NodeProps) {
         (selected ? " !bg-blue-200" : "")
       }
       style={{
-        width: Math.min(9, numSlots) * SIZES.slot + SIZES.slotContainerPadding*2,
-        height: Math.ceil(numSlots / 9) * SIZES.slot + SIZES.slotContainerPadding*2 + SIZES.paddingTop,
+        width: getWidth(numSlots),
+        height: getHeight(numSlots),
       }}
     >
       <div
