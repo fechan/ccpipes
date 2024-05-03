@@ -100,22 +100,16 @@ export default function App() {
   /**
    * End handlers for React Flow events
    */
+  useEffect(() => {
+    if (readyState === ReadyState.CLOSED)
+      setShowNewSessionModal(true)
+  }, [readyState])
 
   useEffect(() => {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
     setNeedLayout(true);
   }, [factory]);
-
-  useEffect(() => {
-    (async () => {
-      if (needLayout) {
-        const layouted = await getLayoutedElements(nodes, edges, factory);
-        setNodes(layouted);
-        setNeedLayout(false);
-      }
-    })();
-  }, [needLayout]);
 
   useEffect(() => {
     setNeedLayout(true);
@@ -132,12 +126,17 @@ export default function App() {
     if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
       setEdges(edges => updateEdgesForFactory(edges, factory, addsAndDeletes))
     }
-  }, [addsAndDeletes])
+  }, [addsAndDeletes]);
 
   useEffect(() => {
-    if (readyState === ReadyState.CLOSED)
-      setShowNewSessionModal(true)
-  }, [readyState])
+    (async () => {
+      if (needLayout) {
+        const layouted = await getLayoutedElements(nodes, edges, factory);
+        setNodes(layouted);
+        setNeedLayout(false);
+      }
+    })();
+  }, [needLayout]);
 
   useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
