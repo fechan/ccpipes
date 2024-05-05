@@ -1,4 +1,4 @@
-import { ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
+import { CcUpdatedFactory, ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
@@ -173,6 +173,10 @@ export default function App() {
             alert("Error joining session: " + (failRes.message || "Unknown reason"));
           }
         }
+      } else if (message.type === "CcUpdatedFactory") {
+        const ccUpdatedFactory = message as CcUpdatedFactory;
+        patchFactory(ccUpdatedFactory.diff);
+        return;
       }
 
     }

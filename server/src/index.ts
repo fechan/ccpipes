@@ -41,6 +41,11 @@ wss.on("connection", function connection(ws) {
             relayMessage(json, sessionId, destination);
             break;
         }
+      } else if (message.type === "CcUpdatedFactory") {
+        const destination = role === 'CC' ? 'editor' : 'CC';
+        // TODO: if either client sends WS messages when the other isn't there, this throw
+        // we should probably check beforehand, and respond to the sender with an error
+        relayMessage(json, sessionId, destination);
       }
     } catch (error) {
       console.error(`Caught error ${error.name}: ${error.message}`);

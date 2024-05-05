@@ -93,7 +93,7 @@ end
 ---Add a newly created group to a machine in the factory
 ---@param factory Factory Factory the machine is in
 ---@param group Group New group to add
----@param machineId string ID of machine to add the group to
+---@param machineId? string ID of machine to add the group to. If provided, the group ID will be added to the machine's group list.
 local function groupAdd (factory, group, machineId)
   local diff = {
     groups = {
@@ -101,15 +101,19 @@ local function groupAdd (factory, group, machineId)
     }
   }
 
-  factory.groups[group.id] = group
+  if machineId then
+    factory.groups[group.id] = group
 
-  local machineUpdatedGroups = Utils.shallowCopy(factory.machines[machineId].groups)
-  table.insert(machineUpdatedGroups, group.id)
+    local machineUpdatedGroups = Utils.shallowCopy(factory.machines[machineId].groups)
+    table.insert(machineUpdatedGroups, group.id)
 
-  return Utils.concatArrays(
-    {diff},
-    machineEdit(factory, machineId, { groups=machineUpdatedGroups })
-  )
+    return Utils.concatArrays(
+      {diff},
+      machineEdit(factory, machineId, { groups=machineUpdatedGroups })
+    )
+  end
+
+  return {diff}
 end
 
 ---Delete a group from the factory
@@ -220,7 +224,7 @@ local function getPeripheralIds ()
   local periphs = {}
   for i, periphId in ipairs(peripheral.getNames()) do
     -- add if the peripheral has an inventory and is connected via a modem
-    if peripheral.wrap(periphId)['pushItems'] and string.match(periphId, ':') then 
+    if peripheral.wrap(periphId)['pushItems'] and string.match(periphId, ':') then
       table.insert(periphs, periphId)
     end
   end

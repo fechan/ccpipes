@@ -15,7 +15,8 @@ export type MessageType = (
   "ConfirmationResponse" |
   "SessionCreate" | "SessionJoin" |
   "FactoryGet" | "FactoryGetResponse" |
-  FactoryUpdateRequest
+  FactoryUpdateRequest |
+  "CcUpdatedFactory"
 );
 
 export interface Message {
@@ -215,4 +216,14 @@ export interface GroupAddReq extends Request {
   type: "GroupAdd",
   group: Group,
   machineId: MachineId,
+}
+
+/**
+ * Unilateral declaration by ComputerCraft that it has updated the factory.
+ * 
+ * - Emitted from CC when peripherals are attached or detached from the network.
+ */
+export interface CcUpdatedFactory extends Message {
+  type: "CcUpdatedFactory",
+  diff: Delta[],
 }
