@@ -17,6 +17,7 @@ end
 ---Add a pipe to a factory
 ---@param factory Factory Factory to add to
 ---@param pipe Pipe Pipe to add
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function pipeAdd (factory, pipe)
   factory.pipes[pipe.id] = pipe
 
@@ -31,6 +32,7 @@ end
 ---Delete a pipe from the factory
 ---@param factory Factory Factory to delete from
 ---@param pipeId string ID of pipe to remove
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function pipeDel (factory, pipeId)
   factory.pipes[pipeId] = nil
 
@@ -48,6 +50,7 @@ end
 ---@param factory Factory Factory the pipe is in
 ---@param pipeId string ID of pipe to edit
 ---@param edits table Map of keys to edit -> new values
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function pipeEdit (factory, pipeId, edits)
   local pipe = factory.pipes[pipeId]
 
@@ -70,6 +73,7 @@ end
 ---@param factory Factory Factory the machine is in
 ---@param machineId string ID of machine to edit
 ---@param edits table Map of keys to edit -> new values
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function machineEdit (factory, machineId, edits)
   local machine = factory.machines[machineId]
 
@@ -94,6 +98,7 @@ end
 ---@param factory Factory Factory the machine is in
 ---@param group Group New group to add
 ---@param machineId? string ID of machine to add the group to. If provided, the group ID will be added to the machine's group list.
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function groupAdd (factory, group, machineId)
   local diff = {
     groups = {
@@ -116,6 +121,10 @@ local function groupAdd (factory, group, machineId)
   return {diff}
 end
 
+---Delete a machine from the factory
+---@param factory Factory Factory to delete from
+---@param machineId string ID of the machine to delete
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function machineDel (factory, machineId)
   factory.machines[machineId] = nil
 
@@ -132,6 +141,7 @@ end
 ---Delete a group from the factory
 ---@param factory Factory Factory the group is in
 ---@param groupId string ID of group to remove
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function groupDel (factory, groupId)
   local oldGroup = factory.groups[groupId]
   factory.groups[groupId] = nil
@@ -185,6 +195,7 @@ end
 ---@param factory Factory Factory the group is in
 ---@param groupId string ID of group to edit
 ---@param edits table Map of keys to edit -> new values
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function groupEdit (factory, groupId, edits)
   local group = factory.groups[groupId]
 
@@ -208,6 +219,7 @@ end
 ---Delete a machine from the factory
 ---@param factory Factory Factory the machine is in
 ---@param machineId string ID of machine to remove
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function machineDel (factory, machineId)
   factory.machines[machineId] = nil
 
@@ -224,6 +236,7 @@ end
 ---Add a machine to a factory
 ---@param factory Factory Factory to add to
 ---@param machine Machine Machine to add
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function machineAdd (factory, machine)
   factory.machines[machine.id] = machine
 
@@ -235,6 +248,13 @@ local function machineAdd (factory, machine)
   return {diff}
 end
 
+---Remove a peripheral from groups in the factory.
+---
+---If any groups are empty after the peripheral is removed, the group is removed
+---as well.
+---@param factory Factory Factory to remove from
+---@param periphId string CC peripheral ID
+---@return table diffs List of jsondiffpatch Deltas for the factory
 local function periphDel (factory, periphId)
   local diffs = {}
 
