@@ -81,6 +81,8 @@ end
 
 local function handlePeripheralDetach(periphId, factory, sendMessage)
   local diff = Factory.periphDel(factory, periphId)
+  if #diff == 0 then return end
+
   sendMessage(textutils.serializeJSON({
     type = "CcUpdatedFactory",
     diff = diff
