@@ -54,13 +54,6 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
     addSelectedNodes([]);
   }
 
-  function onMachineOptionChanged(option: keyof Machine, value: string) {
-    for (let machine of selectedMachines) {
-      GraphUpdateCallbacks.onMachineUpdate(machine.id, { [option]: value }, sendMessage)
-    }
-    setters[option](value);
-  }
-
   return (
     <>
       {selectedMachines.length > 0 && <div className="border p-3 border-2 rounded mcui-window">
@@ -82,7 +75,7 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
             id="nickName"
             className="mcui-input p-1 ps-2"
             value={ nickname }
-            onInput={ e => onMachineOptionChanged("nickname", (e.target as HTMLInputElement).value) }
+            onInput={ e => setNickname((e.target as HTMLInputElement).value) }
           />
         </div>
 
