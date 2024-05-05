@@ -29,7 +29,7 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
     const edits: Partial<Pipe> = {};
     let changes = false;
 
-    if (!["...", ""].includes(nickname)) {
+    if (nickname !== "...") {
       edits.nickname = nickname;
       changes = true;
     }

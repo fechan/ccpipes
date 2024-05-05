@@ -36,7 +36,7 @@ export function MachineOptions({ sendMessage }: MachineOptionsProps) {
     const edits: Partial<Machine> = {};
     let changes = false;
 
-    if (!["...", ""].includes(nickname)) {
+    if (nickname !== "") {
       edits.nickname = nickname;
       changes = true;
     }

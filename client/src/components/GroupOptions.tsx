@@ -32,7 +32,7 @@ export function GroupOptions({ sendMessage }: GroupOptionsProps) {
     const edits: Partial<Group> = {};
     let changes = false;
 
-    if (!["...", ""].includes(nickname)) {
+    if (nickname !== "...") {
       edits.nickname = nickname;
       changes = true;
     }
