@@ -135,7 +135,7 @@ local function listenForCcpipesEvents (wsContext, factory)
       handlePeripheralAttach(message, factory, sendMessage)
     end
 
-    if (handlers[event] or event == 'ccpipes-BatchRequest') and event ~= 'ccpipes-FactoryGet' then
+    if (handlers[event] or event == 'ccpipes-BatchRequest' or event == 'peripheral') and event ~= 'ccpipes-FactoryGet' then
       Factory.saveFactory(factory)
     end
 
