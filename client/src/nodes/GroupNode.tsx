@@ -78,8 +78,8 @@ export function GroupNode({ id, selected }: NodeProps) {
         </div>
       </div>
 
-      <Handle type="target" position={ Position.Left } />
-      <Handle type="source" position={ Position.Right } />
+      <Handle type="target" position={ Position.Left } className="h-2.5 w-2.5 rounded-sm bg-blue-600 border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark" />
+      <Handle type="source" position={ Position.Right } className="h-2.5 w-2.5 rounded-sm bg-red-600 border border-t-mcgui-group-border-light border-s-mcgui-group-border-light border-b-mcgui-group-border-dark border-e-mcgui-group-border-dark" />
     </div>
   );
 }
