@@ -1,5 +1,8 @@
 local Utils = require('utils')
 
+---CC: Tweaked WebSocket handle (https://tweaked.cc/module/http.html#ty:Websocket)
+---@class Websocket
+
 -- This is a table with message type names as keys and not an array
 -- so it's easy to check if a string is in the list of message types
 local MESSAGE_TYPES = {

@@ -5,6 +5,12 @@ local Utils = require('utils')
 ---A data structure for a Factory matching `/server/src/types/core-types.ts#Factory`
 ---@class Factory
 
+---A data structure for a Machine matching `/server/src/types/core-types.ts#Machine`
+---@class Machine
+
+---A data structure for a Group matching `/server/src/types/core-types.ts#Group`
+---@class Group
+
 ---Save a factory as a JSON file
 ---@param factory Factory Factory to save
 local function saveFactory(factory)

@@ -2,6 +2,11 @@ local CacheMap = require('CacheMap')
 local Concurrent = require('concurrent')
 local Utils = require('utils')
 
+---An inventory slot on a peripheral in the network
+---@class Slot
+---@field periphId string CC peripheral ID
+---@field slot number Slot number on the peripheral
+
 ---A request to transfer `limit` items from the `from` slot to the `to` slot
 ---@class TransferOrder
 ---@field from Slot Origin slot
