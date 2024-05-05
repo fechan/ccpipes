@@ -216,23 +216,6 @@ local function groupEdit (factory, groupId, edits)
   return {diff}
 end
 
----Delete a machine from the factory
----@param factory Factory Factory the machine is in
----@param machineId string ID of machine to remove
----@return table diffs List of jsondiffpatch Deltas for the factory
-local function machineDel (factory, machineId)
-  factory.machines[machineId] = nil
-
-  local diff = {
-    machines = {
-      [machineId] = {
-        nil, 0, 0
-      }
-    }
-  }
-  return {diff}
-end
-
 ---Add a machine to a factory
 ---@param factory Factory Factory to add to
 ---@param machine Machine Machine to add
