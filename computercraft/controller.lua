@@ -72,24 +72,11 @@ local function createConfirmationResponse(request, ok, diff)
 end
 
 local function handlePeripheralAttach(periphId, factory, sendMessage)
-  local newMachine, newGroups = Machine.fromPeriphId(periphId)
-  local periphAttachDiffs = {}
-
-  local machineAddDiff = Factory.machineAdd(factory, newMachine)
-  machineAddDiff = Utils.freezeTable(machineAddDiff)
-  table.insert(periphAttachDiffs, machineAddDiff)
-
-  for groupId, group in pairs(newGroups) do
-    local groupAddDiff = Factory.groupAdd(factory, group)
-    groupAddDiff = Utils.freezeTable(groupAddDiff)
-    table.insert(periphAttachDiffs, groupAddDiff)
-  end
-
-  local ccUpdatedFactory = {
+  local diff = Factory.periphAdd(factory, periphId)
+  sendMessage(textutils.serializeJSON({
     type = "CcUpdatedFactory",
-    diff = Utils.concatArrays(unpack(periphAttachDiffs))
-  }
-  sendMessage(textutils.serializeJSON(ccUpdatedFactory))
+    diff = diff
+  }))
 end
 
 local function handlePeripheralDetach(periphId, factory, sendMessage)

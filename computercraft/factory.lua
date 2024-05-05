@@ -231,7 +231,28 @@ local function machineAdd (factory, machine)
   return {diff}
 end
 
----Remove a peripheral from groups in the factory.
+---Add a peripheral to the factory as a new machine
+---@param factory Factory Factory to add the peripheral to
+---@param periphId string Peripheral to add
+---@return table diffs List of jsondiffpatch Deltas for the factory
+local function periphAdd (factory, periphId)
+  local newMachine, newGroups = Machine.fromPeriphId(periphId)
+  local periphAttachDiffs = {}
+
+  local machineAddDiff = machineAdd(factory, newMachine)
+  machineAddDiff = Utils.freezeTable(machineAddDiff)
+  table.insert(periphAttachDiffs, machineAddDiff)
+
+  for groupId, group in pairs(newGroups) do
+    local groupAddDiff = groupAdd(factory, group)
+    groupAddDiff = Utils.freezeTable(groupAddDiff)
+    table.insert(periphAttachDiffs, groupAddDiff)
+  end
+
+  return Utils.concatArrays(unpack(periphAttachDiffs))
+end
+
+---Remove a peripheral's slots from all groups in the factory.
 ---
 ---If any groups are empty after the peripheral is removed, the group is removed
 ---as well.
@@ -300,11 +321,12 @@ return {
   pipeDel = pipeDel,
   pipeEdit = pipeEdit,
   machineAdd = machineAdd,
-  machineEdit = machineEdit,
   machineDel = machineDel,
+  machineEdit = machineEdit,
   groupAdd = groupAdd,
-  groupEdit = groupEdit,
   groupDel = groupDel,
+  groupEdit = groupEdit,
+  periphAdd = periphAdd,
   periphDel = periphDel,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
