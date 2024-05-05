@@ -19,7 +19,11 @@ local function processPipe (pipe, groupMap)
     local coros = {}
     for i, order in ipairs(transferOrders) do
       local fromPeriph = peripheral.wrap(order.from.periphId)
-      local coro = function () fromPeriph.pushItems(order.to.periphId, order.from.slot, order.limit, order.to.slot) end
+      local coro = function ()
+        pcall(function ()
+          fromPeriph.pushItems(order.to.periphId, order.from.slot, order.limit, order.to.slot)
+        end)
+      end
       table.insert(coros, coro)
     end
     parallel.waitForAll(unpack(coros))
