@@ -72,21 +72,27 @@ local function createConfirmationResponse(request, ok, diff)
 end
 
 local function handlePeripheralAttach(periphId, factory, sendMessage)
-  local diff = Factory.periphAdd(factory, periphId)
-  sendMessage(textutils.serializeJSON({
-    type = "CcUpdatedFactory",
-    diff = diff
-  }))
+  local isInventory = peripheral.wrap(periphId)['pushItems']
+  if isInventory then
+    local diff = Factory.periphAdd(factory, periphId)
+    sendMessage(textutils.serializeJSON({
+      type = "CcUpdatedFactory",
+      diff = diff
+    }))
+  end
 end
 
 local function handlePeripheralDetach(periphId, factory, sendMessage)
-  local diff = Factory.periphDel(factory, periphId)
-  if #diff == 0 then return end
+  local isInventory = peripheral.wrap(periphId)['pushItems']
+  if isInventory then
+    local diff = Factory.periphDel(factory, periphId)
+    if #diff == 0 then return end
 
-  sendMessage(textutils.serializeJSON({
-    type = "CcUpdatedFactory",
-    diff = diff
-  }))
+    sendMessage(textutils.serializeJSON({
+      type = "CcUpdatedFactory",
+      diff = diff
+    }))
+  end
 end
 
 local function listenForCcpipesEvents (wsContext, factory)
