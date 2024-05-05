@@ -32,6 +32,9 @@ local function init ()
   else
     factory = textutils.unserializeJSON(factoryJsonFile:read('a'))
     io.close(factoryJsonFile)
+
+    Factory.updateWithPeriphChanges(factory)
+    Factory.saveFactory(factory)
   end
 
   -- When attachSession is called, the wsContext updates wsContext.ws with a

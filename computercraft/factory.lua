@@ -322,6 +322,39 @@ local function autodetectFactory ()
   return factory
 end
 
+---Given an existing factory, remove peripherals that are no longer on the
+---network and create machines for newly added peripherals.
+---@param factory Factory Factory to update with peripheral changes
+local function updateWithPeriphChanges (factory)
+  local currentPeriphSet = {}
+  for i, periphId in ipairs(getPeripheralIds()) do
+    currentPeriphSet[periphId] = true
+  end
+
+  local oldPeriphSet = {}
+  for groupId, group in pairs(factory.groups) do
+    for i, slot in ipairs(group.slots) do
+      oldPeriphSet[slot.periphId] = true
+    end
+  end
+
+  -- get rid of disconnected peripherals:
+  -- remove anything in oldPeriphSet that's not in currentPeriphSet
+  for oldPeriphId, _ in pairs(oldPeriphSet) do
+    if currentPeriphSet[oldPeriphId] == nil then
+      periphDel(factory, oldPeriphId)
+    end
+  end
+
+  -- add new peripherals:
+  -- add anything in currentPeriphSet that's not in oldPeriphSet
+  for currentPeriphId, _ in pairs(currentPeriphSet) do
+    if oldPeriphSet[currentPeriphId] == nil then
+      periphAdd(factory, currentPeriphId)
+    end
+  end
+end
+
 return {
   pipeAdd = pipeAdd,
   pipeDel = pipeDel,
@@ -335,5 +368,6 @@ return {
   periphAdd = periphAdd,
   periphDel = periphDel,
   autodetectFactory = autodetectFactory,
+  updateWithPeriphChanges = updateWithPeriphChanges,
   saveFactory = saveFactory,
 }
