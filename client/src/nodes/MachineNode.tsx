@@ -57,7 +57,7 @@ export function MachineNode({ id, selected }: NodeProps) {
           (selected ? " !bg-blue-200" : "")
         }
       >
-        <div>{ nickname || id }</div>
+        <div className="truncate hover:w-max">{ nickname || id }</div>
         <div
           className="h-7 overflow-x-auto whitespace-nowrap"
           style={{scrollbarWidth: "thin"}}
