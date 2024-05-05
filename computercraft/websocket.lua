@@ -66,7 +66,7 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   while res == nil or not res.ok do
     if attempts > maxAttempts then
       print('Failed to create session for editor... pipes will continue to run but you cannot edit them.')
-      print('Reason:', res.message)
+      print('Reason:', (res and res.message) or 'received empty response after requesting session.')
       return false
     end
     print('Trying to create session. Attempt', attempts)
