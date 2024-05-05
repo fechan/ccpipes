@@ -295,7 +295,8 @@ local function getPeripheralIds ()
   local periphs = {}
   for i, periphId in ipairs(peripheral.getNames()) do
     -- add if the peripheral has an inventory and is connected via a modem
-    if peripheral.wrap(periphId)['pushItems'] and string.match(periphId, ':') then
+    local periph = peripheral.wrap(periphId)
+    if periph['pushItems'] and periph.size() >= 1 and string.match(periphId, ':') then
       table.insert(periphs, periphId)
     end
   end
