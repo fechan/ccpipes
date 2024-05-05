@@ -92,6 +92,14 @@ local function handlePeripheralAttach(periphId, factory, sendMessage)
   sendMessage(textutils.serializeJSON(ccUpdatedFactory))
 end
 
+local function handlePeripheralDetach(periphId, factory, sendMessage)
+  local diff = Factory.periphDel(factory, periphId)
+  sendMessage(textutils.serializeJSON({
+    type = "CcUpdatedFactory",
+    diff = diff
+  }))
+end
+
 local function listenForCcpipesEvents (wsContext, factory)
   while true do
     local sendMessage = function (...) end
@@ -133,13 +141,13 @@ local function listenForCcpipesEvents (wsContext, factory)
       end
     elseif event == 'peripheral' then
       handlePeripheralAttach(message, factory, sendMessage)
+    elseif event == 'peripheral_detach' then
+      handlePeripheralDetach(message, factory, sendMessage)
     end
 
-    if (handlers[event] or event == 'ccpipes-BatchRequest' or event == 'peripheral') and event ~= 'ccpipes-FactoryGet' then
+    if (handlers[event] or event == 'ccpipes-BatchRequest' or event == 'peripheral' or event == 'peripheral_detach') and event ~= 'ccpipes-FactoryGet' then
       Factory.saveFactory(factory)
     end
-
-    coroutine.yield()
   end
 end
 

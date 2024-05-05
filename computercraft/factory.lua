@@ -101,9 +101,9 @@ local function groupAdd (factory, group, machineId)
     }
   }
 
-  if machineId then
-    factory.groups[group.id] = group
+  factory.groups[group.id] = group
 
+  if machineId then
     local machineUpdatedGroups = Utils.shallowCopy(factory.machines[machineId].groups)
     table.insert(machineUpdatedGroups, group.id)
 
@@ -113,6 +113,19 @@ local function groupAdd (factory, group, machineId)
     )
   end
 
+  return {diff}
+end
+
+local function machineDel (factory, machineId)
+  factory.machines[machineId] = nil
+
+  local diff = {
+    machines = {
+      [machineId] = {
+        nil, 0, 0
+      }
+    }
+  }
   return {diff}
 end
 
@@ -141,26 +154,30 @@ local function groupDel (factory, groupId)
   pipeDels = Utils.concatArrays(unpack(pipeDels))
 
   -- find the machine that had the group in it and remove the group from it
-  local machineEdits = {}
+  local machineUpdates = {}
   for machineId, machine in pairs(factory.machines) do
     for groupIdxInMachine, groupIdInMachine in ipairs(machine.groups) do
       if groupIdInMachine == groupId then
         table.remove(machine.groups, groupIdxInMachine)
-        table.insert(machineEdits, machineEdit(factory, machineId, { groups = machine.groups }))
+        if #machine.groups == 0 then
+          table.insert(machineUpdates, machineDel(factory, machineId))
+        else
+          table.insert(machineUpdates, machineEdit(factory, machineId, { groups = machine.groups }))
+        end
         break
       end
     end
 
-    if #machineEdits > 0 then
+    if #machineUpdates > 0 then
       break
     end
   end
-  machineEdits = Utils.concatArrays(unpack(machineEdits))
+  machineUpdates = Utils.concatArrays(unpack(machineUpdates))
 
   return Utils.concatArrays(
     {diff},
     pipeDels,
-    machineEdits
+    machineUpdates
   )
 end
 
@@ -218,6 +235,30 @@ local function machineAdd (factory, machine)
   return {diff}
 end
 
+local function periphDel (factory, periphId)
+  local diffs = {}
+
+  for groupId, group in pairs(factory.groups) do
+    local numSlots = #group.slots
+    local keptSlots = {}
+    for i, slot in ipairs(group.slots) do
+      if slot.periphId ~= periphId then
+        table.insert(keptSlots, slot)
+      end
+    end
+
+    if #keptSlots == 0 then
+      local groupDelDiff = groupDel(factory, groupId)
+      table.insert(diffs, Utils.freezeTable(groupDelDiff))
+    elseif numSlots ~= #keptSlots then
+      local groupEditDiff = groupEdit(factory, groupId, { slots = keptSlots })
+      table.insert(diffs, Utils.freezeTable(groupEditDiff))
+    end
+  end
+
+  return Utils.concatArrays(unpack(diffs))
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
@@ -261,6 +302,7 @@ return {
   groupAdd = groupAdd,
   groupEdit = groupEdit,
   groupDel = groupDel,
+  periphDel = periphDel,
   autodetectFactory = autodetectFactory,
   saveFactory = saveFactory,
 }
