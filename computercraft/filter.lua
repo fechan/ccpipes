@@ -38,6 +38,17 @@ local function tagMatch (itemDetail, filter)
   return false
 end
 
+---Check if the itemDetail's nbt hash matches the filter
+---@param itemDetail table CC itemDetail object
+---@param filter string Filter to match
+---@return boolean match True if match, false otherwise
+local function nbtHashMatch (itemDetail, filter)
+  local nbtHash = itemDetail.nbt
+  if nbtHash == nil then return false end
+
+  return string.match(nbtHash, string.sub(filter, 2) ) ~= nil
+end
+
 ---Check if the itemDetail's display name matches the filter
 ---@param itemDetail table CC itemDetail object
 ---@param filter string Filter to match
@@ -69,6 +80,8 @@ local function getSingleFilterFn (jeiFilterSingle)
     filterFn = function (itemDetail) return itemIdMatch(itemDetail, jeiFilterSingle) end
   elseif string.find(jeiFilterSingle, '^%$') then -- if starts with $ then match tags/oreDict
     filterFn = function (itemDetail) return tagMatch(itemDetail, jeiFilterSingle) end
+  elseif string.find(jeiFilterSingle, '^~') then -- if starts with ~ then match NBT hash
+    filterFn = function (itemDetail) return nbtHashMatch(itemDetail, jeiFilterSingle) end
   else -- otherwise match display name
     filterFn = function (itemDetail) return displayNameMatch(itemDetail, jeiFilterSingle) end
   end
