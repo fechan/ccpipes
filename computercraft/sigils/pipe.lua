@@ -4,8 +4,8 @@
 ---A data structure for a Pipe matching `/server/src/types/core-types.ts#Pipe`
 ---@class Pipe
 
-local TransferCalculator = require('transfer-calculator')
-local Filter = require('filter')
+local TransferCalculator = require('sigils.transfer-calculator')
+local Filter = require('sigils.filter')
 
 local function processPipe (pipe, groupMap)
   local filter = Filter.getFilterFn(pipe.filter)

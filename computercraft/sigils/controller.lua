@@ -1,6 +1,6 @@
-local Factory = require('factory')
-local Machine = require('machine')
-local Utils   = require('utils')
+local Factory = require('sigils.factory')
+local Machine = require('sigils.machine')
+local Utils   = require('sigils.utils')
 
 local function handleFactoryGet (request, factory, sendMessage)
   local factoryGetRes = {

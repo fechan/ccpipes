@@ -1,8 +1,8 @@
-local Controller = require('controller')
-local Factory = require('factory')
-local Pipe = require('pipe')
-local WebSocket = require('websocket')
-local Utils = require('utils')
+local Controller = require('sigils.controller')
+local Factory = require('sigils.factory')
+local Pipe = require('sigils.pipe')
+local WebSocket = require('sigils.websocket')
+local Utils = require('sigils.utils')
 
 local SERVER_URL = "ws://localhost:3000"
 

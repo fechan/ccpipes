@@ -1,4 +1,4 @@
-local Utils = require('utils')
+local Utils = require('sigils.utils')
 
 ---CC: Tweaked WebSocket handle (https://tweaked.cc/module/http.html#ty:Websocket)
 ---@class Websocket

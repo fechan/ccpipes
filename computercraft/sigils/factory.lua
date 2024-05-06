@@ -1,6 +1,6 @@
 --- factory.lua: Functions for modifying the factory data structure (in place)
-local Machine = require('machine')
-local Utils = require('utils')
+local Machine = require('sigils.machine')
+local Utils = require('sigils.utils')
 
 ---A data structure for a Factory matching `/server/src/types/core-types.ts#Factory`
 ---@class Factory

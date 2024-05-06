@@ -1,6 +1,6 @@
-local CacheMap = require('CacheMap')
-local Concurrent = require('concurrent')
-local Utils = require('utils')
+local CacheMap = require('sigils.CacheMap')
+local Concurrent = require('sigils.concurrent')
+local Utils = require('sigils.utils')
 
 ---An inventory slot on a peripheral in the network
 ---@class Slot
