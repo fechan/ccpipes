@@ -91,6 +91,11 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             <summary className="cursor-pointer">Advanced syntax</summary>
 
             <p>
+              Prefix a term with an exclamation mark (!) to exclude it:
+              <blockquote className="ps-5">!cobblestone</blockquote>
+            </p>
+
+            <p>
               Filter supports JEI prefixes for:
               <ul className="list-disc ps-5">
                 <li>@mod_name</li>
