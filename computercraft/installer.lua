@@ -31,6 +31,7 @@ end
 parallel.waitForAll(table.unpack(tasks))
 
 print(' done')
+print()
 
 io.open('sigils.lua', 'w'):write("shell.run('.sigils/sigils.lua')"):close()
 
@@ -48,7 +49,9 @@ while writeStartup == nil do
 end
 
 if writeStartup then
+  print('SIGILS will now run on startup.')
   io.open('startup', 'w'):write("shell.run('.sigils/sigils.lua')"):close()
 end
 
+print()
 print('SIGILS successfully installed! Run /sigils.lua to start.')
