@@ -87,6 +87,23 @@ export function EdgeOptions({ sendMessage }: EdgeOptionsProps) {
             value={ filter }
             onInput={ e => setFilter((e.target as HTMLInputElement).value) }
           />
+          <details className="text-sm text-neutral-700 mt-1 w-full">
+            <summary className="cursor-pointer">Advanced syntax</summary>
+
+            <p>
+              Filter supports JEI prefixes for:
+              <ul className="list-disc ps-5">
+                <li>@mod_name</li>
+                <li>&item_id</li>
+                <li>$ore_dict</li>
+              </ul>
+            </p>
+
+            <p>
+              To match multiple filters, use the pipe (|) character:
+              <blockquote className="ps-5">iron ore | dirt | cobblestone</blockquote>
+            </p>
+          </details>
         </div>
 
         <div className="text-right box-border">
