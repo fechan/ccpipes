@@ -28,7 +28,7 @@ local MESSAGE_TYPES = {
 ---@return table response ConfirmationResponse as a Lua table
 ---@return string sessionId Session ID requested
 local function requestSessionOnce (ws)
-  local sessionId = Utils.randomString(1)
+  local sessionId = Utils.randomString(4)
   local req = {
     type = 'SessionCreate',
     reqId = Utils.randomString(20),
