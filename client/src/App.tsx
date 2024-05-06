@@ -172,7 +172,10 @@ export default function App() {
 
           if (failRes.respondingTo === "SessionJoin") {
             toast.error(`Error joining session: ${failRes.message} (${failRes.error})`)
+            return;
           }
+
+          toast.error(`Unexpected error: ${failRes.message} (${failRes.error})`)
         }
       } else if (message.type === "CcUpdatedFactory") {
         const ccUpdatedFactory = message as CcUpdatedFactory;
