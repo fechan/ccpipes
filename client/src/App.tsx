@@ -29,6 +29,7 @@ import { GroupOptions } from "./components/GroupOptions";
 import { MachineOptions } from "./components/MachineOptions";
 import { TempEdgeOptions } from "./components/TempEdgeOptions";
 import { getLayoutedElements } from "./Layouting";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -170,7 +171,7 @@ export default function App() {
           const failRes = message as FailResponse;
 
           if (failRes.respondingTo === "SessionJoin") {
-            alert("Error joining session: " + (failRes.message || "Unknown reason"));
+            toast.error(`Error joining session: ${failRes.message} (${failRes.error})`)
           }
         }
       } else if (message.type === "CcUpdatedFactory") {
@@ -184,6 +185,8 @@ export default function App() {
 
   return (
     <div className="w-full h-full">
+      <Toaster />
+
       { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
       { tempEdge && <TempEdgeOptions
           sendMessage={ sendMessage }
