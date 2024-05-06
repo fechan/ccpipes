@@ -6,4 +6,5 @@ export interface Session {
   id: SessionId,
   computerCraft: WebSocket,
   editor?: WebSocket,
+  idleTimerId?: ReturnType<typeof setTimeout>,
 };

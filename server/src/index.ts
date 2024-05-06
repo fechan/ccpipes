@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { FailResponse, MessageType, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
+import { FailResponse, IdleTimeout, MessageType, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
 import { Session, SessionId } from "./types/session";
 
 type Role = ('CC' | 'editor');
@@ -19,6 +19,9 @@ wss.on("connection", function connection(ws) {
     const message = JSON.parse(json);
     console.log(message.type)
 
+    const session = sessions[sessionId];
+    if (session) resetIdleTimer(session);
+
     try {
       if ("reqId" in message) {
         const request: Request = message;
@@ -26,7 +29,10 @@ wss.on("connection", function connection(ws) {
         switch (request.type) {
           case "SessionCreate":
             sessionId = createSession(request as SessionCreateReq, ws);
-            if (sessionId) role = 'CC';
+            if (sessionId) {
+              role = 'CC';
+              resetIdleTimer(sessions[sessionId]);
+            }
             break;
             
           case "SessionJoin":
@@ -36,7 +42,7 @@ wss.on("connection", function connection(ws) {
         
           default:
             const destination = role === 'CC' ? 'editor' : 'CC';
-            if ((role === 'CC' && !sessions[sessionId].editor) || (role === 'editor' && !sessions[sessionId].computerCraft)) {
+            if ((role === 'CC' && !session.editor) || (role === 'editor' && !session.computerCraft)) {
               const res: FailResponse = {
                 type: "ConfirmationResponse",
                 respondingTo: message.type,
@@ -53,8 +59,7 @@ wss.on("connection", function connection(ws) {
         }
       } else if (message.type === "CcUpdatedFactory") {
         const destination = role === 'CC' ? 'editor' : 'CC';
-        if ((role === 'CC' && !sessions[sessionId].editor) || (role === 'editor' && !sessions[sessionId].computerCraft)) {
-        } else {
+        if ((role === 'CC' && !session.editor) || (role === 'editor' && !session.computerCraft)) {
           const res: FailResponse = {
             type: "ConfirmationResponse",
             respondingTo: message.type,
@@ -62,11 +67,21 @@ wss.on("connection", function connection(ws) {
             error: 'PeerNotConnected',
             message: `Tried sending a message to ${destination}, but it doesn't exist on this session.`
           };
+          ws.send(JSON.stringify(res));
+        } else {
           relayMessage(json, sessionId, destination);
         }
       }
     } catch (error) {
       console.error(`Caught error ${error.name}: ${error.message}`);
+      const res: FailResponse = {
+        type: "ConfirmationResponse",
+        respondingTo: message.type,
+        ok: false,
+        error: 'UnknownError',
+        message: 'Unknown error!'
+      };
+      ws.send(JSON.stringify(res));
       ws.close()
     }
   });
@@ -80,6 +95,30 @@ wss.on("connection", function connection(ws) {
     }
   });
 });
+
+function resetIdleTimer(session: Session) {
+  if (session.idleTimerId) {
+    clearTimeout(session.idleTimerId);
+  }
+
+  session.idleTimerId = setTimeout(() => {
+    console.log('timeout reached')
+
+    const timeoutMsg: IdleTimeout = {
+      type: "IdleTimeout",
+      message: "10 minutes passed without any edits."
+    };
+
+    if (session.computerCraft) {
+      session.computerCraft.send(JSON.stringify(timeoutMsg));
+      session.computerCraft.close();
+    }
+    if (session.editor) {
+      session.editor.send(JSON.stringify(timeoutMsg));
+      session.editor.close();
+    }
+  }, 10 * 60 * 1000)
+}
 
 /**
  * Relay a message from the editor to ComputerCraft or vice versa

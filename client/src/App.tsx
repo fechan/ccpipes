@@ -1,4 +1,4 @@
-import { CcUpdatedFactory, ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, Message, SuccessResponse } from "@server/types/messages";
+import { CcUpdatedFactory, ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, IdleTimeout, Message, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
@@ -30,6 +30,7 @@ import { MachineOptions } from "./components/MachineOptions";
 import { TempEdgeOptions } from "./components/TempEdgeOptions";
 import { getLayoutedElements } from "./Layouting";
 import toast, { Toaster } from "react-hot-toast";
+import { Toast } from "./components/Toast";
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState("ws://localhost:3000");
@@ -171,15 +172,30 @@ export default function App() {
           const failRes = message as FailResponse;
 
           if (failRes.respondingTo === "SessionJoin") {
-            toast.error(`Error joining session: ${failRes.message} (${failRes.error})`)
+            toast.custom((t) => <Toast
+              toastObj={t}
+              text={`Error joining session: ${failRes.message} (${failRes.error})`}
+            />);
             return;
           }
-
-          toast.error(`Unexpected error: ${failRes.message} (${failRes.error})`)
+          
+          toast.custom((t) => <Toast
+            toastObj={t}
+            text={`Unexpected error: ${failRes.message} (${failRes.error})`}
+          />);
+          return;
         }
       } else if (message.type === "CcUpdatedFactory") {
         const ccUpdatedFactory = message as CcUpdatedFactory;
         patchFactory(ccUpdatedFactory.diff);
+        return;
+      } else if (message.type === "IdleTimeout") {
+        const idleTimeout = message as IdleTimeout;
+        toast.custom((t) => <Toast
+          toastObj={t}
+          text={`Disconnected due to idling: ${idleTimeout.message}`}
+          showDismiss
+        />, { duration: Infinity });
         return;
       }
 

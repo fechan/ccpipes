@@ -14,6 +14,7 @@ export type FactoryUpdateRequest = typeof FACTORY_UPDATE_REQUEST_TYPES[number];
 export type MessageType = (
   "BatchRequest" |
   "ConfirmationResponse" |
+  "IdleTimeout" |
   "SessionCreate" | "SessionJoin" |
   "FactoryGet" | "FactoryGetResponse" |
   FactoryUpdateRequest |
@@ -64,6 +65,11 @@ export interface SuccessResponse extends ConfirmationResponse {
 export interface FailResponse extends ConfirmationResponse {
   ok: false,
   error: ErrorType,
+  message: string,
+}
+
+export interface IdleTimeout extends Message {
+  type: "IdleTimeout"
   message: string,
 }
 

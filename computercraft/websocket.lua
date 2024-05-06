@@ -91,6 +91,8 @@ local function queueEventFromMessage (message)
 
   if MESSAGE_TYPES[messageType] then
     os.queueEvent('ccpipes-' .. messageType, message)
+  elseif messageType == 'IdleTimeout' then
+    print('Disconnected due to idling: ' .. message['message'])
   else
     print('Unhandled message type in websocket.lua: ' .. messageType)
   end
