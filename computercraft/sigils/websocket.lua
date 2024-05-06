@@ -47,7 +47,8 @@ end
 local function connectAndRequestSession (wsContext, maxAttempts)
   local attempts = 1
 
-  local ws, err = http.websocket(wsContext.wsUrl)
+  print("Trying to connect to editor session server...")
+  local ws, err = http.websocket(wsContext.wsUrl, {timeout=10})
   while not ws do
     if attempts > maxAttempts then
       print('Failed to connect to editor session server... pipes will continue to run but you cannot edit them.')
@@ -57,7 +58,7 @@ local function connectAndRequestSession (wsContext, maxAttempts)
 
     print('Trying to connect. Attempt', attempts)
     os.sleep(3)
-    ws, err = http.websocket(wsContext.wsUrl)
+    ws, err = http.websocket(wsContext.wsUrl, {timeout=10})
     attempts = attempts + 1
   end
   wsContext.ws = ws

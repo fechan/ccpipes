@@ -1,3 +1,4 @@
 factory.json
 node_modules/
 build/
+.env
