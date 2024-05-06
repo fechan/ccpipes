@@ -1,4 +1,5 @@
 import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "./core-types"
+import { ErrorType } from "./errors";
 import { SessionId } from "./session";
 import { Delta } from "jsondiffpatch";
 
@@ -52,7 +53,7 @@ export interface BatchRequest extends Request {
 export interface ConfirmationResponse extends Message {
   type: "ConfirmationResponse"
   respondingTo: MessageType,
-  reqId: string,
+  reqId?: string,
   ok: boolean,
 };
 
@@ -62,6 +63,7 @@ export interface SuccessResponse extends ConfirmationResponse {
 
 export interface FailResponse extends ConfirmationResponse {
   ok: false,
+  error: ErrorType,
   message: string,
 }
 

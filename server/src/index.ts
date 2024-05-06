@@ -36,16 +36,34 @@ wss.on("connection", function connection(ws) {
         
           default:
             const destination = role === 'CC' ? 'editor' : 'CC';
-            // TODO: if either client sends WS messages when the other isn't there, this throw
-            // we should probably check beforehand, and respond to the sender with an error
-            relayMessage(json, sessionId, destination);
+            if ((role === 'CC' && !sessions[sessionId].editor) || (role === 'editor' && !sessions[sessionId].computerCraft)) {
+              const res: FailResponse = {
+                type: "ConfirmationResponse",
+                respondingTo: message.type,
+                ok: false,
+                reqId: message.reqId,
+                error: 'PeerNotConnected',
+                message: `Tried sending a message to ${destination}, but it doesn't exist on this session.`
+              };
+              ws.send(JSON.stringify(res));
+            } else {
+              relayMessage(json, sessionId, destination);
+            }
             break;
         }
       } else if (message.type === "CcUpdatedFactory") {
         const destination = role === 'CC' ? 'editor' : 'CC';
-        // TODO: if either client sends WS messages when the other isn't there, this throw
-        // we should probably check beforehand, and respond to the sender with an error
-        relayMessage(json, sessionId, destination);
+        if ((role === 'CC' && !sessions[sessionId].editor) || (role === 'editor' && !sessions[sessionId].computerCraft)) {
+        } else {
+          const res: FailResponse = {
+            type: "ConfirmationResponse",
+            respondingTo: message.type,
+            ok: false,
+            error: 'PeerNotConnected',
+            message: `Tried sending a message to ${destination}, but it doesn't exist on this session.`
+          };
+          relayMessage(json, sessionId, destination);
+        }
       }
     } catch (error) {
       console.error(`Caught error ${error.name}: ${error.message}`);
@@ -105,6 +123,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
       type: "ConfirmationResponse",
       respondingTo: "SessionJoin",
       ok: false,
+      error: 'SessionIdNotExist',
       message: "Session ID does not exist",
       reqId: reqId,
     };
@@ -117,6 +136,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
       type: "ConfirmationResponse",
       respondingTo: "SessionJoin",
       ok: false,
+      error: 'SessionHasEditor',
       message: "Someone is already editing the factory",
       reqId: reqId,
     };
@@ -142,6 +162,7 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
       type: "ConfirmationResponse",
       respondingTo: "SessionCreate",
       ok: false,
+      error: 'SessionIdTaken',
       message: "Session ID already exists",
       reqId: reqId,
     };
