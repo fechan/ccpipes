@@ -14,13 +14,13 @@ local function waitForQuitKey (wsContext)
     if keys.getName(key) == 'q' then
       if wsContext.ws then wsContext.ws.close() end
       -- there's no canonical exit function, so we just raise an error to stop
-      error("Program quit successfully. Thank you for using CCPipes!")
+      error("Program quit successfully. Thank you for using SIGILS!")
     end
   end
 end
 
 local function init ()
-  print("Welcome to CCPipes! Press Q to stop all pipes and quit.\n")
+  print("Welcome to SIGILS! Press Q to stop all pipes and quit.\n")
 
   local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
