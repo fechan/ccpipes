@@ -1,4 +1,5 @@
 local Utils = require('sigils.utils')
+local LOGGER = require('sigils.logging').LOGGER
 
 ---CC: Tweaked WebSocket handle (https://tweaked.cc/module/http.html#ty:Websocket)
 ---@class Websocket
@@ -51,8 +52,10 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   local ws, err = http.websocket(wsContext.wsUrl, {timeout=10})
   while not ws do
     if attempts > maxAttempts then
-      print('Failed to connect to editor session server... pipes will continue to run but you cannot edit them.')
-      print('Reason:', err)
+      LOGGER:error(
+        'Failed to create session for editor... pipes will continue to run but you cannot edit them.\n' ..
+        'Reason: ' .. err
+      )
       return false
     end
 
@@ -66,8 +69,10 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   local res, sessionId = requestSessionOnce(ws)
   while res == nil or not res.ok do
     if attempts > maxAttempts then
-      print('Failed to create session for editor... pipes will continue to run but you cannot edit them.')
-      print('Reason:', (res and res.message) or 'received empty response after requesting session.')
+      LOGGER:error(
+        'Failed to create session for editor... pipes will continue to run but you cannot edit them.\n' ..
+        'Reason: ' .. ((res and res.message) or 'received empty response after requesting session.')
+      )
       return false
     end
     print('Trying to create session. Attempt', attempts)
