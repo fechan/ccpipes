@@ -27,7 +27,7 @@ local function getConfig ()
 
   if config == nil then
     fs.copy(
-      Utils.absolutePathTo('.sigils/sigils-config.dist.json'),
+      Utils.absolutePathTo('.sigils/sigils/sigils-config.dist.json'),
       Utils.absolutePathTo('sigils-config.json')
     )
     config = io.open(Utils.absolutePathTo('sigils-config.json'), 'r')
