@@ -134,6 +134,7 @@ local function doWebSocket (wsContext)
           'Press E to try to create a factory editing session again ' ..
           'or press Q to stop all pipes and quit.'
         )
+        wsContext.ws = nil
         state = 'WAIT-FOR-USER'
       end
     elseif state == 'CONNECTED' then
@@ -143,6 +144,7 @@ local function doWebSocket (wsContext)
           print()
           print('Lost connection to editor session server.')
           print('Press E to try to create a factory editing session again.')
+          wsContext.ws = nil
           state = 'WAIT-FOR-USER'
         elseif res ~= nil and not isBinary then
           queueEventFromMessage(textutils.unserializeJSON(res))
