@@ -26,7 +26,7 @@ runs:
     - run : git config user.email github-actions@github.com
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-    - run : git --work-tree build add --all
+    - run : git --work-tree dist add --all
       working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git commit -m "Automatic Deploy action run by github-actions"
