@@ -1,4 +1,4 @@
 {
   "server": "wss://sigils.fredchan.org",
-  "verbose": false
+  "logLevel": 1
 }

@@ -3,6 +3,7 @@ local Factory = require('sigils.factory')
 local Pipe = require('sigils.pipe')
 local WebSocket = require('sigils.websocket')
 local Utils = require('sigils.utils')
+local Logging = require('sigils.logging')
 
 local DEFAULT_SERVER_URL = 'wss://sigils.fredchan.org'
 
@@ -50,6 +51,8 @@ local function init ()
   local factory
 
   local config = getConfig()
+  Logging.LOGGER:setLevel(config.logLevel or 1)
+  Logging.LOGGER:warn("test")
 
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then

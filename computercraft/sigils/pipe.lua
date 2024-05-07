@@ -6,6 +6,7 @@
 
 local TransferCalculator = require('sigils.transfer-calculator')
 local Filter = require('sigils.filter')
+local LOGGER = require('sigils.logging').LOGGER
 
 local function processPipe (pipe, groupMap)
   local filter = Filter.getFilterFn(pipe.filter)
@@ -28,7 +29,7 @@ local function processPipe (pipe, groupMap)
     end
     parallel.waitForAll(unpack(coros))
   else
-    print('caught err', transferOrders)
+    LOGGER:warn("pipe.lua#processPipe() caught error " .. transferOrders)
   end
 end
 
