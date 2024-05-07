@@ -10,6 +10,7 @@ local files = {
   'sigils/transfer-calculator.lua',
   'sigils/utils.lua',
   'sigils/websocket.lua',
+  'sigils/sigils-config.dist.json',
 }
 
 write('Downloading SIGILS...')
