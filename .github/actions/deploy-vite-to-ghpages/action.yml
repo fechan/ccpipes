@@ -17,7 +17,7 @@ runs:
     - run : npm ci --include=dev
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-    - run : vite build
+    - run : npx vite build
       working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git config user.name github-actions
