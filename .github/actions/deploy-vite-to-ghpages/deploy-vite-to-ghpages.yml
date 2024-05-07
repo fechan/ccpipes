@@ -4,22 +4,34 @@ author: 'fechan'
 branding:
   color: blue
   icon: code
+inputs:
+  working-directory:
+    description: Working directory for this action
+    required: true
 runs: 
   using: 'composite'
   steps: 
     - run : npm i
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : npm ci
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : vite build
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git config user.name github-actions
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git config user.email github-actions@github.com
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git --work-tree build add --all
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git commit -m "Automatic Deploy action run by github-actions"
+      working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : git push origin HEAD:gh-pages --force
+      working-directory: ${{ inputs.working-directory }}
       shell: bash

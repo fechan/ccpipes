@@ -16,4 +16,5 @@ jobs:
 
     - name: Deploy react app to github pages
       uses: ./.github/actions/deploy-vite-to-ghpages
-      working-directory: ./client
+      with:
+        working-directory: ./client
