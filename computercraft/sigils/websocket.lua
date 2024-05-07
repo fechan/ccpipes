@@ -78,7 +78,9 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   print()
   print('Connection to editor server successful!')
   print('Press E again to end the session.')
-  print('Insert code', sessionId, 'into web editor to edit pipes.')
+  print('**')
+  print('** Insert code', sessionId, 'into web editor to edit pipes.')
+  print('**')
   return true
 end
 
