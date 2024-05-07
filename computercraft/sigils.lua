@@ -52,7 +52,6 @@ local function init ()
 
   local config = getConfig()
   Logging.LOGGER:setLevel(config.logLevel or 1)
-  Logging.LOGGER:warn("test")
 
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then
