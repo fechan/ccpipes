@@ -1,0 +1,19 @@
+name: Vite app deployment
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Deploy react app to github pages
+      uses: ./.github/actions/deploy-vite-to-ghpages
+      working-directory: ./client
