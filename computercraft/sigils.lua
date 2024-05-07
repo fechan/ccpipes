@@ -46,12 +46,12 @@ end
 local function init ()
   print("Welcome to SIGILS! Press Q to stop all pipes and quit.\n")
 
+  local config = getConfig()
+  Logging.LOGGER:setLevel(config.logLevel or 1)
+
   -- try to load the factory
   local factoryJsonFile = io.open(Utils.absolutePathTo('factory.json'), 'r')
   local factory
-
-  local config = getConfig()
-  Logging.LOGGER:setLevel(config.logLevel or 1)
 
   -- if there's no existing json file, generate a factory from detected peripherals
   if factoryJsonFile == nil then
