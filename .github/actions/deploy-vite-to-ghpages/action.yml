@@ -11,10 +11,10 @@ inputs:
 runs: 
   using: 'composite'
   steps: 
-    - run : npm i
+    - run : npm i --include=dev
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-    - run : npm ci
+    - run : npm ci --include=dev
       working-directory: ${{ inputs.working-directory }}
       shell: bash
     - run : vite build
