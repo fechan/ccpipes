@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Deploy react app to github pages
+    - name: Deploy vite app to github pages
       uses: ./.github/actions/deploy-vite-to-ghpages
       with:
         working-directory: ./client
