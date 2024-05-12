@@ -35,7 +35,7 @@ local function requestSessionOnce (wsContext)
     req = {
       type = 'SessionRejoin',
       reqId = Utils.randomString(20),
-      ccReconnectToken = reconnectToken,
+      ccReconnectToken = wsContext.reconnectToken,
       sessionId = wsContext.sessionId,
     }
   else
@@ -93,8 +93,6 @@ local function connectAndRequestSession (wsContext, maxAttempts)
     attempts = attempts + 1
   end
 
-  print(textutils.serialiseJSON(res))
-
   print()
   print('Connection to editor server successful!')
   print('Press E again to end the session.')
@@ -151,6 +149,7 @@ local function doWebSocket (wsContext)
           'Press E to try to create a factory editing session again ' ..
           'or press Q to stop all pipes and quit.'
         )
+        wsContext.reconnectToken = nil
         wsContext.ws = nil
         state = 'WAIT-FOR-USER'
       end
@@ -168,6 +167,7 @@ local function doWebSocket (wsContext)
             print()
             print('Lost connection to editor session server.')
             print('Press E to try to create a factory editing session again.')
+            wsContext.reconnectToken = nil
             wsContext.ws = nil
             state = 'WAIT-FOR-USER'
           end
