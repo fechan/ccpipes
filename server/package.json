@@ -12,6 +12,7 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "uuid": "^9.0.1",
     "ws": "^8.16.0"
   },
   "devDependencies": {

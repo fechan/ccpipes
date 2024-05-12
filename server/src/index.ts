@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { FailResponse, IdleTimeout, MessageType, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
+import { FailResponse, IdleTimeout, MessageType, Request, SessionCreateReq, SessionCreateRes, SessionJoinReq, SessionRejoinReq, SuccessResponse } from "./types/messages";
 import { Session, SessionId } from "./types/session";
+import { v4 as uuidv4 } from "uuid";
 
 type Role = ('CC' | 'editor');
 
@@ -38,6 +39,11 @@ wss.on("connection", function connection(ws) {
           case "SessionJoin":
             sessionId = joinSession(request as SessionJoinReq, ws);
             if (sessionId) role = 'editor';
+            break;
+
+          case "SessionRejoin":
+            sessionId = rejoinSession(message as SessionRejoinReq, ws);
+            if (sessionId) role = 'CC';
             break;
         
           default:
@@ -88,8 +94,7 @@ wss.on("connection", function connection(ws) {
 
   ws.on("close", (data) => {
     if (role === "CC" && sessionId && sessions[sessionId]) {
-      sessions[sessionId].editor?.close();
-      delete sessions[sessionId];
+      sessions[sessionId].computerCraft = undefined;
     } else if (role === "editor" && sessionId && sessions[sessionId]) {
       sessions[sessionId].editor = undefined;
     }
@@ -189,13 +194,45 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
   return sessionId;
 }
 
+function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq, computerCraft: WebSocket) {
+  if (!sessions[reqId]) {
+    const res: FailResponse = {
+      type: "ConfirmationResponse",
+      respondingTo: "SessionRejoin",
+      ok: false,
+      error: 'SessionIdNotExist',
+      message: "Cannot connect to an expired session ID",
+      reqId: reqId,
+    };
+    computerCraft.send(JSON.stringify(res));
+    return;
+  }
+
+  if (sessions[reqId].ccReconnectToken !== ccReconnectToken) {
+    const res: FailResponse = {
+      type: "ConfirmationResponse",
+      respondingTo: "SessionRejoin",
+      ok: false,
+      error: 'BadReconnectToken',
+      message: "Reconnect token incorrect",
+      reqId: reqId,
+    };
+    computerCraft.send(JSON.stringify(res));
+    return;
+  }
+
+  sessions[sessionId].computerCraft = computerCraft;
+
+  return sessionId as SessionId;
+}
+
 /**
  * Create a session and add the ComputerCraft computer to it
  * @param param0 Session create request
  * @param computerCraft Websocket of the CC computer
  * @returns Session ID on success, undefined on failure
  */
-function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: WebSocket): SessionId {
+function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: WebSocket) {
   if (sessionId in sessions) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
@@ -209,11 +246,22 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
     return;
   }
 
+  const ccReconnectToken = uuidv4();
+
   sessions[sessionId] = {
     id: sessionId,
-    computerCraft: computerCraft
+    computerCraft: computerCraft,
+    ccReconnectToken: ccReconnectToken,
   };
 
-  sendGenericSuccess("SessionCreate", reqId, computerCraft);
-  return sessionId;
+  const res: SessionCreateRes = {
+    type: "ConfirmationResponse",
+    respondingTo: "SessionCreate",
+    ok: true,
+    reqId: reqId,
+    ccReconnectToken: ccReconnectToken,
+  };
+  computerCraft.send(JSON.stringify(res));
+
+  return sessionId as SessionId;
 }

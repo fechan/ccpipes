@@ -4,7 +4,8 @@ export type SessionId = string;
 
 export interface Session {
   id: SessionId,
-  computerCraft: WebSocket,
+  computerCraft?: WebSocket,
   editor?: WebSocket,
   idleTimerId?: ReturnType<typeof setTimeout>,
+  ccReconnectToken?: string,
 };

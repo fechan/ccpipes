@@ -73,6 +73,8 @@ local function init ()
   local wsContext = {
     wsUrl = config.server or DEFAULT_SERVER_URL,
     ws = nil,
+    reconnectToken = nil,
+    sessionId = string,
   }
 
   parallel.waitForAll(
