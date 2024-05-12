@@ -158,7 +158,7 @@ local function doWebSocket (wsContext)
         local ok, res, isBinary = pcall(function () return wsContext.ws.receive() end)
         if not ok then
           print()
-          print('Attempting to reconnect')
+          print('Lost connection to editor session server. Attempting to reconnect.')
           local reconnectToken = connectAndRequestSession(wsContext, 5)
 
           if reconnectToken then
