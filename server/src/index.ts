@@ -122,6 +122,8 @@ function resetIdleTimer(session: Session) {
       session.editor.send(JSON.stringify(timeoutMsg));
       session.editor.close();
     }
+
+    delete sessions[session.id];
   }, 10 * 60 * 1000)
 }
 
