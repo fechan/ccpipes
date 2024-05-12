@@ -223,6 +223,15 @@ function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq,
 
   sessions[sessionId].computerCraft = computerCraft;
 
+  const res: SessionCreateRes = {
+    type: "ConfirmationResponse",
+    respondingTo: "SessionRejoin",
+    ok: true,
+    reqId: reqId,
+    ccReconnectToken: ccReconnectToken,
+  };
+  computerCraft.send(JSON.stringify(res));
+
   return sessionId as SessionId;
 }
 
