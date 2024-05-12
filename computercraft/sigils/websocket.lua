@@ -47,9 +47,9 @@ local function requestSessionOnce (wsContext)
     }
   end
 
-  ws.send(textutils.serializeJSON(req))
+  wsContext.ws.send(textutils.serializeJSON(req))
 
-  local res = ws.receive(5)
+  local res = wsContext.ws.receive(5)
   return textutils.unserializeJSON(res)
 end
 
@@ -88,15 +88,18 @@ local function connectAndRequestSession (wsContext, maxAttempts)
       return false
     end
     print('Trying to create session. Attempt', attempts)
+    os.sleep(3)
     res = requestSessionOnce(wsContext)
     attempts = attempts + 1
   end
+
+  print(textutils.serialiseJSON(res))
 
   print()
   print('Connection to editor server successful!')
   print('Press E again to end the session.')
   print('**')
-  print('** Insert code', res.sessionId, 'into web editor to edit pipes.')
+  print('** Insert code', wsContext.sessionId, 'into web editor to edit pipes.')
   print('**')
   return res.ccReconnectToken
 end

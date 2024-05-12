@@ -195,7 +195,7 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
 }
 
 function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq, computerCraft: WebSocket) {
-  if (!sessions[reqId]) {
+  if (!sessions[sessionId]) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
       respondingTo: "SessionRejoin",
@@ -208,7 +208,7 @@ function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq,
     return;
   }
 
-  if (sessions[reqId].ccReconnectToken !== ccReconnectToken) {
+  if (sessions[sessionId].ccReconnectToken !== ccReconnectToken) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
       respondingTo: "SessionRejoin",
