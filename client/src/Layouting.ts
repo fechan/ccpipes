@@ -9,6 +9,9 @@ const elk = new ELK();
 const elkOptions: LayoutOptions = {
   "elk.direction": "RIGHT",
   "elk.algorithm": "layered",
+  "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+  "elk.layered.layering.strategy": "INTERACTIVE",
+  "elk.layered.cycleBreaking.strategy": "INTERACTIVE",
   "elk.layered.spacing.nodeNodeBetweenLayers": "100",
   "elk.layered.spacing.baseValue": "60",
 };
@@ -36,6 +39,8 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
       width: 1,
       height: 1,
       children: [],
+      x: machine.x || 0,
+      y: machine.y || 0,
     }
     graph.children!.push(machineNodeElk);
 
@@ -49,6 +54,11 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
         height: getHeight(group.slots.length),
       };
       machineNodeElk.children!.push(groupNodeElk);
+      
+        if (group.x) {
+          groupNodeElk.x = group.x;
+          groupNodeElk.y = group.y;
+        }
     }
   }
 

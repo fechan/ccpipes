@@ -54,6 +54,8 @@ export interface Group {
     id: GroupId,
     slots: Slot[],
     nickname?: string,
+    x?: number,
+    y?: number,
 };
 
 export type MachineId = string;
@@ -66,4 +68,6 @@ export interface Machine {
     id: MachineId,
     groups: GroupId[],
     nickname?: string,
+    x?: number,
+    y?: number,
 }
