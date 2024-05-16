@@ -24,27 +24,39 @@ local MESSAGE_TYPES = {
   GroupDel = true,
 }
 
----Request a session from the editor session server once
----@param ws Websocket ComputerCraft Websocket handle
+---Request a session from the editor session server once, or reconnect if
+---there's a reconnect token
+---@param wsContext table WebSocket context
 ---@return table response ConfirmationResponse as a Lua table
----@return string sessionId Session ID requested
-local function requestSessionOnce (ws)
-  local sessionId = Utils.randomString(4)
-  local req = {
-    type = 'SessionCreate',
-    reqId = Utils.randomString(20),
-    sessionId = sessionId,
-  }
-  ws.send(textutils.serializeJSON(req))
+local function requestSessionOnce (wsContext)
+  local req
 
-  local res = ws.receive(5)
-  return textutils.unserializeJSON(res), sessionId
+  if wsContext.reconnectToken then
+    req = {
+      type = 'SessionRejoin',
+      reqId = Utils.randomString(20),
+      ccReconnectToken = wsContext.reconnectToken,
+      sessionId = wsContext.sessionId,
+    }
+  else
+    wsContext.sessionId = Utils.randomString(4)
+    req = {
+      type = 'SessionCreate',
+      reqId = Utils.randomString(20),
+      sessionId = wsContext.sessionId,
+    }
+  end
+
+  wsContext.ws.send(textutils.serializeJSON(req))
+
+  local res = wsContext.ws.receive(5)
+  return textutils.unserializeJSON(res)
 end
 
 ---Connect to the editor session server and request a session, retrying if needed
 ---@param wsContext table Shared WebSocket context
 ---@param maxAttempts number Max attempts to connect and get a session
----@return boolean ok True if session was acquired, false otherwise
+---@return string ccReconnectToken A reconnect token for resuming the session if it breaks
 local function connectAndRequestSession (wsContext, maxAttempts)
   local attempts = 1
 
@@ -66,7 +78,7 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   end
   wsContext.ws = ws
 
-  local res, sessionId = requestSessionOnce(ws)
+  local res = requestSessionOnce(wsContext)
   while res == nil or not res.ok do
     if attempts > maxAttempts then
       LOGGER:error(
@@ -76,7 +88,8 @@ local function connectAndRequestSession (wsContext, maxAttempts)
       return false
     end
     print('Trying to create session. Attempt', attempts)
-    res, sessionId = requestSessionOnce(ws)
+    os.sleep(3)
+    res = requestSessionOnce(wsContext)
     attempts = attempts + 1
   end
 
@@ -84,9 +97,9 @@ local function connectAndRequestSession (wsContext, maxAttempts)
   print('Connection to editor server successful!')
   print('Press E again to end the session.')
   print('**')
-  print('** Insert code', sessionId, 'into web editor to edit pipes.')
+  print('** Insert code', wsContext.sessionId, 'into web editor to edit pipes.')
   print('**')
-  return true
+  return res.ccReconnectToken
 end
 
 ---Queue an OS event for a given message. The event name will always be in the
@@ -120,20 +133,23 @@ local function doWebSocket (wsContext)
   print('Press E to create a factory editing session.')
   while true do
     if state == 'WAIT-FOR-USER' then
+      wsContext.reconnectToken = nil
       local event, char = os.pullEvent('char')
       if char == 'e' then
         state = 'START-CONNECT'
       end
     elseif state == 'START-CONNECT' then
-      local established = connectAndRequestSession(wsContext, 5)
-      if established then
+      local reconnectToken = connectAndRequestSession(wsContext, 5)
+      if reconnectToken then
         state = 'CONNECTED'
+        wsContext.reconnectToken = reconnectToken
       else
         print()
         print(
           'Press E to try to create a factory editing session again ' ..
           'or press Q to stop all pipes and quit.'
         )
+        wsContext.reconnectToken = nil
         wsContext.ws = nil
         state = 'WAIT-FOR-USER'
       end
@@ -142,10 +158,20 @@ local function doWebSocket (wsContext)
         local ok, res, isBinary = pcall(function () return wsContext.ws.receive() end)
         if not ok then
           print()
-          print('Lost connection to editor session server.')
-          print('Press E to try to create a factory editing session again.')
-          wsContext.ws = nil
-          state = 'WAIT-FOR-USER'
+          print('Lost connection to editor session server. Attempting to reconnect.')
+          local reconnectToken = connectAndRequestSession(wsContext, 5)
+
+          if reconnectToken then
+            wsContext.reconnectToken = reconnectToken
+          else
+            print()
+            print('Lost connection to editor session server.')
+            print('Press E to try to create a factory editing session again.')
+            wsContext.reconnectToken = nil
+            wsContext.ws = nil
+            state = 'WAIT-FOR-USER'
+          end
+
         elseif res ~= nil and not isBinary then
           queueEventFromMessage(textutils.unserializeJSON(res))
         end
@@ -158,6 +184,7 @@ local function doWebSocket (wsContext)
             'Editor session closed. Press E to create a new editing session ' ..
             'or press Q to stop all pipes and quit.'
           )
+          wsContext.reconnectToken = nil
           wsContext.ws.close()
           wsContext.ws = nil
           state = 'WAIT-FOR-USER'

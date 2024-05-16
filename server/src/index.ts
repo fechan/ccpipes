@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { FailResponse, IdleTimeout, MessageType, Request, SessionCreateReq, SessionJoinReq, SuccessResponse } from "./types/messages";
+import { ConfirmationResponse, FailResponse, IdleTimeout, Message, MessageType, Request, SessionCreateReq, SessionCreateRes, SessionJoinReq, SessionRejoinReq, SuccessResponse } from "./types/messages";
 import { Session, SessionId } from "./types/session";
+import { v4 as uuidv4 } from "uuid";
 
 type Role = ('CC' | 'editor');
 
@@ -39,10 +40,15 @@ wss.on("connection", function connection(ws) {
             sessionId = joinSession(request as SessionJoinReq, ws);
             if (sessionId) role = 'editor';
             break;
+
+          case "SessionRejoin":
+            sessionId = rejoinSession(message as SessionRejoinReq, ws);
+            if (sessionId) role = 'CC';
+            break;
         
           default:
             const destination = role === 'CC' ? 'editor' : 'CC';
-            if ((role === 'CC' && !session.editor) || (role === 'editor' && !session.computerCraft)) {
+            if (role === 'CC' && !session.editor) {
               const res: FailResponse = {
                 type: "ConfirmationResponse",
                 respondingTo: message.type,
@@ -52,24 +58,25 @@ wss.on("connection", function connection(ws) {
                 message: `Tried sending a message to ${destination}, but it doesn't exist on this session.`
               };
               ws.send(JSON.stringify(res));
+            } else if (role === 'editor' && !session.computerCraft) {
+              queueRequestForCCForLater(message as Request, session);
             } else {
               relayMessage(json, sessionId, destination);
             }
             break;
         }
       } else if (message.type === "CcUpdatedFactory") {
-        const destination = role === 'CC' ? 'editor' : 'CC';
-        if ((role === 'CC' && !session.editor) || (role === 'editor' && !session.computerCraft)) {
+        if (!session.editor) {
           const res: FailResponse = {
             type: "ConfirmationResponse",
             respondingTo: message.type,
             ok: false,
             error: 'PeerNotConnected',
-            message: `Tried sending a message to ${destination}, but it doesn't exist on this session.`
+            message: `Tried sending a message to the editor, but it isn't connected on this session.`
           };
           ws.send(JSON.stringify(res));
         } else {
-          relayMessage(json, sessionId, destination);
+          relayMessage(json, sessionId, 'editor');
         }
       }
     } catch (error) {
@@ -88,8 +95,7 @@ wss.on("connection", function connection(ws) {
 
   ws.on("close", (data) => {
     if (role === "CC" && sessionId && sessions[sessionId]) {
-      sessions[sessionId].editor?.close();
-      delete sessions[sessionId];
+      sessions[sessionId].computerCraft = undefined;
     } else if (role === "editor" && sessionId && sessions[sessionId]) {
       sessions[sessionId].editor = undefined;
     }
@@ -117,6 +123,8 @@ function resetIdleTimer(session: Session) {
       session.editor.send(JSON.stringify(timeoutMsg));
       session.editor.close();
     }
+
+    delete sessions[session.id];
   }, 10 * 60 * 1000)
 }
 
@@ -189,13 +197,64 @@ function joinSession({ reqId, sessionId }: SessionJoinReq, editor: WebSocket): S
   return sessionId;
 }
 
+function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq, computerCraft: WebSocket) {
+  if (!sessions[sessionId]) {
+    const res: FailResponse = {
+      type: "ConfirmationResponse",
+      respondingTo: "SessionRejoin",
+      ok: false,
+      error: 'SessionIdNotExist',
+      message: "Cannot connect to an expired session ID",
+      reqId: reqId,
+    };
+    computerCraft.send(JSON.stringify(res));
+    return;
+  }
+
+  if (sessions[sessionId].ccReconnectToken !== ccReconnectToken) {
+    const res: FailResponse = {
+      type: "ConfirmationResponse",
+      respondingTo: "SessionRejoin",
+      ok: false,
+      error: 'BadReconnectToken',
+      message: "Reconnect token incorrect",
+      reqId: reqId,
+    };
+    computerCraft.send(JSON.stringify(res));
+    return;
+  }
+
+  const session = sessions[sessionId];
+  session.computerCraft = computerCraft;
+
+  const res: SessionCreateRes = {
+    type: "ConfirmationResponse",
+    respondingTo: "SessionRejoin",
+    ok: true,
+    reqId: reqId,
+    ccReconnectToken: ccReconnectToken,
+  };
+  computerCraft.send(JSON.stringify(res));
+
+  if (session.staleOutboxTimerId) {
+    clearTimeout(session.staleOutboxTimerId);
+    session.staleOutboxTimerId = undefined;
+  }
+
+  while (session.editorOutbox.length > 0) {
+    computerCraft.send(JSON.stringify(session.editorOutbox.pop()));
+  }
+
+  return sessionId as SessionId;
+}
+
 /**
  * Create a session and add the ComputerCraft computer to it
  * @param param0 Session create request
  * @param computerCraft Websocket of the CC computer
  * @returns Session ID on success, undefined on failure
  */
-function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: WebSocket): SessionId {
+function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: WebSocket) {
   if (sessionId in sessions) {
     const res: FailResponse = {
       type: "ConfirmationResponse",
@@ -209,11 +268,52 @@ function createSession({ reqId, sessionId }: SessionCreateReq, computerCraft: We
     return;
   }
 
+  const ccReconnectToken = uuidv4();
+
   sessions[sessionId] = {
     id: sessionId,
-    computerCraft: computerCraft
+    computerCraft: computerCraft,
+    ccReconnectToken: ccReconnectToken,
+    editorOutbox: [],
   };
 
-  sendGenericSuccess("SessionCreate", reqId, computerCraft);
-  return sessionId;
+  const res: SessionCreateRes = {
+    type: "ConfirmationResponse",
+    respondingTo: "SessionCreate",
+    ok: true,
+    reqId: reqId,
+    ccReconnectToken: ccReconnectToken,
+  };
+  computerCraft.send(JSON.stringify(res));
+
+  return sessionId as SessionId;
+}
+
+/**
+ * Queue a request to be sent to CC for after CC reconnects to the session.
+ * If there's not a timer already, this starts a timer which clears after
+ * CC reconnects, otherwise it sends sends failure ConfirmationResponses back
+ * to the editor and closes the editor's websocket
+ * @param message Message to queue for later.
+ */
+function queueRequestForCCForLater(request: Request, session: Session) {
+  session.editorOutbox.push(request);
+
+  if (!session.staleOutboxTimerId) {
+    session.staleOutboxTimerId = setTimeout(() => {
+      const failResponse: FailResponse = {
+        type: "ConfirmationResponse",
+        respondingTo: request.type,
+        reqId: request.reqId,
+        ok: false,
+        error: 'PeerNotConnected',
+        message: 'Tried sending a message to ComputerCraft, but it did not connect within 10 seconds.'
+      };
+      session.editor.send(JSON.stringify(failResponse));
+
+      session.editorOutbox = [];
+
+      session.editor.close();
+    }, 10 * 1000);
+  }
 }
