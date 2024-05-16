@@ -311,6 +311,8 @@ function queueRequestForCCForLater(request: Request, session: Session) {
       };
       session.editor.send(JSON.stringify(failResponse));
 
+      session.editorOutbox = [];
+
       session.editor.close();
     }, 10 * 1000);
   }
