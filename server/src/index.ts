@@ -238,6 +238,7 @@ function rejoinSession({ reqId, sessionId, ccReconnectToken }: SessionRejoinReq,
 
   if (session.staleOutboxTimerId) {
     clearTimeout(session.staleOutboxTimerId);
+    session.staleOutboxTimerId = undefined;
   }
 
   while (session.editorOutbox.length > 0) {
