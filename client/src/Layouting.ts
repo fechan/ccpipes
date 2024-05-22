@@ -7,7 +7,7 @@ import { getHeight, getWidth } from "./nodes/GroupNode";
 const elk = new ELK();
 
 const elkOptions: LayoutOptions = {
-  "elk.direction": "RIGHT",
+  "elk.direction": "DOWN",
   "elk.algorithm": "layered",
   "elk.hierarchyHandling": "INCLUDE_CHILDREN",
   "elk.layered.layering.strategy": "INTERACTIVE",
@@ -55,14 +55,60 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
       };
       machineNodeElk.children!.push(groupNodeElk);
       
-        if (group.x) {
-          groupNodeElk.x = group.x;
-          groupNodeElk.y = group.y;
-        }
+      if (group.x) {
+        groupNodeElk.x = group.x;
+        groupNodeElk.y = group.y;
+      }
     }
   }
 
-  const layout = await elk.layout(graph);
+  // fulfill width information first
+  let layout = await elk.layout(graph);
+
+  // layout again with fixed x,y positions if they exist in the factory
+  const graph2: ElkNode = {
+    id: "root",
+    layoutOptions: elkOptions,
+    edges: edges.map(edge => ({ ...edge, sources: [edge.source], targets: [edge.target]})),
+    children: [],
+  }
+
+  for (let machineNodeElk of layout.children || []) {
+    const newMachineNodeElk: ElkNode = {
+      ...nodeMap[machineNodeElk.id],
+      layoutOptions: {
+        "elk.padding": "[top=30,right=30,bottom=30,left=30]",
+      },
+      x: machineNodeElk.x,
+      y: machineNodeElk.y,
+      width: machineNodeElk.width,
+      height: machineNodeElk.height,
+      children: [],
+    };
+
+    // if (x,y) position is defined in the factory, set the position and set noLayout
+    const machine = factory.machines[machineNodeElk.id];
+    if (machine.x) {
+      newMachineNodeElk.x = machine.x;
+      newMachineNodeElk.y = machine.y;
+      newMachineNodeElk.layoutOptions = { "elk.noLayout": "true" };
+    }
+
+    for (let groupNodeElk of machineNodeElk.children || []) {
+      newMachineNodeElk.children!.push({
+        ...nodeMap[groupNodeElk.id],
+        x: groupNodeElk.x,
+        y: groupNodeElk.y,
+        width: groupNodeElk.width,
+        height: groupNodeElk.height,
+      });
+    }
+
+    graph2.children?.push(newMachineNodeElk);
+  }
+
+  layout = await elk.layout(graph2);
+
   const layoutedNodes: Node[] = [];
   for (let machineNodeElk of layout.children!) {
     layoutedNodes.push({
