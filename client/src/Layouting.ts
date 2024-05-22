@@ -79,7 +79,7 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
         ...groupNodeElk,
         position: {
           x: group.x || groupNodeElk.x || 0,
-          y: group.x || groupNodeElk.y || 0
+          y: group.y || groupNodeElk.y || 0
         },
         style: { width: groupNodeElk.width, height: groupNodeElk.height },
         parentId: machineNodeElk.id,
