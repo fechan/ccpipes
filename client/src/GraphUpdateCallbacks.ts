@@ -164,10 +164,6 @@ function onNodeDragStop(
     clearDropTarget();
   } else if (draggedNode.type === "machine" || draggedNode.type === "group") {
     // update node x/y
-    const mousePosition = reactFlowInstance.screenToFlowPosition({
-      x: mouseEvent.clientX,
-      y: mouseEvent.clientY,
-    });
 
     let nodeEditReq: MachineEditReq | GroupEditReq;
     if (draggedNode.type === "machine") {
@@ -176,8 +172,8 @@ function onNodeDragStop(
         reqId: uuidv4(),
         machineId: draggedNode.id,
         edits: {
-          x: mousePosition.x,
-          y: mousePosition.y,
+          x: draggedNode.position.x,
+          y: draggedNode.position.y,
         }
       };
     } else if (draggedNode.type === "group") {
@@ -187,8 +183,8 @@ function onNodeDragStop(
         reqId: uuidv4(),
         groupId: draggedNode.id,
         edits: {
-          x: parentPos.x - mousePosition.x,
-          y: parentPos.y - mousePosition.y,
+          x: parentPos.x - draggedNode.position.x,
+          y: parentPos.y - draggedNode.position.y,
         }
       }
     }
