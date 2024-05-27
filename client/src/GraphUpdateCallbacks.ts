@@ -162,7 +162,7 @@ function onNodeDragStop(
     }
 
     clearDropTarget();
-  } else if (draggedNode.type === "machine" || draggedNode.type === "group") {
+  } else if (draggedNode.type === "machine" || draggedNode.type === "slot-group") {
     // update node x/y
 
     let nodeEditReq: MachineEditReq | GroupEditReq;
@@ -176,15 +176,14 @@ function onNodeDragStop(
           y: draggedNode.position.y,
         }
       };
-    } else if (draggedNode.type === "group") {
-      const parentPos = reactFlowInstance.getNode(draggedNode.parentId!)!.position;
+    } else if (draggedNode.type === "slot-group") {
       nodeEditReq = {
         type: "GroupEdit",
         reqId: uuidv4(),
         groupId: draggedNode.id,
         edits: {
-          x: parentPos.x - draggedNode.position.x,
-          y: parentPos.y - draggedNode.position.y,
+          x: draggedNode.position.x,
+          y: draggedNode.position.y,
         }
       }
     }
