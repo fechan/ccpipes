@@ -29,12 +29,14 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
     children: [],
   }
 
+  // convert React Flow graph to ELK graph format
   for (let [machineId, machine] of Object.entries(factory.machines)) {
     const machineNodeFlow = nodeMap[machineId];
     const machineNodeElk: ElkNode = {
       ...machineNodeFlow,
       layoutOptions: {
         "elk.padding": "[top=30,right=30,bottom=30,left=30]",
+        "elk.layered.crossingMinimization.semiInteractive": "true", // allows groups to "position" themselves with elk.position
       },
       width: 1,
       height: 1,
@@ -50,6 +52,9 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
 
       const groupNodeElk: ElkNode = {
         ...groupNodeFlow,
+        layoutOptions: {
+          "elk.position": `(${group.slots[0].slot * 100},1)`,
+        },
         width: getWidth(group.slots.length),
         height: getHeight(group.slots.length),
       };
@@ -57,9 +62,10 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
     }
   }
 
-  // fulfill width information first
+  // lay out ELK graph
   let layout = await elk.layout(graph);
 
+  // Convert back to React Flow Graph
   const layoutedNodes: Node[] = [];
   for (let machineNodeElk of layout.children!) {
     const machine = factory.machines[machineNodeElk.id];
