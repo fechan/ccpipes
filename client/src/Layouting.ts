@@ -53,7 +53,7 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
   const graph: ElkNode = {
     id: "root",
     layoutOptions: elkOptions,
-    edges: edges.map(edge => ({ ...edge, sources: [edge.source], targets: [edge.target]})),
+    //edges: edges.map(edge => ({ ...edge, sources: [edge.source], targets: [edge.target]})),
     children: [],
   }
 
