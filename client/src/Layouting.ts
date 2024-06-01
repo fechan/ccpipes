@@ -14,8 +14,36 @@ const elkOptions: LayoutOptions = {
   "elk.layered.cycleBreaking.strategy": "INTERACTIVE",
   "elk.layered.spacing.nodeNodeBetweenLayers": "100",
   "elk.layered.spacing.baseValue": "60",
+  "elk.layered.crossingMinimization.semiInteractive": "true", // allows machines to "position" themselves with elk.position
 };
 
+/**
+ * Get a dictionary that maps each string in a string array to their position if
+ * the array were sorted.
+ * 
+ * @param strings String array
+ * @returns String position map
+ */
+function stringOrder(strings: string[]) {
+  let stringOrder = {} as {[string: string]: number};
+
+  strings = [...strings].sort()
+  strings.forEach((str, i) => stringOrder[str] = i);
+
+  return stringOrder;
+}
+
+/**
+ * Lay out elements using ELK
+ * 
+ * @note ELK is kinda huge and it doesn't even handle fixed positions very well.
+ * Should consider replacing it with another layout module.
+ * 
+ * @param nodes List of React Flow nodes to lay out
+ * @param edges List of React Flow edges between nodes
+ * @param factory State of the factory
+ * @returns List of Reace Flow nodes with their layouted `position`s set
+ */
 export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory: Factory) {
   const nodeMap: {[nodeId: string]: Node} = {};
   for (let node of nodes) {
@@ -30,6 +58,8 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
   }
 
   // convert React Flow graph to ELK graph format
+  let machineOrder = stringOrder(Object.keys(factory.machines));
+
   for (let [machineId, machine] of Object.entries(factory.machines)) {
     const machineNodeFlow = nodeMap[machineId];
     const machineNodeElk: ElkNode = {
@@ -37,6 +67,7 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
       layoutOptions: {
         "elk.padding": "[top=30,right=30,bottom=30,left=30]",
         "elk.layered.crossingMinimization.semiInteractive": "true", // allows groups to "position" themselves with elk.position
+        "elk.position": `(${machineOrder[machineId]},1)`,
       },
       width: 1,
       height: 1,
@@ -53,7 +84,7 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
       const groupNodeElk: ElkNode = {
         ...groupNodeFlow,
         layoutOptions: {
-          "elk.position": `(${group.slots[0].slot * 100},1)`,
+          "elk.position": `(${group.slots[0].slot},1)`,
         },
         width: getWidth(group.slots.length),
         height: getHeight(group.slots.length),
