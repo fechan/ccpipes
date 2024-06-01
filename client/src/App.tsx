@@ -32,8 +32,10 @@ import { getLayoutedElements } from "./Layouting";
 import toast, { Toaster } from "react-hot-toast";
 import { Toast } from "./components/Toast";
 
+const DEFAULT_ENDPOINT = (process.env.NODE_ENV === "production") ? "wss://sigils.fredchan.org" : "ws://localhost:3000";
+
 export default function App() {
-  const [ socketUrl, setSocketUrl ] = useState("wss://sigils.fredchan.org");
+  const [ socketUrl, setSocketUrl ] = useState(DEFAULT_ENDPOINT);
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
     shouldReconnect: () => true,
     reconnectAttempts: 10,

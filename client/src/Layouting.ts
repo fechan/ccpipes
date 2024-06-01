@@ -7,8 +7,11 @@ import { getHeight, getWidth } from "./nodes/GroupNode";
 const elk = new ELK();
 
 const elkOptions: LayoutOptions = {
-  "elk.direction": "RIGHT",
+  "elk.direction": "DOWN",
   "elk.algorithm": "layered",
+  "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+  "elk.layered.layering.strategy": "INTERACTIVE",
+  "elk.layered.cycleBreaking.strategy": "INTERACTIVE",
   "elk.layered.spacing.nodeNodeBetweenLayers": "100",
   "elk.layered.spacing.baseValue": "60",
 };
@@ -26,16 +29,20 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
     children: [],
   }
 
+  // convert React Flow graph to ELK graph format
   for (let [machineId, machine] of Object.entries(factory.machines)) {
     const machineNodeFlow = nodeMap[machineId];
     const machineNodeElk: ElkNode = {
       ...machineNodeFlow,
       layoutOptions: {
         "elk.padding": "[top=30,right=30,bottom=30,left=30]",
+        "elk.layered.crossingMinimization.semiInteractive": "true", // allows groups to "position" themselves with elk.position
       },
       width: 1,
       height: 1,
       children: [],
+      x: machine.x || 0,
+      y: machine.y || 0,
     }
     graph.children!.push(machineNodeElk);
 
@@ -45,6 +52,9 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
 
       const groupNodeElk: ElkNode = {
         ...groupNodeFlow,
+        layoutOptions: {
+          "elk.position": `(${group.slots[0].slot * 100},1)`,
+        },
         width: getWidth(group.slots.length),
         height: getHeight(group.slots.length),
       };
@@ -52,20 +62,31 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
     }
   }
 
-  const layout = await elk.layout(graph);
+  // lay out ELK graph
+  let layout = await elk.layout(graph);
+
+  // Convert back to React Flow Graph
   const layoutedNodes: Node[] = [];
   for (let machineNodeElk of layout.children!) {
+    const machine = factory.machines[machineNodeElk.id];
     layoutedNodes.push({
       ...machineNodeElk,
-      position: { x: machineNodeElk.x || 0, y: machineNodeElk.y || 0 },
+      position: {
+        x: machine.x || machineNodeElk.x || 0,
+        y: machine.y || machineNodeElk.y || 0
+      },
       style: { width: machineNodeElk.width, height: machineNodeElk.height },
       data: {},
     });
 
     for (let groupNodeElk of machineNodeElk.children!) {
+      const group = factory.groups[groupNodeElk.id];
       layoutedNodes.push({
         ...groupNodeElk,
-        position: { x: groupNodeElk.x || 0, y: groupNodeElk.y || 0 },
+        position: {
+          x: group.x || groupNodeElk.x || 0,
+          y: group.y || groupNodeElk.y || 0
+        },
         style: { width: groupNodeElk.width, height: groupNodeElk.height },
         parentId: machineNodeElk.id,
         data: {},
