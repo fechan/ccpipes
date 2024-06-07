@@ -64,30 +64,3 @@ body,
   height: 100%;
   margin: 0;
 }
-
-/* .react-flow__node {
-  z-index: -1 !important;
-} */
-
-/*
-  HACK: Slot groups need to appear above their parent machine,
-  and dragged machines should appear above other machines.
-  The problem is, there's no class added to child nodes (slot groups) if
-  the parent is being dragged.
-
-  This z-index stuff should probably be implemented in JS
-*/
-
-.react-flow__node.react-flow__node-machine {
-  z-index: -30 !important;
-}
-
-.react-flow__node.react-flow__node-slot-group {
-  z-index: -20 !important;
-}
-
-.react-flow__node.react-flow__node-machine.dragging {
-  z-index: -29 !important;
-}
-
-/* END HACK */
