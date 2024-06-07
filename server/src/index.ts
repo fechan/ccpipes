@@ -16,8 +16,20 @@ wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
 
   ws.on("message", (data) => {
-    const json = data.toString();
-    const message = JSON.parse(json);
+    const messageData = data.toString();
+    
+    if (messageData === "ping") {
+      ws.send("pong");
+      return;
+    }
+
+    let message;
+    try {
+      message = JSON.parse(messageData);
+    } catch (e) {
+      console.error("Received bad message:", messageData);
+      return;
+    }
     console.log(message.type)
 
     const session = sessions[sessionId];
@@ -61,7 +73,7 @@ wss.on("connection", function connection(ws) {
             } else if (role === 'editor' && !session.computerCraft) {
               queueRequestForCCForLater(message as Request, session);
             } else {
-              relayMessage(json, sessionId, destination);
+              relayMessage(messageData, sessionId, destination);
             }
             break;
         }
@@ -76,7 +88,7 @@ wss.on("connection", function connection(ws) {
           };
           ws.send(JSON.stringify(res));
         } else {
-          relayMessage(json, sessionId, 'editor');
+          relayMessage(messageData, sessionId, 'editor');
         }
       }
     } catch (error) {
