@@ -40,10 +40,11 @@ local function shallowCopy (tbl)
 end
 
 function concatArrays (...)
+  local arrays = {...} -- in some versions of CC, arg is overwritten by the program's args
   local t = {}
 
-  for i = 1, arg.n do
-      local array = arg[i]
+  for i = 1, #arrays do
+      local array = arrays[i]
       if (type(array) == "table") then
           for j = 1, #array do
               t[#t+1] = array[j]
