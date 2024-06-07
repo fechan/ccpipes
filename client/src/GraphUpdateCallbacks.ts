@@ -105,13 +105,11 @@ function onNodeDrag(
     y: mouseEvent.clientY,
   });
 
-  // Get nodes that are under the mouse cursor AND are not the dragged node AND are compatible drop targets
-  // For the mouse checking, there's probably a dedicated function for it but I don't know what it is
   const intersections = getIntersectingNodes(boxToRect({
     x: mousePosition.x,
     x2: mousePosition.x+.1,
     y: mousePosition.y,
-    y2: mousePosition.y+.1
+    y2: mousePosition.y+50 // the 50 lets it detect the machine node's header (containing it name and attached peripherals) that's not technically part of the node
   }))
     .filter(node => node.id !== draggedNode.id && nodeIsCompatibleDropTarget(draggedNode, node));
 
