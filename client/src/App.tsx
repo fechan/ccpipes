@@ -1,4 +1,4 @@
-import { CcUpdatedFactory, ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, IdleTimeout, Message, SuccessResponse } from "@server/types/messages";
+import { CcUpdatedFactory, ConfirmationResponse, FactoryGetReq, FactoryGetRes, FactoryUpdateRes, FailResponse, IdleTimeout, Message, SessionJoinReq, SuccessResponse } from "@server/types/messages";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,10 +36,17 @@ const DEFAULT_ENDPOINT = (process.env.NODE_ENV === "production") ? "wss://sigils
 
 export default function App() {
   const [ socketUrl, setSocketUrl ] = useState(DEFAULT_ENDPOINT);
+  const [ sessionId, setSessionId ] = useState("");
   const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
     shouldReconnect: () => true,
     reconnectAttempts: 10,
     reconnectInterval: 3000,
+    heartbeat: {
+      message: "ping",
+      returnMessage: "pong",
+      timeout: 60000,
+      interval: 45000,
+    }
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
@@ -105,8 +112,18 @@ export default function App() {
    * End handlers for React Flow events
    */
   useEffect(() => {
-    if (readyState === ReadyState.CLOSED)
-      setShowNewSessionModal(true)
+    if (readyState === ReadyState.CLOSED) {
+      console.log("got disconnected!", new Date().getTime())
+      setShowNewSessionModal(true);
+    } else if (readyState === ReadyState.OPEN && sessionId !== "") {
+      console.log("got disconnected but trying to rejoin", new Date().getTime())
+      const sessionJoinReq: SessionJoinReq = {
+        type: "SessionJoin",
+        reqId: uuidv4(),
+        sessionId: sessionId,
+      };
+      sendMessage(JSON.stringify(sessionJoinReq));
+    }
   }, [readyState])
 
   useEffect(() => {
@@ -208,7 +225,13 @@ export default function App() {
     <div className="w-full h-full">
       <Toaster />
 
-      { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
+      { showNewSessionModal && <NewSessionModal
+          sendMessage={ sendMessage }
+          sessionId={sessionId}
+          setSessionId={setSessionId}
+        />
+      }
+
       { tempEdge && <TempEdgeOptions
           sendMessage={ sendMessage }
           tempEdge={ tempEdge }
