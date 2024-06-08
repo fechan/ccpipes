@@ -2,7 +2,6 @@ import { useFactoryStore } from "../stores/factory";
 
 export function MissingPeriphs() {
   const missingPeriphs = useFactoryStore(state => state.factory.missing);
-  console.log(missingPeriphs);
 
   return (
     <>
