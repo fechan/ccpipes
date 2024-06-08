@@ -31,6 +31,7 @@ import { TempEdgeOptions } from "./components/TempEdgeOptions";
 import { getLayoutedElements } from "./Layouting";
 import toast, { Toaster } from "react-hot-toast";
 import { Toast } from "./components/Toast";
+import { MissingPeriphs } from "./components/MissingPeriphs";
 
 const DEFAULT_ENDPOINT = (process.env.NODE_ENV === "production") ? "wss://sigils.fredchan.org" : "ws://localhost:3000";
 
@@ -241,6 +242,9 @@ export default function App() {
           <EdgeOptions sendMessage={ sendMessage } />
           <GroupOptions sendMessage={ sendMessage } />
           <MachineOptions sendMessage={ sendMessage } />
+        </Panel>
+        <Panel position="top-left">
+          <MissingPeriphs />
         </Panel>
         <Background className="bg-neutral-700" />
         <MiniMap />
