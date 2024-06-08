@@ -324,8 +324,8 @@ local function autodetectFactory ()
   return factory
 end
 
----Given an existing factory, remove peripherals that are no longer on the
----network and create machines for newly added peripherals.
+---Given an existing factory, add peripherals that are no longer on the network
+---to the missing peripheral set and create machines for newly added peripherals.
 ---@param factory Factory Factory to update with peripheral changes
 local function updateWithPeriphChanges (factory)
   local currentPeriphSet = {}
@@ -340,11 +340,11 @@ local function updateWithPeriphChanges (factory)
     end
   end
 
-  -- get rid of disconnected peripherals:
-  -- remove anything in oldPeriphSet that's not in currentPeriphSet
+  -- put disconnected peripherals in missing:
+  -- (any periphId in oldPeriphSet that's not in currentPeriphSet goes into missing)
   for oldPeriphId, _ in pairs(oldPeriphSet) do
     if currentPeriphSet[oldPeriphId] == nil then
-      periphDel(factory, oldPeriphId)
+      factory.missing[oldPeriphId] = true
     end
   end
 
