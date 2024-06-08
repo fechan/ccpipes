@@ -15,11 +15,14 @@
  * - Each machine has one or more slot Groups, which group together the
  * peripherals' slots so they're collectively addressable.
  * - Pipes connect Groups together to transfer items between them.
+ * - Missing peripherals are peripherals that may be part of some Machine(s) but
+ *   are disconnected from the network
  */
 export interface Factory {
     pipes: PipeMap,
     machines: MachineMap,
     groups: GroupMap,
+    missing: PeriphId[],
 }
 
 export type PipeId = string;
@@ -36,11 +39,13 @@ export interface Pipe {
     filter?: string,
 };
 
+export type PeriphId = string;
+
 /**
  * Data structure representing a slot on a particular peripheral
  */
 export interface Slot {
-    periphId: string,
+    periphId: PeriphId,
     slot: number,
 };
 

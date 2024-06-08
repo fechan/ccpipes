@@ -310,6 +310,7 @@ local function autodetectFactory ()
     machines = {},
     groups = {},
     pipes = {},
+    missing = {},
   }
   for i, periphId in ipairs(getPeripheralIds()) do
     local machine, groups = Machine.fromPeriphId(periphId)
