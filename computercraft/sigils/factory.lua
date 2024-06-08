@@ -401,6 +401,8 @@ return {
   groupEdit = groupEdit,
   periphAdd = periphAdd,
   periphDel = periphDel,
+  missingAdd = missingAdd,
+  missingDel = missingDel,
   autodetectFactory = autodetectFactory,
   updateWithPeriphChanges = updateWithPeriphChanges,
   saveFactory = saveFactory,
