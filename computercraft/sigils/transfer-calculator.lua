@@ -22,7 +22,7 @@ local function getSlotsWithMatchingItems (group, filter, inventoryLists)
   local matchingSlots = {}
   for i, slot in pairs(group.slots) do
     local list = inventoryLists[slot.periphId]
-    if list[slot.slot] and filter(list[slot.slot]) then
+    if list ~= nil and list[slot.slot] and filter(list[slot.slot]) then
       table.insert(matchingSlots, slot)
     end
   end
@@ -35,7 +35,7 @@ local function getEmptySlots (group, inventoryLists)
     -- get the inv list from this slot's peripheral
     local invList = inventoryLists[slot.periphId]
     -- check if slot.slot is in that list
-    if invList[slot.slot] == nil then
+    if invList ~= nil and invList[slot.slot] == nil then
       table.insert(emptySlots, slot)
     end
   end
@@ -95,18 +95,20 @@ local function getManyDetailedInvLists (periphs)
   return invLists
 end
 
-local function getManyItemLimits (groups)
+local function getManyItemLimits (groups, missingPeriphs)
   local itemLimits = {} -- maps 'periphId/slotNbr' -> itemLimit
   local runner = Concurrent.create_runner(64)
 
   for i, group in ipairs(groups) do
     for j, slot in ipairs(group.slots) do
-      runner.spawn(
-        function ()
-          local periph = peripheral.wrap(slot.periphId)
-          itemLimits[slot.periphId .. "/" .. slot.slot] = periph.getItemLimit(slot.slot)
-        end
-      )
+      if missingPeriphs[slot.periphId] == nil then
+        runner.spawn(
+          function ()
+            local periph = peripheral.wrap(slot.periphId)
+            itemLimits[slot.periphId .. "/" .. slot.slot] = periph.getItemLimit(slot.slot)
+          end
+        )
+      end
     end
   end
 
@@ -114,11 +116,13 @@ local function getManyItemLimits (groups)
   return itemLimits
 end
 
-local function getAllPeripheralIds (groups)
+local function getAllPeripheralIds (groups, missingPeriphs)
   local periphIdSet = {}
   for i, group in ipairs(groups) do
     for j, slot in ipairs(group.slots) do
-      periphIdSet[slot.periphId] = true
+      if missingPeriphs[slot.periphId] == nil then
+        periphIdSet[slot.periphId] = true
+      end
     end
   end
 
@@ -134,14 +138,14 @@ end
 ---origin inventory to the destination
 ---@param origin Group Origin group to transfer from
 ---@param destination Group Destination group to transfer to
+---@param missingPeriphs Table Set of missing peripherals by ID
 ---@param filter function Filter function that accepts the result of inventory.getItemDetail()
 ---@return TransferOrder[] transferOrders List of transfer orders
-local function getTransferOrders (origin, destination, filter)
+local function getTransferOrders (origin, destination, missingPeriphs, filter)
   local orders = {}
 
-  local itemLimits = getManyItemLimits({destination})
-  local itemLimitCache = CacheMap.new()
-  local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}))
+  local itemLimits = getManyItemLimits({destination}, missingPeriphs)
+  local inventoryLists = getManyDetailedInvLists(getAllPeripheralIds({origin, destination}, missingPeriphs))
 
   local possibleSlotsEmpty = getEmptySlots(destination, inventoryLists)
   local shouldTransfer = getSlotsWithMatchingItems(origin, filter, inventoryLists)

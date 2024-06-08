@@ -8,11 +8,11 @@ local TransferCalculator = require('sigils.transfer-calculator')
 local Filter = require('sigils.filter')
 local LOGGER = require('sigils.logging').LOGGER
 
-local function processPipe (pipe, groupMap)
+local function processPipe (pipe, groupMap, missingPeriphs)
   local filter = Filter.getFilterFn(pipe.filter)
   local ok, transferOrders = pcall(
     function ()
-      return TransferCalculator.getTransferOrders(groupMap[pipe.from], groupMap[pipe.to], filter)
+      return TransferCalculator.getTransferOrders(groupMap[pipe.from], groupMap[pipe.to], missingPeriphs, filter)
     end
   )
 
@@ -35,7 +35,7 @@ end
 
 local function processAllPipes (factory)
   for pipeId, pipe in pairs(factory.pipes) do
-    processPipe(pipe, factory.groups)
+    processPipe(pipe, factory.groups, factory.missing)
   end
 end
 
