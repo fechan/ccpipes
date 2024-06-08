@@ -28,6 +28,7 @@ const emptyFactory: Factory = {
   machines: {},
   pipes: {},
   groups: {},
+  missing: {},
 };
 
 const getEmptyFactoryAddsAndDeletes = (): FactoryAddsAndDeletes => ({
