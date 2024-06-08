@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { SendMessage } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
 import { useFactoryStore } from "../stores/factory";
+import { MissingPeripheralBadge } from "./MissingPeripheralBadge";
 
 interface MissingPeriphsProps {
   sendMessage: SendMessage,
@@ -23,19 +24,26 @@ export function MissingPeriphs({ sendMessage }: MissingPeriphsProps) {
 
   return (
     <>
-      <ul>
-        {
-          Object.keys(missingPeriphs).map(periphId => 
-            <li
-              key={ periphId }
-              className="hover:bg-red-500"
-              onClick={ () => onDeletePeriph(periphId) }
-            >
-              { periphId }
-            </li>
-          )
-        }
-      </ul>
+      {Object.keys(missingPeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window">
+        <header>
+          <h2>Missing peripherals</h2>
+          <span className="text-sm">Click to remove</span>
+        </header>
+
+        <ul>
+          {
+            Object.keys(missingPeriphs).map(periphId => 
+              <li
+                key={periphId}
+                onClick={ () => onDeletePeriph(periphId) }
+                className="w-full mt-2"
+              >
+                <MissingPeripheralBadge periphId={periphId}/>
+              </li>
+            )
+          }
+        </ul>
+      </div>}
     </>
   );
 }
