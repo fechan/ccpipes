@@ -22,6 +22,7 @@ local MESSAGE_TYPES = {
   GroupAdd = true,
   GroupEdit = true,
   GroupDel = true,
+  PeriphDel = true
 }
 
 ---Request a session from the editor session server once, or reconnect if

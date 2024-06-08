@@ -244,7 +244,7 @@ export default function App() {
           <MachineOptions sendMessage={ sendMessage } />
         </Panel>
         <Panel position="top-left">
-          <MissingPeriphs />
+          <MissingPeriphs sendMessage={ sendMessage }/>
         </Panel>
         <Background className="bg-neutral-700" />
         <MiniMap />

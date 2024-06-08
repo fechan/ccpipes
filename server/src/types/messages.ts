@@ -1,4 +1,4 @@
-import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "./core-types"
+import { Factory, Group, GroupId, Machine, MachineId, PeriphId, Pipe, PipeId } from "./core-types"
 import { ErrorType } from "./errors";
 import { SessionId } from "./session";
 import { Delta } from "jsondiffpatch";
@@ -6,7 +6,8 @@ import { Delta } from "jsondiffpatch";
 export const FACTORY_UPDATE_REQUEST_TYPES = [
   "PipeAdd", "PipeEdit", "PipeDel",
   "MachineAdd", "MachineEdit", "MachineDel",
-  "GroupAdd", "GroupEdit", "GroupDel"
+  "GroupAdd", "GroupEdit", "GroupDel",
+  "PeriphDel",
 ] as const;
 
 export type FactoryUpdateRequest = typeof FACTORY_UPDATE_REQUEST_TYPES[number];
@@ -234,6 +235,16 @@ export interface GroupAddReq extends Request {
   type: "GroupAdd",
   group: Group,
   machineId: MachineId,
+}
+
+/**
+ * Request to delete a peripheral from the factory.
+ * 
+ * - Emitted from the editor when the user wants to delete a missing peripheral
+ */
+export interface PeriphDel extends Request {
+  type: "PeriphDel",
+  periphId: PeriphId,
 }
 
 /**

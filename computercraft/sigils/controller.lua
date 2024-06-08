@@ -61,6 +61,11 @@ local function handleGroupEdit (request, factory, sendMessage)
   return diff
 end
 
+local function handlePeriphDel(request, factory, sengMessage)
+  local diff = Factory.periphDel(factory, request.periphId)
+  return diff
+end
+
 local function createConfirmationResponse(request, ok, diff)
   return {
     type = 'ConfirmationResponse',
@@ -101,6 +106,7 @@ local function handlePeripheralDetach(periphId, factory, sendMessage)
   }))
 end
 
+
 local function listenForCcpipesEvents (wsContext, factory)
   while true do
     local sendMessage = function (...) end
@@ -120,6 +126,7 @@ local function listenForCcpipesEvents (wsContext, factory)
       ['ccpipes-GroupAdd'] = handleGroupAdd,
       ['ccpipes-GroupDel'] = handleGroupDel,
       ['ccpipes-GroupEdit'] = handleGroupEdit,
+      ['ccpipes-PeriphDel'] = handlePeriphDel,
     }
 
     if event == 'ccpipes-BatchRequest' then
