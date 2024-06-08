@@ -22,7 +22,7 @@ export interface Factory {
     pipes: PipeMap,
     machines: MachineMap,
     groups: GroupMap,
-    missing: PeriphId[],
+    missing: MissingPeriphMap,
 }
 
 export type PipeId = string;
@@ -40,6 +40,11 @@ export interface Pipe {
 };
 
 export type PeriphId = string;
+
+/**
+ * A Lua-style set of Peripheral IDs missing from the CC network
+ */
+export type MissingPeriphMap = { [key: PeriphId]: boolean }
 
 /**
  * Data structure representing a slot on a particular peripheral
