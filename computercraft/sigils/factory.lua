@@ -387,6 +387,13 @@ local function updateWithPeriphChanges (factory)
       periphAdd(factory, currentPeriphId)
     end
   end
+
+  -- remove peripherals from missing peripheral list are connected now
+  for periphId, _ in pairs(factory.missing) do
+    if currentPeriphSet[periphId] then
+      missingDel(factory, periphId)
+    end
+  end
 end
 
 return {
