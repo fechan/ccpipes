@@ -258,37 +258,6 @@ local function periphAdd (factory, periphId)
   return Utils.concatArrays(unpack(periphAttachDiffs))
 end
 
----Remove a peripheral's slots from all groups in the factory.
----
----If any groups are empty after the peripheral is removed, the group is removed
----as well.
----@param factory Factory Factory to remove from
----@param periphId string CC peripheral ID
----@return table diffs List of jsondiffpatch Deltas for the factory
-local function periphDel (factory, periphId)
-  local diffs = {}
-
-  for groupId, group in pairs(factory.groups) do
-    local numSlots = #group.slots
-    local keptSlots = {}
-    for i, slot in ipairs(group.slots) do
-      if slot.periphId ~= periphId then
-        table.insert(keptSlots, slot)
-      end
-    end
-
-    if #keptSlots == 0 then
-      local groupDelDiff = groupDel(factory, groupId)
-      table.insert(diffs, Utils.freezeTable(groupDelDiff))
-    elseif numSlots ~= #keptSlots then
-      local groupEditDiff = groupEdit(factory, groupId, { slots = keptSlots })
-      table.insert(diffs, Utils.freezeTable(groupEditDiff))
-    end
-  end
-
-  return Utils.concatArrays(unpack(diffs))
-end
-
 ---Add a peripheral to the missing peripherals set
 ---@param factory Factory Factory to add to
 ---@param periphId string CC Peripheral ID
@@ -319,6 +288,41 @@ local function missingDel (factory, periphId)
     }
   }
   return {diff}
+end
+
+---Remove a peripheral's slots from all groups in the factory.
+---
+---If any groups are empty after the peripheral is removed, the group is removed
+---as well.
+---@param factory Factory Factory to remove from
+---@param periphId string CC peripheral ID
+---@return table diffs List of jsondiffpatch Deltas for the factory
+local function periphDel (factory, periphId)
+  local diffs = {}
+
+  if factory.missing[periphId] then
+    table.insert(diffs, missingDel(factory, periphId))
+  end
+
+  for groupId, group in pairs(factory.groups) do
+    local numSlots = #group.slots
+    local keptSlots = {}
+    for i, slot in ipairs(group.slots) do
+      if slot.periphId ~= periphId then
+        table.insert(keptSlots, slot)
+      end
+    end
+
+    if #keptSlots == 0 then
+      local groupDelDiff = groupDel(factory, groupId)
+      table.insert(diffs, Utils.freezeTable(groupDelDiff))
+    elseif numSlots ~= #keptSlots then
+      local groupEditDiff = groupEdit(factory, groupId, { slots = keptSlots })
+      table.insert(diffs, Utils.freezeTable(groupEditDiff))
+    end
+  end
+
+  return Utils.concatArrays(unpack(diffs))
 end
 
 ---Get peripheral IDs connected to this factory
