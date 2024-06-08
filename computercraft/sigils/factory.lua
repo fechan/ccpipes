@@ -289,6 +289,38 @@ local function periphDel (factory, periphId)
   return Utils.concatArrays(unpack(diffs))
 end
 
+---Add a peripheral to the missing peripherals set
+---@param factory Factory Factory to add to
+---@param periphId string CC Peripheral ID
+---@return table diffs List of jsondiffpatch Deltas for the factory
+local function missingAdd (factory, periphId)
+  factory.missing[periphId] = true
+
+  local diff = {
+    missing = {
+      [periphId] = {true}
+    }
+  }
+  return {diff}
+end
+
+---Delete a peripheral from the missing peripherals set
+---@param factory Factory Factory to delete from to
+---@param periphId string CC Peripheral ID
+---@return table diffs List of jsondiffpatch Deltas for the factory
+local function missingDel (factory, periphId)
+  factory.missing[periphId] = nil
+
+  local diff = {
+    missing = {
+      [periphId] = {
+        nil, 0, 0
+      }
+    }
+  }
+  return {diff}
+end
+
 ---Get peripheral IDs connected to this factory
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
