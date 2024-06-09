@@ -152,7 +152,8 @@ function onNodeDragStop(
   clearDropTarget: () => void,
   sendMessage: SendMessage,
   reactFlowInstance: (ReactFlowInstance | null),
-  factory: Factory
+  factory: Factory,
+  addReqNeedingLayout: (reqId: string) => void
 ) {
   if (!reactFlowInstance) return;
 
@@ -165,11 +166,13 @@ function onNodeDragStop(
     }
 
     if (messages) {
+      const reqId = uuidv4();
       const batchReq: BatchRequest = {
         type: "BatchRequest",
-        reqId: uuidv4(),
+        reqId: reqId,
         requests: messages,
       };
+      addReqNeedingLayout(reqId);
       sendMessage(JSON.stringify(batchReq));
     }
 
@@ -178,10 +181,11 @@ function onNodeDragStop(
     // update node x/y
 
     let nodeEditReq: MachineEditReq | GroupEditReq;
+    const reqId = uuidv4();
     if (draggedNode.type === "machine") {
       nodeEditReq = {
         type: "MachineEdit",
-        reqId: uuidv4(),
+        reqId: reqId,
         machineId: draggedNode.id,
         edits: {
           x: draggedNode.position.x,
@@ -191,7 +195,7 @@ function onNodeDragStop(
     } else if (draggedNode.type === "slot-group") {
       nodeEditReq = {
         type: "GroupEdit",
-        reqId: uuidv4(),
+        reqId: reqId,
         groupId: draggedNode.id,
         edits: {
           x: draggedNode.position.x,
@@ -200,6 +204,7 @@ function onNodeDragStop(
       }
     }
 
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(nodeEditReq!));
   }
 }
@@ -212,8 +217,9 @@ function onDragOver(event: DragEvent) {
 function onDrop(
   event: DragEvent,
   reactFlowInstance: (ReactFlowInstance | null),
+  factory: Factory,
   sendMessage: SendMessage,
-  factory: Factory
+  addReqNeedingLayout: (reqId: string) => void
 ) {
   event.preventDefault();
 
@@ -254,12 +260,13 @@ function onDrop(
   }
 
   if (requests && requests.length > 0) {
+    const reqId = uuidv4();
     const batchReq: BatchRequest = {
       type: "BatchRequest",
-      reqId: uuidv4(),
+      reqId: reqId,
       requests: requests,
     }
-
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(batchReq));
   }
 }
