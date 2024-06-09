@@ -240,7 +240,6 @@ export default function App() {
       { showNewSessionModal && <NewSessionModal
           sendMessage={ sendMessage }
           addReqNeedingLayout={ addReqNeedingLayout }
-          sendMessage={ sendMessage }
           sessionId={sessionId}
           setSessionId={setSessionId}
         />

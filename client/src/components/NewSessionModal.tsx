@@ -13,8 +13,6 @@ export interface NewSessionModalData {
 };
 
 export function NewSessionModal({ sendMessage, sessionId, setSessionId, addReqNeedingLayout }: NewSessionModalData) {
-  const [ sessionId, setSessionId ] = useState("");
-
   function joinSession() {
     const reqId = uuidv4();
     const sessionJoinReq: SessionJoinReq = {
