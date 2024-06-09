@@ -161,12 +161,16 @@ export default function App() {
 
           if (successRes.respondingTo === "FactoryGet") {
             const factoryGetRes = message as FactoryGetRes;
+            setReqsNeedingLayout({...reqsNeedingLayout, [factoryGetRes.reqId]: true});
             setFactory(factoryGetRes.factory);
             return;
           }
 
           if ("diff" in successRes) {
             const factoryUpdateRes = successRes as FactoryUpdateRes;
+            if (factoryUpdateRes.respondingTo in  reqsNeedingLayout) {
+              setReqsNeedingLayout({...reqsNeedingLayout, [factoryUpdateRes.reqId]: true});
+            }
             patchFactory(factoryUpdateRes.diff);
             return;
           }
