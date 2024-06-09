@@ -51,6 +51,9 @@ export default function App() {
   // values: Boolean that's true if the Request has been fulfilled
   type PendingRequests = {[requestId: string]: boolean};
   const [ reqsNeedingLayout, setReqsNeedingLayout ] = useState({} as PendingRequests);
+  const addReqNeedingLayout = useCallback((reqId: string) => {
+    setReqsNeedingLayout({...reqsNeedingLayout, [reqId]: true});
+  }, [reqsNeedingLayout, setReqsNeedingLayout]);
 
   const { getIntersectingNodes, getNode } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
@@ -70,13 +73,13 @@ export default function App() {
   );
 
   const onEdgesDelete: OnEdgesDelete = useCallback(
-    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage),
-    [sendMessage]
+    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage, addReqNeedingLayout),
+    [sendMessage, addReqNeedingLayout]
   );
 
   const onEdgeUpdate: OnEdgeUpdateFunc = useCallback(
-    (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, setEdges),
-    [sendMessage, setEdges]
+    (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, addReqNeedingLayout),
+    [sendMessage, setEdges, addReqNeedingLayout]
   );
 
   const onNodeDrag: NodeDragHandler = useCallback(
@@ -214,9 +217,10 @@ export default function App() {
 
       { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
       { tempEdge && <TempEdgeOptions
+          addReqNeedingLayout={ addReqNeedingLayout }
           sendMessage={ sendMessage }
-          tempEdge={ tempEdge }
           setTempEdge={ setTempEdge }
+          tempEdge={ tempEdge }
           onCancel={ () => {
             setTempEdge(null);
             setEdges(edges.filter(edge => edge.type !== "temp"));

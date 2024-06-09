@@ -7,13 +7,19 @@ import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { splitPeripheralFromMachine, splitSlotFromGroup } from "./SplitHandlers";
 
-function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
+function onEdgesDelete(
+  edges: Edge[],
+  sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void
+) {
   for (let edge of edges) {
+    const reqId = uuidv4();
     const pipeDelReq: PipeDelReq = {
       type: "PipeDel",
-      reqId: uuidv4(),
+      reqId: reqId,
       pipeId: edge.id,
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(pipeDelReq));
   }
 }
@@ -37,17 +43,25 @@ function onConnect(connection: Connection, setTempEdge: Dispatch<SetStateAction<
   setTempEdge(tempEdge);
 }
 
-function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {
+
+function onEdgeUpdate(
+  oldEdge: Edge,
+  newConnection: Connection,
+  sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void
+) {
   if (newConnection.source !== null && newConnection.target !== null) {
+    const reqId = uuidv4();
     const pipeEditReq: PipeEditReq = {
       type: "PipeEdit",
-      reqId: uuidv4(),
+      reqId: reqId,
       pipeId: oldEdge.id,
       edits: {
         from: newConnection.source,
         to: newConnection.target,
       }
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(pipeEditReq));
   }
 }
