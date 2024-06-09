@@ -66,5 +66,5 @@ body,
 }
 
 .react-flow__edges {
-  z-index: 100 !important;
+  z-index: 1001 !important;
 }
