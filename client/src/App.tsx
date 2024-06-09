@@ -17,8 +17,8 @@ import {
 
 import "reactflow/dist/style.css";
 
-import { edgeTypes, getEdgesForFactory, updateEdgesForFactory } from "./edges";
-import { getNodesForFactory, nodeTypes, updateNodesForFactory } from "./nodes";
+import { edgeTypes, getEdgesForFactory } from "./edges";
+import { getNodesForFactory, nodeTypes } from "./nodes";
 
 import { EdgeOptions } from "./components/EdgeOptions";
 import { NewSessionModal } from "./components/NewSessionModal";
@@ -31,6 +31,7 @@ import { TempEdgeOptions } from "./components/TempEdgeOptions";
 import { getLayoutedElements } from "./Layouting";
 import toast, { Toaster } from "react-hot-toast";
 import { Toast } from "./components/Toast";
+import { MissingPeriphs } from "./components/MissingPeriphs";
 
 const DEFAULT_ENDPOINT = (process.env.NODE_ENV === "production") ? "wss://sigils.fredchan.org" : "ws://localhost:3000";
 
@@ -50,14 +51,22 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
-  const { factory, addsAndDeletes, groupParents, setFactory, patchFactory } = useFactoryStore();
+  const { factory, version, setFactory, patchFactory } = useFactoryStore();
+
+  
+  // reqsNeedingLayout keys: Request IDs that, when fulfilled, should trigger graph layouting
+  // values: Boolean that's true if the Request has been fulfilled
+  type PendingRequests = {[requestId: string]: boolean};
+  const [ reqsNeedingLayout, setReqsNeedingLayout ] = useState({} as PendingRequests);
+  const addReqNeedingLayout = useCallback((reqId: string) => {
+    setReqsNeedingLayout({...reqsNeedingLayout, [reqId]: true});
+  }, [reqsNeedingLayout, setReqsNeedingLayout]);
 
   const { getIntersectingNodes, getNode } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
 
-  const [ needLayout, setNeedLayout ] = useState(false);
   const [ tempEdge, setTempEdge ] = useState(null as (Edge | null));
 
   const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
@@ -71,13 +80,13 @@ export default function App() {
   );
 
   const onEdgesDelete: OnEdgesDelete = useCallback(
-    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage),
-    [sendMessage]
+    (edges) => GraphUpdateCallbacks.onEdgesDelete(edges, sendMessage, addReqNeedingLayout),
+    [sendMessage, addReqNeedingLayout]
   );
 
   const onEdgeUpdate: OnEdgeUpdateFunc = useCallback(
-    (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, setEdges),
-    [sendMessage, setEdges]
+    (oldEdge, newConnection) => GraphUpdateCallbacks.onEdgeUpdate(oldEdge, newConnection, sendMessage, addReqNeedingLayout),
+    [sendMessage, setEdges, addReqNeedingLayout]
   );
 
   const onNodeDrag: NodeDragHandler = useCallback(
@@ -86,8 +95,8 @@ export default function App() {
   );
 
   const onNodeDragStop: NodeDragHandler = useCallback(
-    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, clearDropTarget, sendMessage, reactFlowInstance, factory),
-    [setNodes, clearDropTarget, dropTarget, sendMessage, reactFlowInstance, factory]
+    (mouseEvent: MouseEvent, node: Node) => GraphUpdateCallbacks.onNodeDragStop(mouseEvent, node, dropTarget, clearDropTarget, sendMessage, reactFlowInstance, factory, addReqNeedingLayout),
+    [setNodes, clearDropTarget, dropTarget, sendMessage, reactFlowInstance, factory, addReqNeedingLayout]
   );
 
   const onDragOver: DragEventHandler = useCallback(
@@ -96,8 +105,8 @@ export default function App() {
   );
 
   const onDrop: DragEventHandler = useCallback(
-    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, sendMessage, factory),
-    [reactFlowInstance, sendMessage, setNodes, factory]
+    (event: DragEvent) => GraphUpdateCallbacks.onDrop(event, reactFlowInstance, factory, sendMessage, addReqNeedingLayout),
+    [reactFlowInstance, factory, sendMessage, setNodes, addReqNeedingLayout]
   );
 
   const beforeNodesChange = useCallback(
@@ -127,36 +136,30 @@ export default function App() {
   }, [readyState])
 
   useEffect(() => {
-    setNodes(getNodesForFactory(factory));
-    setEdges(getEdgesForFactory(factory));
-    setNeedLayout(true);
-  }, [factory]);
+    const nodes = getNodesForFactory(factory);
+    const edges = getEdgesForFactory(factory);
+    setEdges(edges);
 
-  useEffect(() => {
-    if (
-      addsAndDeletes.groups.adds.size > 0 ||
-      addsAndDeletes.groups.deletes.size > 0 ||
-      addsAndDeletes.machines.adds.size > 0 ||
-      addsAndDeletes.machines.deletes.size > 0
-    ) {
-      setNodes(nodes => updateNodesForFactory(nodes, addsAndDeletes, groupParents));
-      setNeedLayout(true);
+    // determine if we need layout and remove requests from reqsNeedingLayout
+    // that have been fulfilled
+    let needLayout = false;
+    const unfulfilledReqs: PendingRequests = {};
+    for (let [req, fulfilled] of Object.entries(reqsNeedingLayout)) {
+      if (fulfilled) {
+        needLayout = true;
+      } else {
+        unfulfilledReqs[req] = false;
+      }
     }
+    setReqsNeedingLayout(unfulfilledReqs);
 
-    if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
-      setEdges(edges => updateEdgesForFactory(edges, factory, addsAndDeletes))
-    }
-  }, [addsAndDeletes]);
-
-  useEffect(() => {
-    (async () => {
-      if (needLayout) {
+    if (needLayout) {
+      (async () => {
         const layouted = await getLayoutedElements(nodes, edges, factory);
         setNodes(layouted);
-        setNeedLayout(false);
-      }
-    })();
-  }, [needLayout]);
+      })();
+    }
+  }, [factory, version]);
 
   useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
@@ -178,12 +181,16 @@ export default function App() {
 
           if (successRes.respondingTo === "FactoryGet") {
             const factoryGetRes = message as FactoryGetRes;
+            setReqsNeedingLayout({...reqsNeedingLayout, [factoryGetRes.reqId]: true});
             setFactory(factoryGetRes.factory);
             return;
           }
 
           if ("diff" in successRes) {
             const factoryUpdateRes = successRes as FactoryUpdateRes;
+            if (factoryUpdateRes.respondingTo in reqsNeedingLayout) {
+              setReqsNeedingLayout({...reqsNeedingLayout, [factoryUpdateRes.reqId]: true});
+            }
             patchFactory(factoryUpdateRes.diff);
             return;
           }
@@ -206,7 +213,12 @@ export default function App() {
         }
       } else if (message.type === "CcUpdatedFactory") {
         const ccUpdatedFactory = message as CcUpdatedFactory;
-        patchFactory(ccUpdatedFactory.diff);
+        setReqsNeedingLayout({...reqsNeedingLayout, ["force-update-layout"]: true});
+        // HACK: setTimeout makes sure setReqsNeedingLayout happens before patchFactory.
+        // I have no idea why this is necessary, because the race condition doesn't happen
+        // when I need to update both states in other situations, like after receiving
+        // a FactoryUpdateRes
+        setTimeout(() => patchFactory(ccUpdatedFactory.diff), 100);
         return;
       } else if (message.type === "IdleTimeout") {
         const idleTimeout = message as IdleTimeout;
@@ -227,15 +239,16 @@ export default function App() {
 
       { showNewSessionModal && <NewSessionModal
           sendMessage={ sendMessage }
+          addReqNeedingLayout={ addReqNeedingLayout }
           sessionId={sessionId}
           setSessionId={setSessionId}
         />
       }
-
       { tempEdge && <TempEdgeOptions
+          addReqNeedingLayout={ addReqNeedingLayout }
           sendMessage={ sendMessage }
-          tempEdge={ tempEdge }
           setTempEdge={ setTempEdge }
+          tempEdge={ tempEdge }
           onCancel={ () => {
             setTempEdge(null);
             setEdges(edges.filter(edge => edge.type !== "temp"));
@@ -264,6 +277,12 @@ export default function App() {
           <EdgeOptions sendMessage={ sendMessage } />
           <GroupOptions sendMessage={ sendMessage } />
           <MachineOptions sendMessage={ sendMessage } />
+        </Panel>
+        <Panel position="top-left">
+          <MissingPeriphs
+            sendMessage={ sendMessage }
+            addReqNeedingLayout={addReqNeedingLayout}
+          />
         </Panel>
         <Background className="bg-neutral-700" />
         <MiniMap />

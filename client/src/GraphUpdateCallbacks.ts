@@ -7,13 +7,19 @@ import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { splitPeripheralFromMachine, splitSlotFromGroup } from "./SplitHandlers";
 
-function onEdgesDelete(edges: Edge[], sendMessage: SendMessage) {
+function onEdgesDelete(
+  edges: Edge[],
+  sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void
+) {
   for (let edge of edges) {
+    const reqId = uuidv4();
     const pipeDelReq: PipeDelReq = {
       type: "PipeDel",
-      reqId: uuidv4(),
+      reqId: reqId,
       pipeId: edge.id,
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(pipeDelReq));
   }
 }
@@ -37,17 +43,25 @@ function onConnect(connection: Connection, setTempEdge: Dispatch<SetStateAction<
   setTempEdge(tempEdge);
 }
 
-function onEdgeUpdate(oldEdge: Edge, newConnection: Connection, sendMessage: SendMessage, setEdges: Dispatch<SetStateAction<Edge[]>>) {
+
+function onEdgeUpdate(
+  oldEdge: Edge,
+  newConnection: Connection,
+  sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void
+) {
   if (newConnection.source !== null && newConnection.target !== null) {
+    const reqId = uuidv4();
     const pipeEditReq: PipeEditReq = {
       type: "PipeEdit",
-      reqId: uuidv4(),
+      reqId: reqId,
       pipeId: oldEdge.id,
       edits: {
         from: newConnection.source,
         to: newConnection.target,
       }
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(pipeEditReq));
   }
 }
@@ -138,7 +152,8 @@ function onNodeDragStop(
   clearDropTarget: () => void,
   sendMessage: SendMessage,
   reactFlowInstance: (ReactFlowInstance | null),
-  factory: Factory
+  factory: Factory,
+  addReqNeedingLayout: (reqId: string) => void
 ) {
   if (!reactFlowInstance) return;
 
@@ -151,11 +166,13 @@ function onNodeDragStop(
     }
 
     if (messages) {
+      const reqId = uuidv4();
       const batchReq: BatchRequest = {
         type: "BatchRequest",
-        reqId: uuidv4(),
+        reqId: reqId,
         requests: messages,
       };
+      addReqNeedingLayout(reqId);
       sendMessage(JSON.stringify(batchReq));
     }
 
@@ -164,10 +181,11 @@ function onNodeDragStop(
     // update node x/y
 
     let nodeEditReq: MachineEditReq | GroupEditReq;
+    const reqId = uuidv4();
     if (draggedNode.type === "machine") {
       nodeEditReq = {
         type: "MachineEdit",
-        reqId: uuidv4(),
+        reqId: reqId,
         machineId: draggedNode.id,
         edits: {
           x: draggedNode.position.x,
@@ -177,7 +195,7 @@ function onNodeDragStop(
     } else if (draggedNode.type === "slot-group") {
       nodeEditReq = {
         type: "GroupEdit",
-        reqId: uuidv4(),
+        reqId: reqId,
         groupId: draggedNode.id,
         edits: {
           x: draggedNode.position.x,
@@ -198,8 +216,9 @@ function onDragOver(event: DragEvent) {
 function onDrop(
   event: DragEvent,
   reactFlowInstance: (ReactFlowInstance | null),
+  factory: Factory,
   sendMessage: SendMessage,
-  factory: Factory
+  addReqNeedingLayout: (reqId: string) => void
 ) {
   event.preventDefault();
 
@@ -240,12 +259,13 @@ function onDrop(
   }
 
   if (requests && requests.length > 0) {
+    const reqId = uuidv4();
     const batchReq: BatchRequest = {
       type: "BatchRequest",
-      reqId: uuidv4(),
+      reqId: reqId,
       requests: requests,
     }
-
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(batchReq));
   }
 }

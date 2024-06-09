@@ -9,18 +9,20 @@ export interface TempEdgeOptionsProps {
   tempEdge: (Edge | null),
   setTempEdge: Dispatch<SetStateAction<Edge | null>>,
   onCancel: () => void,
+  addReqNeedingLayout: (reqId: string) => void,
 };
 
-export function TempEdgeOptions({ tempEdge, setTempEdge, sendMessage, onCancel }: TempEdgeOptionsProps) {
+export function TempEdgeOptions({ tempEdge, setTempEdge, sendMessage, onCancel, addReqNeedingLayout }: TempEdgeOptionsProps) {
   const [ nickname, setNickname ] = useState("");
   const [ filter, setFilter ] = useState("");
 
   function onCommit() {
     if (!(tempEdge && tempEdge.source && tempEdge.target)) return;
 
+    const reqId = uuidv4();
     const pipeAddReq: PipeAddReq = {
       type: "PipeAdd",
-      reqId: uuidv4(),
+      reqId: reqId,
       pipe: {
         id: tempEdge.id,
         from: tempEdge.source,
@@ -31,6 +33,7 @@ export function TempEdgeOptions({ tempEdge, setTempEdge, sendMessage, onCancel }
     if (nickname !== "") pipeAddReq.pipe.nickname = nickname;
     if (filter !== "") pipeAddReq.pipe.filter = filter;
 
+    addReqNeedingLayout(reqId);
     setTempEdge(null);
     sendMessage(JSON.stringify(pipeAddReq));
   }

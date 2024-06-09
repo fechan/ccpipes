@@ -37,7 +37,7 @@ export function MachineNode({ id, selected }: NodeProps) {
   // Ideally we want the factory store and the nodes to get updated simultaneously,
   // but for now we just detect if this Node is stale and render a placeholder
   if (!exists) {
-    return <div className="react-flow__node-default"></div>
+    return <div className="react-flow__node-default hidden"></div>
   }
 
 

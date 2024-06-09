@@ -9,16 +9,18 @@ export interface NewSessionModalData {
   sendMessage: SendMessage,
   sessionId: string,
   setSessionId: Dispatch<SetStateAction<string>>,
+  addReqNeedingLayout: (reqId: string) => void,
 };
 
-export function NewSessionModal({ sendMessage, sessionId, setSessionId }: NewSessionModalData) {
-
+export function NewSessionModal({ sendMessage, sessionId, setSessionId, addReqNeedingLayout }: NewSessionModalData) {
   function joinSession() {
+    const reqId = uuidv4();
     const sessionJoinReq: SessionJoinReq = {
       type: "SessionJoin",
-      reqId: uuidv4(),
+      reqId: reqId,
       sessionId: sessionId,
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(sessionJoinReq));
   }
 

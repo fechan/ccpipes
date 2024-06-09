@@ -2,7 +2,6 @@ import type { Node, NodeTypes } from "reactflow";
 import { Factory } from "@server/types/core-types";
 import { MachineNode } from "./MachineNode";
 import { GroupNode } from "./GroupNode";
-import { FactoryAddsAndDeletes, GroupParentsMap } from "../stores/factory";
 
 export function getNodesForFactory(factory: Factory): Node[] {
   const nodes = [];
@@ -32,51 +31,6 @@ export function getNodesForFactory(factory: Factory): Node[] {
   }
 
   return nodes;
-}
-
-export function createAddedNodes(addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {
-  const newMachines = addsAndDeletes.machines.adds;
-  const newGroups = addsAndDeletes.groups.adds;
-
-  const newNodes: Node[] = [];
-
-  for (let machineId of newMachines) {
-    const machineNode: Node = {
-      id: machineId,
-      type: "machine",
-      position: { x: 0, y: 0 },
-      style: { width: 350, height: 300 },
-      data: {},
-    };
-    newNodes.push(machineNode);
-  }
-
-  for (let groupId of newGroups) {
-    const groupNode: Node = {
-      id: groupId,
-      type: "slot-group",
-      position: { x: 0, y: 0 },
-      parentId: groupParents[groupId],
-      extent: "parent",
-      data: {},
-    };
-    newNodes.push(groupNode)
-  }
-
-  return newNodes;
-}
-
-export function updateNodesForFactory(oldNodes: Node[], addsAndDeletes: FactoryAddsAndDeletes, groupParents: GroupParentsMap) {  
-  const newNodes = oldNodes
-    .filter(node => !addsAndDeletes.groups.deletes.has(node.id) && !addsAndDeletes.machines.deletes.has(node.id))
-    .map(node => {
-      if (node.type === "slot-group") {
-        return {...node, parentId: groupParents[node.id]}
-      }
-      return {...node};
-    }
-  );
-  return newNodes.concat(createAddedNodes(addsAndDeletes, groupParents));
 }
 
 export const nodeTypes = {
