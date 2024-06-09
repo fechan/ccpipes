@@ -7,17 +7,20 @@ import shackIndustries from "../shack-industries.png";
 
 export interface NewSessionModalData {
   sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void,
 };
 
-export function NewSessionModal({ sendMessage }: NewSessionModalData) {
+export function NewSessionModal({ sendMessage, addReqNeedingLayout }: NewSessionModalData) {
   const [ sessionId, setSessionId ] = useState("");
 
   function joinSession() {
+    const reqId = uuidv4();
     const sessionJoinReq: SessionJoinReq = {
       type: "SessionJoin",
-      reqId: uuidv4(),
+      reqId: reqId,
       sessionId: sessionId,
     };
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(sessionJoinReq));
   }
 

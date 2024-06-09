@@ -215,7 +215,11 @@ export default function App() {
     <div className="w-full h-full">
       <Toaster />
 
-      { showNewSessionModal && <NewSessionModal sendMessage={ sendMessage } /> }
+      { showNewSessionModal && <NewSessionModal
+         sendMessage={ sendMessage }
+         addReqNeedingLayout={ addReqNeedingLayout }
+        />
+      }
       { tempEdge && <TempEdgeOptions
           addReqNeedingLayout={ addReqNeedingLayout }
           sendMessage={ sendMessage }
