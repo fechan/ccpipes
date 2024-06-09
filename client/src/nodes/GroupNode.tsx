@@ -36,7 +36,7 @@ export function GroupNode({ id, selected }: NodeProps) {
   // but for now we just detect if this Node is stale and render a placeholder
   if (slots === undefined) {
     return (
-      <div className="react-flow__node-default"></div>
+      <div className="react-flow__node-default hidden"></div>
     );
   }
   
