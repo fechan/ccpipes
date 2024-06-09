@@ -120,7 +120,30 @@ export default function App() {
     const edges = getEdgesForFactory(factory);
     setEdges(edges);
 
-    const needLayout = Object.values(reqsNeedingLayout).some(fulfilled => fulfilled);
+    (async () => {
+      const layouted = await getLayoutedElements(nodes, edges, factory);
+      setNodes(layouted);
+    })();
+  }, [factory]);
+
+  useEffect(() => {
+    const nodes = getNodesForFactory(factory);
+    const edges = getEdgesForFactory(factory);
+    setEdges(edges);
+
+    // determine if we need layout and remove requests from reqsNeedingLayout
+    // that have been fulfilled
+    let needLayout = false;
+    const unfulfilledReqs: PendingRequests = {};
+    for (let [req, fulfilled] of Object.entries(reqsNeedingLayout)) {
+      if (fulfilled) {
+        needLayout = true;
+      } else {
+        unfulfilledReqs[req] = false;
+      }
+    }
+    setReqsNeedingLayout(unfulfilledReqs);
+
     if (needLayout) {
       (async () => {
         const layouted = await getLayoutedElements(nodes, edges, factory);
