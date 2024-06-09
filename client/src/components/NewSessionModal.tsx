@@ -1,16 +1,18 @@
 import { SessionJoinReq } from "@server/types/messages";
 import { v4 as uuidv4 } from "uuid";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { SendMessage } from "react-use-websocket";
 import logo from "../logo.png";
 import shackIndustries from "../shack-industries.png";
 
 export interface NewSessionModalData {
   sendMessage: SendMessage,
+  sessionId: string,
+  setSessionId: Dispatch<SetStateAction<string>>,
   addReqNeedingLayout: (reqId: string) => void,
 };
 
-export function NewSessionModal({ sendMessage, addReqNeedingLayout }: NewSessionModalData) {
+export function NewSessionModal({ sendMessage, sessionId, setSessionId, addReqNeedingLayout }: NewSessionModalData) {
   const [ sessionId, setSessionId ] = useState("");
 
   function joinSession() {
