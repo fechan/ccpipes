@@ -171,7 +171,7 @@ export default function App() {
 
           if ("diff" in successRes) {
             const factoryUpdateRes = successRes as FactoryUpdateRes;
-            if (factoryUpdateRes.respondingTo in  reqsNeedingLayout) {
+            if (factoryUpdateRes.respondingTo in reqsNeedingLayout) {
               setReqsNeedingLayout({...reqsNeedingLayout, [factoryUpdateRes.reqId]: true});
             }
             patchFactory(factoryUpdateRes.diff);
