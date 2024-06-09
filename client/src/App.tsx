@@ -17,8 +17,8 @@ import {
 
 import "reactflow/dist/style.css";
 
-import { edgeTypes, getEdgesForFactory, updateEdgesForFactory } from "./edges";
-import { getNodesForFactory, nodeTypes, updateNodesForFactory } from "./nodes";
+import { edgeTypes, getEdgesForFactory } from "./edges";
+import { getNodesForFactory, nodeTypes } from "./nodes";
 
 import { EdgeOptions } from "./components/EdgeOptions";
 import { NewSessionModal } from "./components/NewSessionModal";
@@ -51,7 +51,6 @@ export default function App() {
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
   const [ reactFlowInstance, setReactFlowInstance ] = useState(null as (ReactFlowInstance<any, any> | null));
 
-  const [ needLayout, setNeedLayout ] = useState(false);
   const [ tempEdge, setTempEdge ] = useState(null as (Edge | null));
 
   const { dropTarget, setDropTarget, clearDropTarget } = useDropTargetStore();
@@ -111,20 +110,15 @@ export default function App() {
   }, [readyState])
 
   useEffect(() => {
-    setNodes(getNodesForFactory(factory));
-    setEdges(getEdgesForFactory(factory));
-    setNeedLayout(true);
-  }, [factory, version]);
+    const nodes = getNodesForFactory(factory);
+    const edges = getEdgesForFactory(factory);
+    setEdges(edges);
 
-  useEffect(() => {
     (async () => {
-      if (needLayout) {
-        const layouted = await getLayoutedElements(nodes, edges, factory);
-        setNodes(layouted);
-        setNeedLayout(false);
-      }
+      const layouted = await getLayoutedElements(nodes, edges, factory);
+      setNodes(layouted);
     })();
-  }, [needLayout]);
+  }, [factory, version]);
 
   useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
