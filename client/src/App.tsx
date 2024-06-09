@@ -44,7 +44,7 @@ export default function App() {
   });
   const [ showNewSessionModal, setShowNewSessionModal ] = useState(true);
 
-  const { factory, addsAndDeletes, groupParents, setFactory, patchFactory } = useFactoryStore();
+  const { factory, version, setFactory, patchFactory } = useFactoryStore();
 
   const { getIntersectingNodes, getNode } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
@@ -114,23 +114,7 @@ export default function App() {
     setNodes(getNodesForFactory(factory));
     setEdges(getEdgesForFactory(factory));
     setNeedLayout(true);
-  }, [factory]);
-
-  useEffect(() => {
-    if (
-      addsAndDeletes.groups.adds.size > 0 ||
-      addsAndDeletes.groups.deletes.size > 0 ||
-      addsAndDeletes.machines.adds.size > 0 ||
-      addsAndDeletes.machines.deletes.size > 0
-    ) {
-      setNodes(nodes => updateNodesForFactory(nodes, addsAndDeletes, groupParents));
-      setNeedLayout(true);
-    }
-
-    if (addsAndDeletes.pipes.adds.size > 0 || addsAndDeletes.pipes.deletes.size > 0) {
-      setEdges(edges => updateEdgesForFactory(edges, factory, addsAndDeletes))
-    }
-  }, [addsAndDeletes]);
+  }, [factory, version]);
 
   useEffect(() => {
     (async () => {
