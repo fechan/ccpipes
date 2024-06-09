@@ -204,7 +204,6 @@ function onNodeDragStop(
       }
     }
 
-    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(nodeEditReq!));
   }
 }
