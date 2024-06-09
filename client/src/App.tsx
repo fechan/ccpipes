@@ -46,6 +46,12 @@ export default function App() {
 
   const { factory, version, setFactory, patchFactory } = useFactoryStore();
 
+  
+  // reqsNeedingLayout keys: Request IDs that, when fulfilled, should trigger graph layouting
+  // values: Boolean that's true if the Request has been fulfilled
+  type PendingRequests = {[requestId: string]: boolean};
+  const [ reqsNeedingLayout, setReqsNeedingLayout ] = useState({} as PendingRequests);
+
   const { getIntersectingNodes, getNode } = useReactFlow();
   const [ nodes, setNodes, onNodesChange ] = useNodesState([]);
   const [ edges, setEdges, onEdgesChange ] = useEdgesState([]);
@@ -114,10 +120,13 @@ export default function App() {
     const edges = getEdgesForFactory(factory);
     setEdges(edges);
 
-    (async () => {
-      const layouted = await getLayoutedElements(nodes, edges, factory);
-      setNodes(layouted);
-    })();
+    const needLayout = Object.values(reqsNeedingLayout).some(fulfilled => fulfilled);
+    if (needLayout) {
+      (async () => {
+        const layouted = await getLayoutedElements(nodes, edges, factory);
+        setNodes(layouted);
+      })();
+    }
   }, [factory, version]);
 
   useEffect(() => {
