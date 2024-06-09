@@ -120,17 +120,6 @@ export default function App() {
     const edges = getEdgesForFactory(factory);
     setEdges(edges);
 
-    (async () => {
-      const layouted = await getLayoutedElements(nodes, edges, factory);
-      setNodes(layouted);
-    })();
-  }, [factory]);
-
-  useEffect(() => {
-    const nodes = getNodesForFactory(factory);
-    const edges = getEdgesForFactory(factory);
-    setEdges(edges);
-
     // determine if we need layout and remove requests from reqsNeedingLayout
     // that have been fulfilled
     let needLayout = false;
