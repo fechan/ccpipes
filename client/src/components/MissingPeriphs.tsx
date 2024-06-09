@@ -8,17 +8,21 @@ import { MissingPeripheralBadge } from "./MissingPeripheralBadge";
 
 interface MissingPeriphsProps {
   sendMessage: SendMessage,
+  addReqNeedingLayout: (reqId: string) => void,
 };
 
-export function MissingPeriphs({ sendMessage }: MissingPeriphsProps) {
+export function MissingPeriphs({ sendMessage, addReqNeedingLayout }: MissingPeriphsProps) {
   const missingPeriphs = useFactoryStore(state => state.factory.missing);
 
   const onDeletePeriph = useCallback((periphId: PeriphId) => {
+    const reqId = uuidv4();
     const periphDelReq: PeriphDel = {
       type: "PeriphDel",
-      reqId: uuidv4(),
+      reqId: reqId,
       periphId: periphId,
     };
+
+    addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(periphDelReq));
   }, [sendMessage]);
 

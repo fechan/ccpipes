@@ -196,7 +196,12 @@ export default function App() {
         }
       } else if (message.type === "CcUpdatedFactory") {
         const ccUpdatedFactory = message as CcUpdatedFactory;
-        patchFactory(ccUpdatedFactory.diff);
+        setReqsNeedingLayout({...reqsNeedingLayout, ["force-update-layout"]: true});
+        // HACK: setTimeout makes sure setReqsNeedingLayout happens before patchFactory.
+        // I have no idea why this is necessary, because the race condition doesn't happen
+        // when I need to update both states in other situations, like after receiving
+        // a FactoryUpdateRes
+        setTimeout(() => patchFactory(ccUpdatedFactory.diff), 100);
         return;
       } else if (message.type === "IdleTimeout") {
         const idleTimeout = message as IdleTimeout;
@@ -255,7 +260,10 @@ export default function App() {
           <MachineOptions sendMessage={ sendMessage } />
         </Panel>
         <Panel position="top-left">
-          <MissingPeriphs sendMessage={ sendMessage }/>
+          <MissingPeriphs
+            sendMessage={ sendMessage }
+            addReqNeedingLayout={addReqNeedingLayout}
+          />
         </Panel>
         <Background className="bg-neutral-700" />
         <MiniMap />
