@@ -274,7 +274,10 @@ export default function App() {
         fitView
       >
         <Panel position="top-right">
-          <EdgeOptions sendMessage={ sendMessage } />
+          <EdgeOptions
+            sendMessage={ sendMessage }
+            addReqNeedingLayout={ addReqNeedingLayout }
+          />
           <GroupOptions sendMessage={ sendMessage } />
           <MachineOptions sendMessage={ sendMessage } />
         </Panel>
