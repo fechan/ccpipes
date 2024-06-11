@@ -263,14 +263,24 @@ end
 ---@param periphId string CC Peripheral ID
 ---@return table diffs List of jsondiffpatch Deltas for the factory
 local function missingAdd (factory, periphId)
-  factory.missing[periphId] = true
+  -- try to find periphId in the factory. if it's not there, it doesn't matter
+  -- if it's missing, so we don't change anything.
+  for _, group in pairs(factory.groups) do
+    for _, slot in pairs(group.slots) do
+      if periphId == slot.periphId then
+        factory.missing[periphId] = true
 
-  local diff = {
-    missing = {
-      [periphId] = {true}
-    }
-  }
-  return {diff}
+        local diff = {
+          missing = {
+            [periphId] = {true}
+          }
+        }
+        return {diff}
+      end
+    end
+  end
+  
+  return {}
 end
 
 ---Delete a peripheral from the missing peripherals set
