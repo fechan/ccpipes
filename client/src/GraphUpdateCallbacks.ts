@@ -147,8 +147,8 @@ function onNodeDrag(
 
 /**
  * Get an edit message for updating a node's position
- * @param node 
- * @returns 
+ * @param node Node with updated position
+ * @returns Message to send to CC containing position edits
  */
 function getEditMessageForNewPosition(node: Node) {
   if (node.type !== "machine" && node.type !== "slot-group") {
@@ -180,6 +180,32 @@ function getEditMessageForNewPosition(node: Node) {
   }
 
   return nodeEditReq!;
+}
+
+/**
+ * Batched version of getEditMessageForNewPosition for editing lots of node
+ * positions at once.
+ * @param nodes Nodes with updated positions
+ * @returns Message to send to CC containing position edits. If multiple nodes
+ * were provided, this will be a BatchRequest containing edit messages for your
+ * nodes. Otherwise, it will be just an edit message.
+ */
+function getBatchEditMessageForNewPositions(nodes: Node[]) {
+  if (nodes.length === 1) {
+    return getEditMessageForNewPosition(nodes[0]);
+  }
+
+  const batchReq: BatchRequest = {
+    type: "BatchRequest",
+    reqId: uuidv4(),
+    requests: []
+  };
+
+  for (let node of nodes) {
+    batchReq.requests.push(getEditMessageForNewPosition(node))
+  }
+
+  return batchReq;
 }
 
 function onNodeDragStop(
@@ -293,4 +319,5 @@ export const GraphUpdateCallbacks = {
   onNodeDragStop: onNodeDragStop,
   onDragOver: onDragOver,
   onDrop: onDrop,
+  getBatchEditMessageForNewPositions: getBatchEditMessageForNewPositions,
 }

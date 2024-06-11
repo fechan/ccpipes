@@ -155,8 +155,11 @@ export default function App() {
     if (needLayout) {
       const nodes = getNodesForFactory(factory);
       (async () => {
-        const layouted = await getLayoutedElements(nodes, edges, factory);
-        setNodes(layouted);
+        const {layoutedNodes, nodesWithChanges} = await getLayoutedElements(nodes, edges, factory);
+        setNodes(layoutedNodes);
+        if (nodesWithChanges.length > 0) {
+          sendMessage(JSON.stringify(GraphUpdateCallbacks.getBatchEditMessageForNewPositions(nodesWithChanges)));
+        }
       })();
     }
   }, [factory, version]);

@@ -97,10 +97,11 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
   let layout = await elk.layout(graph);
 
   // Convert back to React Flow Graph
-  const layoutedNodes: Node[] = [];
+  const layoutedNodes: Node[] = []; // all nodes, now with the layout applied
+  const nodesWithChanges: Node[] = []; // only nodes that were changed by the layouter
   for (let machineNodeElk of layout.children!) {
     const machine = factory.machines[machineNodeElk.id];
-    layoutedNodes.push({
+    const layoutedMachine: Node = {
       ...machineNodeElk,
       position: {
         x: machine.x || machineNodeElk.x || 0,
@@ -108,11 +109,14 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
       },
       style: { width: machineNodeElk.width, height: machineNodeElk.height },
       data: {},
-    });
+    };
+    layoutedNodes.push(layoutedMachine);
+    if (!machine.x || !machine.y) nodesWithChanges.push(layoutedMachine);
 
     for (let groupNodeElk of machineNodeElk.children!) {
       const group = factory.groups[groupNodeElk.id];
-      layoutedNodes.push({
+
+      const layoutedGroup: Node = {
         ...groupNodeElk,
         position: {
           x: group.x || groupNodeElk.x || 0,
@@ -121,9 +125,11 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
         style: { width: groupNodeElk.width, height: groupNodeElk.height },
         parentId: machineNodeElk.id,
         data: {},
-      });
+      };
+      layoutedNodes.push(layoutedGroup);
+      if (!group.x || !group.y) nodesWithChanges.push(layoutedGroup);
     }
   }
 
-  return layoutedNodes;
+  return {layoutedNodes, nodesWithChanges};
 }
