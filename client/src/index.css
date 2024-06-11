@@ -68,3 +68,7 @@ body,
 .react-flow__edges {
   z-index: 1001 !important;
 }
+
+.react-flow__attribution a {
+  color: black;
+}

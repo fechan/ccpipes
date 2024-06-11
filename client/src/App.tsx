@@ -288,8 +288,14 @@ export default function App() {
           />
         </Panel>
         <Background className="bg-neutral-700" />
-        <MiniMap />
-        <Controls />
+        <MiniMap
+          pannable={ true }
+          zoomable={ true }
+          zoomStep={ 1 }
+          ariaLabel="Minimap of your factory's machines"
+          className="mcui-window rounded"
+        />
+        <Controls className="mcui-window rounded"/>
       </ReactFlow>
     </div>
   );
