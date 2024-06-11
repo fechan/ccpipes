@@ -145,6 +145,43 @@ function onNodeDrag(
  setDropTarget(closestNode);
 }
 
+/**
+ * Get an edit message for updating a node's position
+ * @param node 
+ * @returns 
+ */
+function getEditMessageForNewPosition(node: Node) {
+  if (node.type !== "machine" && node.type !== "slot-group") {
+    throw new Error("Non-machine, non-group node was passed into getEditMessageForNewPosition!");
+  }
+
+  let nodeEditReq: MachineEditReq | GroupEditReq;
+  const reqId = uuidv4();
+  if (node.type === "machine") {
+    nodeEditReq = {
+      type: "MachineEdit",
+      reqId: reqId,
+      machineId: node.id,
+      edits: {
+        x: node.position.x,
+        y: node.position.y,
+      }
+    };
+  } else if (node.type === "slot-group") {
+    nodeEditReq = {
+      type: "GroupEdit",
+      reqId: reqId,
+      groupId: node.id,
+      edits: {
+        x: node.position.x,
+        y: node.position.y,
+      }
+    }
+  }
+
+  return nodeEditReq!;
+}
+
 function onNodeDragStop(
   mouseEvent: MouseEvent,
   draggedNode: Node,
@@ -178,33 +215,8 @@ function onNodeDragStop(
 
     clearDropTarget();
   } else if (draggedNode.type === "machine" || draggedNode.type === "slot-group") {
-    // update node x/y
-
-    let nodeEditReq: MachineEditReq | GroupEditReq;
-    const reqId = uuidv4();
-    if (draggedNode.type === "machine") {
-      nodeEditReq = {
-        type: "MachineEdit",
-        reqId: reqId,
-        machineId: draggedNode.id,
-        edits: {
-          x: draggedNode.position.x,
-          y: draggedNode.position.y,
-        }
-      };
-    } else if (draggedNode.type === "slot-group") {
-      nodeEditReq = {
-        type: "GroupEdit",
-        reqId: reqId,
-        groupId: draggedNode.id,
-        edits: {
-          x: draggedNode.position.x,
-          y: draggedNode.position.y,
-        }
-      }
-    }
-
-    sendMessage(JSON.stringify(nodeEditReq!));
+    // update xy position of node
+    sendMessage(JSON.stringify(getEditMessageForNewPosition(draggedNode)));
   }
 }
 
