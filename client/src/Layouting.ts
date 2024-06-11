@@ -1,6 +1,6 @@
 import { Factory } from "@server/types/core-types";
 import ELK, { ElkNode, LayoutOptions } from "elkjs";
-import { Edge, Instance, Node } from "reactflow";
+import { Edge, Instance, Node, XYPosition } from "reactflow";
 
 import { getHeight, getWidth } from "./nodes/GroupNode";
 
@@ -127,7 +127,7 @@ export async function getLayoutedElements(nodes: Node[], edges: Edge[], factory:
         data: {},
       };
       layoutedNodes.push(layoutedGroup);
-      if (!group.x || !group.y) nodesWithChanges.push(layoutedGroup);
+      // if (!group.x || !group.y) nodesWithChanges.push(layoutedGroup);
     }
   }
 

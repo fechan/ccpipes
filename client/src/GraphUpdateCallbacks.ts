@@ -279,11 +279,16 @@ function onDrop(
   }));
 
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
+
   if (slotData) {
+    const { machineId } = JSON.parse(slotData);
+    const parentMachine = reactFlowInstance.getNode(machineId);
+    
     requests = splitSlotFromGroup(
       JSON.parse(slotData),
       intersections,
-      factory
+      factory,
+      {x: mousePosition.x - parentMachine!.position.x, y: mousePosition.y - parentMachine!.position.y}
     );
   }
 
@@ -293,6 +298,7 @@ function onDrop(
       JSON.parse(peripheralData),
       intersections,
       factory,
+      mousePosition
     );
   }
 

@@ -5,7 +5,12 @@ import { v4 as uuidv4 } from "uuid";
 import { ItemSlotDragData } from "./components/ItemSlot";
 import { PeripheralBadgeDragData } from "./components/PeripheralBadge";
 
-export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: Node[], factory: Factory) {
+export interface XYPosition {
+  x: number;
+  y: number;
+}
+
+export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: Node[], factory: Factory, initialPosition: XYPosition) {
   const { slot, machineId, oldGroupId } = slotData;
 
   // check if we're over a machine node of the same ID as machineId
@@ -24,6 +29,8 @@ export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: No
     const newGroup: Group = {
       id: newGroupId,
       slots: [slot],
+      x: initialPosition.x,
+      y: initialPosition.y,
     };
     const groupAddReq: GroupAddReq = {
       type: "GroupAdd",
@@ -46,7 +53,7 @@ export function splitSlotFromGroup(slotData: ItemSlotDragData, intersections: No
   return [];
 }
 
-export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragData, intersections: Node[], factory: Factory) {
+export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragData, intersections: Node[], factory: Factory, initialPosition: XYPosition) {
   const { periphId, oldMachineId } = peripheralData;
 
   // don't do anything if dragging to the same machine
@@ -73,7 +80,9 @@ export function splitPeripheralFromMachine(peripheralData: PeripheralBadgeDragDa
   const newMachine: Machine = {
     id: uuidv4(),
     nickname: periphId,
-    groups: []
+    groups: [],
+    x: initialPosition.x,
+    y: initialPosition.y,
   };
 
   const machineAddReq: MachineAddReq = {
