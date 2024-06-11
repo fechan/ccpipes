@@ -85,6 +85,15 @@ function combineGroups(sourceGroupIds: GroupId[], targetGroupId: GroupId, groups
     (combinedList, sourceGroupId) => [...combinedList, ...groups[sourceGroupId].slots],
     [...groups[targetGroupId].slots]
   );
+  combinedSlotList.sort((slotA, slotB) => {
+    if (slotA.slot !== slotB.slot) {
+      return slotA.slot - slotB.slot;
+    }
+    if (slotA.periphId !== slotB.periphId) {
+      return slotA.periphId > slotB.periphId ? 1 : -1;
+    }
+    return 0;
+  });
 
   messages.push({
     type: "GroupEdit",
