@@ -136,7 +136,6 @@ export default function App() {
   }, [readyState])
 
   useEffect(() => {
-    const nodes = getNodesForFactory(factory);
     const edges = getEdgesForFactory(factory);
     setEdges(edges);
 
@@ -154,6 +153,7 @@ export default function App() {
     setReqsNeedingLayout(unfulfilledReqs);
 
     if (needLayout) {
+      const nodes = getNodesForFactory(factory);
       (async () => {
         const layouted = await getLayoutedElements(nodes, edges, factory);
         setNodes(layouted);
