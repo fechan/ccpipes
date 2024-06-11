@@ -300,6 +300,7 @@ export default function App() {
           zoomStep={ 1 }
           ariaLabel="Minimap of your factory's machines"
           className="mcui-window rounded"
+          nodeColor="#555555"
         />
         <Controls className="mcui-window rounded"/>
       </ReactFlow>
