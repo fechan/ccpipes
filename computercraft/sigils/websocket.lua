@@ -108,15 +108,20 @@ end
 ---
 ---The purpose of this is to notify the factory controller of user edits.
 ---@param message table Any message from the session server
+---@return boolean intentionalDisconnect Whether the message caused an intentional disconnect
 local function queueEventFromMessage (message)
   local messageType = message['type']
 
   if MESSAGE_TYPES[messageType] then
     os.queueEvent('ccpipes-' .. messageType, message)
+    return false
   elseif messageType == 'IdleTimeout' then
     print('Disconnected due to idling: ' .. message['message'])
+    print('Press E to create a new factory editing session.')
+    return true
   else
     print('Unhandled message type in websocket.lua: ' .. messageType)
+    return false
   end
 end
 
@@ -174,7 +179,9 @@ local function doWebSocket (wsContext)
           end
 
         elseif res ~= nil and not isBinary then
-          queueEventFromMessage(textutils.unserializeJSON(res))
+          if queueEventFromMessage(textutils.unserializeJSON(res)) then
+            state = 'WAIT-FOR-USER'
+          end
         end
       end)
       local listenForStopEditingKey = (function ()
