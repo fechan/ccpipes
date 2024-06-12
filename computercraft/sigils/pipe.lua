@@ -68,7 +68,10 @@ end
 
 local function processAllPipesForever (factory)
   while true do
-    processAllPipes(factory)
+    local ok, err = pcall(function () processAllPipes(factory) end)
+    if not ok then
+      LOGGER:warn("pipe.lua#processAllPipesForever() caught error " .. err)
+    end
     coroutine.yield()
   end
 end
