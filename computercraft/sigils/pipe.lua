@@ -7,6 +7,7 @@
 local TransferCalculator = require('sigils.transfer-calculator')
 local Filter = require('sigils.filter')
 local LOGGER = require('sigils.logging').LOGGER
+local Utils  = require('sigils.utils')
 
 local function processPipe (pipe, groupMap, missingPeriphs)
   local filter = Filter.getFilterFn(pipe.filter)
@@ -34,8 +35,34 @@ local function processPipe (pipe, groupMap, missingPeriphs)
 end
 
 local function processAllPipes (factory)
-  for pipeId, pipe in pairs(factory.pipes) do
-    processPipe(pipe, factory.groups, factory.missing)
+  -- build a set of pipe IDs needing processing
+  local pipesToProcess = {}
+  local numPipesToProcess = 0
+  for pipeId,_ in pairs(factory.pipes) do
+    pipesToProcess[pipeId] = true
+    numPipesToProcess = numPipesToProcess + 1
+  end
+
+  local groupIdsInBatch = {} -- set of group IDs that are affected during this batch of pipe runs
+
+  while numPipesToProcess > 0 do
+    local pipeCoros = {}
+
+    for pipeId, _ in pairs(pipesToProcess) do
+      local pipe = factory.pipes[pipeId]
+      if groupIdsInBatch[pipe.from] == nil and groupIdsInBatch[pipe.to] == nil then
+        table.insert(pipeCoros, function ()
+          processPipe(pipe, factory.groups, factory.missing)
+        end)
+        numPipesToProcess = numPipesToProcess - 1
+        pipesToProcess[pipeId] = nil
+        groupIdsInBatch[pipe.from] = true
+        groupIdsInBatch[pipe.to] = true
+      end
+    end
+
+    parallel.waitForAll(unpack(pipeCoros))
+    groupIdsInBatch = {}
   end
 end
 
