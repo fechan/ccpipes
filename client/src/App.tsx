@@ -163,7 +163,7 @@ export default function App() {
         }
       })();
     }
-  }, [factory, version]);
+  }, [factory, version, sendMessage]);
 
   useEffect(() => {
     if (lastMessage !== null && typeof lastMessage.data === "string") {
