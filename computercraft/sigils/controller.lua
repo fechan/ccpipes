@@ -80,19 +80,17 @@ local function handlePeripheralAttach(periphId, factory, sendMessage)
   local periph = peripheral.wrap(periphId)
   local isInventory = periph['pushItems'] ~= nil
   if isInventory and periph.size() >= 1 then
+    local diff
     if factory.missing[periphId] then
-      local diff = Factory.missingDel(factory, periphId)
-      sendMessage(textutils.serializeJSON({
-        type = "CcUpdatedFactory",
-        diff = diff
-      }))
+      diff = Factory.missingDel(factory, periphId)
     else
-      local diff = Factory.periphAdd(factory, periphId)
-      sendMessage(textutils.serializeJSON({
-        type = "CcUpdatedFactory",
-        diff = diff
-      }))
+      diff = Factory.availableAdd(factory, periphId)
     end
+
+    sendMessage(textutils.serializeJSON({
+      type = "CcUpdatedFactory",
+      diff = diff
+    }))
   end
 end
 
