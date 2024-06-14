@@ -276,7 +276,7 @@ function onDrop(
     x: mousePosition.x,
     x2: mousePosition.x+.1,
     y: mousePosition.y,
-    y2: mousePosition.y+.1
+    y2: mousePosition.y+50
   }));
 
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
@@ -321,6 +321,10 @@ function onDrop(
       type: "PeriphAdd",
       reqId: reqId,
       periphId: periphId,
+      options: {
+        x: mousePosition.x,
+        y: mousePosition.y+50,
+      }
     }
     addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(periphAddReq));

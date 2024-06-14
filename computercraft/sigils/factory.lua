@@ -324,9 +324,15 @@ end
 ---Add a peripheral to the factory as a new machine
 ---@param factory Factory Factory to add the peripheral to
 ---@param periphId string Peripheral to add
+---@param initialOptions table? Options to initialize the machine with
 ---@return table diffs List of jsondiffpatch Deltas for the factory
-local function periphAdd (factory, periphId)
+local function periphAdd (factory, periphId, initialOptions)
   local newMachine, newGroups = Machine.fromPeriphId(periphId)
+
+  for option, v in pairs(initialOptions) do
+    newMachine[option] = v
+  end
+
   local periphAttachDiffs = {}
 
   if factory.available[periphId] then

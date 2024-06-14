@@ -237,9 +237,14 @@ export interface GroupAddReq extends Request {
   machineId: MachineId,
 }
 
+/**
+ * Request to add a peripheral to the factory as a Machine
+ * You can optionally specify machine options to initialize the Machine with
+ */
 export interface PeriphAddReq extends Request {
   type: "PeriphAdd",
   periphId: PeriphId,
+  options?: Partial<Machine>,
 }
 
 /**

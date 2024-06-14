@@ -62,7 +62,7 @@ local function handleGroupEdit (request, factory, sendMessage)
 end
 
 local function handlePeriphAdd(request, factory, sendMessage)
-  local diff = Factory.periphAdd(factory, request.periphId)
+  local diff = Factory.periphAdd(factory, request.periphId, request.options)
   return diff
 end
 
