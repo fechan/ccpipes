@@ -61,6 +61,11 @@ local function handleGroupEdit (request, factory, sendMessage)
   return diff
 end
 
+local function handlePeriphAdd(request, factory, sendMessage)
+  local diff = Factory.periphAdd(factory, request.periphId)
+  return diff
+end
+
 local function handlePeriphDel(request, factory, sengMessage)
   local diff = Factory.periphDel(factory, request.periphId)
   return diff
@@ -124,6 +129,7 @@ local function listenForCcpipesEvents (wsContext, factory)
       ['ccpipes-GroupAdd'] = handleGroupAdd,
       ['ccpipes-GroupDel'] = handleGroupDel,
       ['ccpipes-GroupEdit'] = handleGroupEdit,
+      ['ccpipes-PeriphAdd'] = handlePeriphAdd,
       ['ccpipes-PeriphDel'] = handlePeriphDel,
     }
 
