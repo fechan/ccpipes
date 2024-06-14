@@ -18,6 +18,7 @@ const emptyFactory: Factory = {
   pipes: {},
   groups: {},
   missing: {},
+  available: {},
 };
 
 export interface GroupParentsMap {
