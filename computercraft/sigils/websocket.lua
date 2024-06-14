@@ -22,6 +22,7 @@ local MESSAGE_TYPES = {
   GroupAdd = true,
   GroupEdit = true,
   GroupDel = true,
+  PeriphAdd = true,
   PeriphDel = true
 }
 
@@ -120,7 +121,7 @@ local function queueEventFromMessage (message)
     print('Press E to create a new factory editing session.')
     return true
   else
-    print('Unhandled message type in websocket.lua: ' .. messageType)
+    LOGGER.warn('Unhandled message type in websocket.lua: ' .. messageType)
     return false
   end
 end
