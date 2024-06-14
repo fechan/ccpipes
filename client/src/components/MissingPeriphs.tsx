@@ -1,5 +1,5 @@
 import { PeriphId } from "@server/types/core-types";
-import { PeriphDel } from "@server/types/messages";
+import { PeriphDelReq } from "@server/types/messages";
 import { useCallback } from "react";
 import { SendMessage } from "react-use-websocket";
 import { v4 as uuidv4 } from "uuid";
@@ -16,7 +16,7 @@ export function MissingPeriphs({ sendMessage, addReqNeedingLayout }: MissingPeri
 
   const onDeletePeriph = useCallback((periphId: PeriphId) => {
     const reqId = uuidv4();
-    const periphDelReq: PeriphDel = {
+    const periphDelReq: PeriphDelReq = {
       type: "PeriphDel",
       reqId: reqId,
       periphId: periphId,
@@ -28,7 +28,7 @@ export function MissingPeriphs({ sendMessage, addReqNeedingLayout }: MissingPeri
 
   return (
     <>
-      {Object.keys(missingPeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window">
+      {Object.keys(missingPeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window mb-3">
         <header>
           <h2>Missing peripherals</h2>
           <span className="text-sm">Click to remove</span>

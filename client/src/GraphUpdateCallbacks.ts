@@ -1,11 +1,12 @@
 import { Factory, Group, GroupId, Machine, MachineId, Pipe, PipeId } from "@server/types/core-types";
-import { BatchRequest, GroupEditReq, MachineEditReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
+import { BatchRequest, GroupEditReq, MachineEditReq, PeriphAddReq, PipeDelReq, PipeEditReq, Request } from "@server/types/messages";
 import { Dispatch, DragEvent, MouseEvent, SetStateAction } from "react";
 import { SendMessage } from "react-use-websocket/dist/lib/types";
 import { boxToRect, Connection, Edge, Instance, MarkerType, Node, ReactFlowInstance } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { CombineHandlers } from "./CombineHandlers";
 import { splitPeripheralFromMachine, splitSlotFromGroup } from "./SplitHandlers";
+import { AvailablePeripheralBadgeDragData } from "./components/AvailablePeripheralBadge";
 
 function onEdgesDelete(
   edges: Edge[],
@@ -275,11 +276,10 @@ function onDrop(
     x: mousePosition.x,
     x2: mousePosition.x+.1,
     y: mousePosition.y,
-    y2: mousePosition.y+.1
+    y2: mousePosition.y+50
   }));
 
   const slotData = event.dataTransfer.getData("application/ccpipes-slotmove");
-
   if (slotData) {
     const { machineId } = JSON.parse(slotData);
     const parentMachine = reactFlowInstance.getNode(machineId);
@@ -292,10 +292,10 @@ function onDrop(
     );
   }
 
-  const peripheralData = event.dataTransfer.getData("application/ccpipes-peripheralmove");
-  if (peripheralData) {
+  const peripheralMoveData = event.dataTransfer.getData("application/ccpipes-peripheralmove");
+  if (peripheralMoveData) {
     requests = splitPeripheralFromMachine(
-      JSON.parse(peripheralData),
+      JSON.parse(peripheralMoveData),
       intersections,
       factory,
       mousePosition
@@ -311,6 +311,23 @@ function onDrop(
     }
     addReqNeedingLayout(reqId);
     sendMessage(JSON.stringify(batchReq));
+  }
+
+  const peripheralAddData = event.dataTransfer.getData("application/ccpipes-peripheraladd");
+  if (peripheralAddData) {
+    const { periphId } = JSON.parse(peripheralAddData) as AvailablePeripheralBadgeDragData;
+    const reqId = uuidv4();
+    const periphAddReq: PeriphAddReq = {
+      type: "PeriphAdd",
+      reqId: reqId,
+      periphId: periphId,
+      options: {
+        x: mousePosition.x,
+        y: mousePosition.y+50,
+      }
+    }
+    addReqNeedingLayout(reqId);
+    sendMessage(JSON.stringify(periphAddReq));
   }
 }
 

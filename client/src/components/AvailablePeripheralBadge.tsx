@@ -1,27 +1,21 @@
-import { MachineId } from "@server/types/core-types";
 import { stringToColor } from "../StringToColor";
 import { DragEvent } from "react";
 import { useFactoryStore } from "../stores/factory";
 
-export interface PeripheralBadgeProps {
+export interface AvailablePeripheralBadgeProps {
   periphId: string,
-  machineId: MachineId
 };
 
-export interface PeripheralBadgeDragData {
+export interface AvailablePeripheralBadgeDragData {
   periphId: string,
-  oldMachineId: MachineId,
 }
 
-export function PeripheralBadge({ periphId, machineId }: PeripheralBadgeProps) {
+export function AvailablePeripheralBadge({ periphId }: AvailablePeripheralBadgeProps) {
   const missingPeriphs = useFactoryStore(state => state.factory.missing);
 
   function onDragStart(event: DragEvent<HTMLSpanElement>) {
-    const dragData: PeripheralBadgeDragData = {
-      periphId: periphId,
-      oldMachineId: machineId,
-    };
-    event.dataTransfer.setData("application/ccpipes-peripheralmove", JSON.stringify(dragData));
+    const dragData: AvailablePeripheralBadgeDragData = {periphId: periphId};
+    event.dataTransfer.setData("application/ccpipes-peripheraladd", JSON.stringify(dragData));
     event.dataTransfer.effectAllowed = "move";
   }
 
