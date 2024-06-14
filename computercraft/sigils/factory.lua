@@ -237,27 +237,6 @@ local function machineAdd (factory, machine)
   return {diff}
 end
 
----Add a peripheral to the factory as a new machine
----@param factory Factory Factory to add the peripheral to
----@param periphId string Peripheral to add
----@return table diffs List of jsondiffpatch Deltas for the factory
-local function periphAdd (factory, periphId)
-  local newMachine, newGroups = Machine.fromPeriphId(periphId)
-  local periphAttachDiffs = {}
-
-  local machineAddDiff = machineAdd(factory, newMachine)
-  machineAddDiff = Utils.freezeTable(machineAddDiff)
-  table.insert(periphAttachDiffs, machineAddDiff)
-
-  for groupId, group in pairs(newGroups) do
-    local groupAddDiff = groupAdd(factory, group)
-    groupAddDiff = Utils.freezeTable(groupAddDiff)
-    table.insert(periphAttachDiffs, groupAddDiff)
-  end
-
-  return Utils.concatArrays(unpack(periphAttachDiffs))
-end
-
 ---Add a peripheral to the missing peripherals set
 ---@param factory Factory Factory to add to
 ---@param periphId string CC Peripheral ID
@@ -340,6 +319,31 @@ local function availableDel (factory, periphId)
     }
   }
   return {diff}
+end
+
+---Add a peripheral to the factory as a new machine
+---@param factory Factory Factory to add the peripheral to
+---@param periphId string Peripheral to add
+---@return table diffs List of jsondiffpatch Deltas for the factory
+local function periphAdd (factory, periphId)
+  local newMachine, newGroups = Machine.fromPeriphId(periphId)
+  local periphAttachDiffs = {}
+
+  if factory.available[periphId] then
+    table.insert(periphAttachDiffs, availableDel(factory, periphId))
+  end
+
+  local machineAddDiff = machineAdd(factory, newMachine)
+  machineAddDiff = Utils.freezeTable(machineAddDiff)
+  table.insert(periphAttachDiffs, machineAddDiff)
+
+  for groupId, group in pairs(newGroups) do
+    local groupAddDiff = groupAdd(factory, group)
+    groupAddDiff = Utils.freezeTable(groupAddDiff)
+    table.insert(periphAttachDiffs, groupAddDiff)
+  end
+
+  return Utils.concatArrays(unpack(periphAttachDiffs))
 end
 
 ---Remove a peripheral's slots from all groups in the factory.
