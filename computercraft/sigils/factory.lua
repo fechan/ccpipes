@@ -381,7 +381,7 @@ local function periphDel (factory, periphId)
   return Utils.concatArrays(unpack(diffs))
 end
 
----Get peripheral IDs connected to this factory
+---Get peripheral IDs connected to the network
 ---@return string[] periphs List of peripheral IDs
 local function getPeripheralIds ()
   local periphs = {}
@@ -417,7 +417,8 @@ local function autodetectFactory ()
 end
 
 ---Given an existing factory, add peripherals that are no longer on the network
----to the missing peripheral set and create machines for newly added peripherals.
+---to the missing peripheral set and add newly added peripherals to the
+---available peripheral set.
 ---@param factory Factory Factory to update with peripheral changes
 local function updateWithPeriphChanges (factory)
   local currentPeriphSet = {}
@@ -440,11 +441,11 @@ local function updateWithPeriphChanges (factory)
     end
   end
 
-  -- add new peripherals:
-  -- add anything in currentPeriphSet that's not in oldPeriphSet
+  -- put newly connected peripherals in available
+  -- (any periphId in currentPeriphSet that's not in oldPeriphSet goes into available)
   for currentPeriphId, _ in pairs(currentPeriphSet) do
     if oldPeriphSet[currentPeriphId] == nil then
-      periphAdd(factory, currentPeriphId)
+      factory.available[currentPeriphId] = true
     end
   end
 
@@ -452,6 +453,13 @@ local function updateWithPeriphChanges (factory)
   for periphId, _ in pairs(factory.missing) do
     if currentPeriphSet[periphId] then
       missingDel(factory, periphId)
+    end
+  end
+
+  -- remove peripherals from available peripheral list that are not longer connected
+  for periphId, _ in pairs(factory.available) do
+    if currentPeriphSet[periphId] == nil then
+      availableDel(factory, periphId)
     end
   end
 end
