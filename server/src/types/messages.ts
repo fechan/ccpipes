@@ -7,7 +7,7 @@ export const FACTORY_UPDATE_REQUEST_TYPES = [
   "PipeAdd", "PipeEdit", "PipeDel",
   "MachineAdd", "MachineEdit", "MachineDel",
   "GroupAdd", "GroupEdit", "GroupDel",
-  "PeriphDel",
+  "PeriphAdd", "PeriphDel",
 ] as const;
 
 export type FactoryUpdateRequest = typeof FACTORY_UPDATE_REQUEST_TYPES[number];
@@ -237,12 +237,17 @@ export interface GroupAddReq extends Request {
   machineId: MachineId,
 }
 
+export interface PeriphAddReq extends Request {
+  type: "PeriphAdd",
+  periphId: PeriphId,
+}
+
 /**
  * Request to delete a peripheral from the factory.
  * 
  * - Emitted from the editor when the user wants to delete a missing peripheral
  */
-export interface PeriphDel extends Request {
+export interface PeriphDelReq extends Request {
   type: "PeriphDel",
   periphId: PeriphId,
 }
