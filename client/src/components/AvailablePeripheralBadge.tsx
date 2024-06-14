@@ -24,7 +24,7 @@ export function AvailablePeripheralBadge({ periphId }: AvailablePeripheralBadgeP
       draggable
       className={
         "nodrag rounded py-0.5 px-2 text-xs me-1 bg-blue-500 text-white " +
-        "relative hover:-top-0.5 hover:shadow-md " +
+        "relative hover:-top-0.5 hover:shadow " +
         (missingPeriphs[periphId] ? "opacity-30" : "")
       }
       style={{
