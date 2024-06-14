@@ -28,7 +28,7 @@ export function MissingPeriphs({ sendMessage, addReqNeedingLayout }: MissingPeri
 
   return (
     <>
-      {Object.keys(missingPeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window">
+      {Object.keys(missingPeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window mb-3">
         <header>
           <h2>Missing peripherals</h2>
           <span className="text-sm">Click to remove</span>
