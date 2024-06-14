@@ -289,19 +289,19 @@ local function availableAdd (factory, periphId)
   for _, group in pairs(factory.groups) do
     for _, slot in pairs(group.slots) do
       if periphId == slot.periphId then
-        factory.available[periphId] = true
-
-        local diff = {
-          available = {
-            [periphId] = {true}
-          }
-        }
-        return {diff}
+        return {}
       end
     end
   end
 
-  return {}
+  factory.available[periphId] = true
+
+  local diff = {
+    available = {
+      [periphId] = {true}
+    }
+  }
+  return {diff}
 end
 
 ---Delete a peripheral from the available peripherals set
@@ -403,6 +403,7 @@ local function autodetectFactory ()
     groups = {},
     pipes = {},
     missing = {},
+    available = {},
   }
   for i, periphId in ipairs(getPeripheralIds()) do
     local machine, groups = Machine.fromPeriphId(periphId)

@@ -33,6 +33,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Toast } from "./components/Toast";
 import { MissingPeriphs } from "./components/MissingPeriphs";
 import { Attribution } from "./components/Attribution";
+import { AvailablePeriphs } from "./components/AvailablePeriphs";
 
 const DEFAULT_ENDPOINT = (process.env.NODE_ENV === "production") ? "wss://sigils.fredchan.org" : "ws://localhost:3000";
 
@@ -291,6 +292,7 @@ export default function App() {
             sendMessage={ sendMessage }
             addReqNeedingLayout={addReqNeedingLayout}
           />
+          <AvailablePeriphs />
         </Panel>
         <Panel position="bottom-left" className="ms-16"><Attribution/></Panel>
         <Background className="bg-neutral-700" />

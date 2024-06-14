@@ -8,8 +8,8 @@ export function AvailablePeriphs() {
     <>
       {Object.keys(availablePeriphs).length > 0 && <div className="border p-3 border-2 rounded mcui-window">
         <header>
-          <h2>Missing peripherals</h2>
-          <span className="text-sm">Click to remove</span>
+          <h2>Available peripherals</h2>
+          <span className="text-sm">Drag into factory to add</span>
         </header>
 
         <ul>
@@ -18,7 +18,7 @@ export function AvailablePeriphs() {
               <li
                 key={periphId}
                 draggable
-                className="nodrag w-full mt-2"
+                className="nodrag w-full mt-2 cursor-pointer hover:-top-0.5 relative"
               >
                 <AvailablePeripheralBadge periphId={ periphId } />
               </li>
