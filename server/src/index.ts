@@ -2,10 +2,39 @@ import { WebSocket, WebSocketServer } from "ws";
 import { ConfirmationResponse, FailResponse, IdleTimeout, Message, MessageType, Request, SessionCreateReq, SessionCreateRes, SessionJoinReq, SessionRejoinReq, SuccessResponse } from "./types/messages";
 import { Session, SessionId } from "./types/session";
 import { v4 as uuidv4 } from "uuid";
+import {createServer} from "http";
+
+const PORT = 3000;
+
+const http = createServer((req, res) => {
+  const baseURL =  "https://" + req.headers.host;
+  const reqUrl = new URL(req.url, baseURL);
+
+  switch (reqUrl.pathname) {
+    case "/":
+      res.writeHead(301, {
+        location: "https://fredchan.org/SIGILS",
+      }).end();
+      break;
+
+    case "/install":
+      res.writeHead(301, {
+        location: "https://raw.githubusercontent.com/fechan/SIGILS/master/computercraft/installer.lua?nocache=" + Math.random(),
+      }).end();
+      break;
+  
+    default:
+      res.writeHead(404);
+      res.write("404 Not found. Try visiting http://sigils.fredchan.org");
+      res.end()
+      break;
+  }
+});
+http.listen(PORT)
 
 type Role = ('CC' | 'editor');
 
-const wss = new WebSocketServer({ port: 3000 });
+const wss = new WebSocketServer({ server: http });
 
 const sessions: { [key: SessionId]: Session } = {};
 
